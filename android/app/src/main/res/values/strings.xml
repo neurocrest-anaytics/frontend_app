@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">NeuroCrest</string>
+    <string name="title_activity_main">NeuroCrest</string>
+    <string name="package_name">com.neurocrest.app</string>
+    <string name="custom_url_scheme">com.neurocrest.app</string>
+</resources>
