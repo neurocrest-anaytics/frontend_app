@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+  <domain-config cleartextTrafficPermitted="true">
+    <!-- ✅ Replace with your backend domain -->
+    <domain includeSubdomains="true">https://paper-trading-backend-sqllite.onrender.com</domain>
+  </domain-config>
+</network-security-config>

@@ -14,7 +14,7 @@ const DEFAULTS = {
   emulator: "http://10.0.2.2:8000",   // ✅ Android Emulator alias
   local: "http://127.0.0.1:8000",     // ✅ Localhost (desktop)
   lan: "http://192.168.1.5:8000",     // ✅ Your PC IP for real devices on same Wi-Fi
-  prod: "https://api.neurocrest.in"   // ✅ Production API
+  prod: "https://paper-trading-backend-sqllite.onrender.com"   // ✅ Production API
 };
 
 // ------------------------------------------
@@ -42,11 +42,26 @@ export const API_BASE = inferBase();
 console.log("🔗 Using API Base:", API_BASE);
 
 // ------------------------------------------
-// Generic Fetch Wrapper
+// Generic Fetch Wrapper (with detailed logs)
 // ------------------------------------------
 export async function api(path, options = {}) {
-  const url = `${API_BASE}${path.startsWith("/") ? "" : "/"}${path}`;
-  console.log("🌐 Fetching:", url);
+  // Normalize URL pieces to avoid double slashes
+  const base = String(API_BASE || "").replace(/\/+$/, "");
+  const tail = String(path || "").replace(/^\//, "");
+  const url = `${base}/${tail}`;
+
+  // Step-5 style logging: show method, full URL, and a safe preview of body
+  const method = (options.method || "GET").toUpperCase();
+  let bodyPreview = options?.body;
+  try {
+    // If body is JSON string, log parsed object for readability
+    if (typeof bodyPreview === "string" && bodyPreview.trim().startsWith("{")) {
+      bodyPreview = JSON.parse(bodyPreview);
+    }
+  } catch {
+    // Keep original if parsing fails
+  }
+  console.log("[NEUROCREST] →", method, url, bodyPreview ?? "<no body>");
 
   try {
     const res = await fetch(url, {
@@ -57,21 +72,34 @@ export async function api(path, options = {}) {
       },
     });
 
+    // Clone the response to log a short preview without consuming the stream
+    const clone = res.clone();
+    let preview = "";
+    try {
+      const text = await clone.text();
+      preview = text.slice(0, 500); // keep log compact
+    } catch {
+      preview = "<unreadable body>";
+    }
+
+    console.log("[NEUROCREST] ←", res.status, url, preview || "<empty>");
+
     if (!res.ok) {
-      const text = await res.text();
-      console.error(`❌ API ${res.status}: ${text}`);
-      throw new Error(`API ${res.status}: ${text}`);
+      // Keep existing behavior but with clearer error
+      console.error(`❌ API ${res.status} @ ${url}:`, preview);
+      throw new Error(`API ${res.status}: ${preview}`);
     }
 
     // Return parsed JSON if possible
-    const contentType = res.headers.get("content-type");
-    if (contentType && contentType.includes("application/json")) {
+    const contentType = res.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
       return await res.json();
     } else {
       return await res.text();
     }
   } catch (err) {
-    console.error("🚨 API Error:", err.message);
+    // Network / CORS / DNS / Abort, etc.
+    console.error("🚨 API Error:", err?.message || err, "@", url);
     throw err;
   }
 }
