@@ -14,7 +14,7 @@ const DEFAULTS = {
   emulator: "http://10.0.2.2:8000",   // ✅ Android Emulator alias
   local: "http://127.0.0.1:8000",     // ✅ Localhost (desktop)
   lan: "http://192.168.1.5:8000",     // ✅ Your PC IP for real devices on same Wi-Fi
-  prod: "https://backend-app-k52v.onrender.com"   // ✅ Production API
+  prod: "https://paper-trading-backend-sqllite.onrender.com"   // ✅ Production API
 };
 
 // ------------------------------------------
