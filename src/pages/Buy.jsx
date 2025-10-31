@@ -11,7 +11,6 @@ export default function Buy() {
   const location = useLocation();
   const prefill = location.state || {};
 
-  // Mode flags
   const isModify = Boolean(prefill.modifyId || prefill.fromModify);
   const isAdd = Boolean(prefill.fromAdd);
 
@@ -300,8 +299,8 @@ export default function Buy() {
         onClick={handleSubmit}
         disabled={submitting}
         className={`mt-6 w-full py-3 text-white text-lg font-semibold rounded-lg ${submitting
-            ? "bg-green-400 cursor-not-allowed"
-            : "bg-green-600 hover:bg-green-700"
+          ? "bg-green-400 cursor-not-allowed"
+          : "bg-green-600 hover:bg-green-700"
           }`}
       >
         {submitting
