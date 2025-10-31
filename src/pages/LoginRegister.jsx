@@ -40,13 +40,25 @@ export default function LoginRegister({ onLoginSuccess }) {
     const endpoint = isLogin ? "login" : "register";
 
     try {
-      const res = await fetch(`${backendBaseUrl}/auth/${endpoint}`, {
+      const url = `${backendBaseUrl}/auth/${endpoint}`;
+      const payload = { username, password };
+
+      // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+      // Step 5 logging (Capacitor/WebView): log the exact request
+      console.log("[NEUROCREST] Auth request →", url, payload);
+      // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+      const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
+      // Log status immediately, before parsing
+      console.log("[NEUROCREST] Auth response ←", res.status, url);
+
+      const data = await res.json().catch(() => ({}));
+
       if (data.success) {
         if (isLogin) {
           onLoginSuccess(username);
@@ -55,10 +67,12 @@ export default function LoginRegister({ onLoginSuccess }) {
           setMessageType("success");
         }
       } else {
+        console.error("[NEUROCREST] Auth error payload:", data);
         setMessage("❌ " + (data.message || "Something went wrong"));
         setMessageType("error");
       }
     } catch (err) {
+      console.error("[NEUROCREST] Auth NETWORK ERROR:", err?.message || err);
       setMessage("❌ Cannot connect to server.");
       setMessageType("error");
     } finally {
@@ -70,20 +84,29 @@ export default function LoginRegister({ onLoginSuccess }) {
     const token = credentialResponse.credential;
 
     try {
-      const res = await fetch(`${backendBaseUrl}/auth/google-login`, {
+      const url = `${backendBaseUrl}/auth/google-login`;
+
+      // Step 5 logging for Google login as well
+      console.log("[NEUROCREST] Google login →", url);
+
+      const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token }),
       });
 
-      const data = await res.json();
+      console.log("[NEUROCREST] Google login ←", res.status, url);
+
+      const data = await res.json().catch(() => ({}));
       if (data.success) {
         onLoginSuccess(data.username);
       } else {
+        console.error("[NEUROCREST] Google login error payload:", data);
         setMessage("❌ " + (data.message || "Google login failed"));
         setMessageType("error");
       }
     } catch (err) {
+      console.error("[NEUROCREST] Google login NETWORK ERROR:", err?.message || err);
       setMessage("❌ Google login failed");
       setMessageType("error");
     }
@@ -246,7 +269,7 @@ export default function LoginRegister({ onLoginSuccess }) {
                   <path
                     className="opacity-75"
                     fill="currentColor"
-                    d="M4 12a8 8 0 018-8v8z"
+                    d="M4 12a 8 8 0 018-8v8z"
                   />
                 </svg>
               ) : isLogin ? "Login" : "Register"}

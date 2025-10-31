@@ -9,6 +9,7 @@
 
   <!-- ✅ Universal CSP: allows Android, Emulator, Render, Vercel, Google, Stripe -->
   <meta http-equiv="Content-Security-Policy" content="
+
   default-src 'self' data: blob: capacitor://localhost;
   img-src 'self' data: blob: https:;
   media-src 'self' data: blob: https:;
@@ -32,7 +33,6 @@
     https://www.gstatic.com https://js.stripe.com https://*.onrender.com;
   frame-src 'self' https://accounts.google.com https://www.google.com https://js.stripe.com;
 ">
-
 
   <!-- ✅ Dynamically load Google & Stripe only for web (not Android WebView) -->
   <script>

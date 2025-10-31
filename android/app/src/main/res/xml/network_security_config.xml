@@ -2,9 +2,7 @@
 <network-security-config>
   <domain-config cleartextTrafficPermitted="true">
     <!-- ✅ Replace with your backend domain -->
-    <!-- ✅ Also allow local dev (for emulator / Wi-Fi testing) -->
-    <domain includeSubdomains="true">192.168.1.5</domain>
-    <domain includeSubdomains="true">10.0.2.2</domain>
-    <domain includeSubdomains="true">localhost</domain>
+    <domain includeSubdomains="true">https://paper-trading-backend-sqllite.onrender.com</domain>
+
   </domain-config>
 </network-security-config>
