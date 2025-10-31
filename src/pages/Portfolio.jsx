@@ -12,6 +12,13 @@ import {
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
+// ---------- API base (prod-safe) ----------
+const API_BASE = (
+  import.meta.env.VITE_BACKEND_BASE_URL || "http://127.0.0.1:8000"
+)
+  .trim()
+  .replace(/\/+$/, "");
+
 // ---------- formatting helpers ----------
 const toNum = (v) => {
   const n = Number(v);
@@ -72,7 +79,6 @@ export default function Portfolio({ username }) {
   const navigate = useNavigate();
 
   const fileInputRef = useRef(null);
-
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -82,7 +88,7 @@ export default function Portfolio({ username }) {
     setError("");
     const ctrl = new AbortController();
 
-    fetch(`http://127.0.0.1:8000/portfolio/${encodeURIComponent(username)}`, {
+    fetch(`${API_BASE}/portfolio/${encodeURIComponent(username)}`, {
       signal: ctrl.signal,
     })
       .then(async (res) => {
@@ -154,7 +160,7 @@ export default function Portfolio({ username }) {
     });
   }, [data.open, startDate, endDate]);
 
-  // ------- poll quotes -------
+  // ------- poll quotes (only to display "Live:" label; P&L uses backend fields) -------
   useEffect(() => {
     if (!filteredOpen.length) return;
     const syms = [
@@ -165,7 +171,7 @@ export default function Portfolio({ username }) {
     if (!syms.length) return;
 
     const fetchQuotes = () => {
-      fetch(`http://127.0.0.1:8000/quotes?symbols=${syms.join(",")}`)
+      fetch(`${API_BASE}/quotes?symbols=${syms.join(",")}`)
         .then((r) => r.json())
         .then((arr) => {
           const qmap = {};
@@ -208,7 +214,7 @@ export default function Portfolio({ username }) {
     }
     const formData = new FormData();
     formData.append("file", file);
-    fetch(`http://127.0.0.1:8000/portfolio/${username}/upload`, {
+    fetch(`${API_BASE}/portfolio/${username}/upload`, {
       method: "POST",
       body: formData,
     })
@@ -231,7 +237,6 @@ export default function Portfolio({ username }) {
 
   // ===== Multi-sheet Excel (.xlsx) download =====
   const handleDownloadExcel = () => {
-    // Sheet 1: Instruction
     const instructionSheet = XLSX.utils.aoa_to_sheet([
       ["Instruction"],
       ["This file contains Portfolio and Instrument details."],
@@ -239,7 +244,6 @@ export default function Portfolio({ username }) {
       ["Instrument sheet is refreshed daily from Zerodha."],
     ]);
 
-    // Sheet 2: Portfolio
     const portfolioHeaders = [
       "Symbol",
       "Name",
@@ -292,7 +296,6 @@ export default function Portfolio({ username }) {
       ...portfolioRows,
     ]);
 
-    // Sheet 3: Instrument (dummy for now)
     const instrumentSheet = XLSX.utils.aoa_to_sheet([
       ["Instrument", "Exchange", "Lot Size", "Tick Size"],
       ["RELIANCE", "NSE", 505, 0.05],
@@ -300,13 +303,11 @@ export default function Portfolio({ username }) {
       ["INFY", "NSE", 300, 0.05],
     ]);
 
-    // Create workbook and append all 3 sheets
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, instructionSheet, "Instruction");
     XLSX.utils.book_append_sheet(workbook, portfolioSheet, "Portfolio");
     XLSX.utils.book_append_sheet(workbook, instrumentSheet, "Instrument");
 
-    // Save file
     const excelBuffer = XLSX.write(workbook, {
       bookType: "xlsx",
       type: "array",
@@ -337,8 +338,8 @@ export default function Portfolio({ username }) {
       const symbol = (p.symbol || p.script || "").toUpperCase();
       const qty = toNum(p.qty) ?? 0;
       const live =
-        toNum(quotes[symbol]?.price) ??
         toNum(p.current_price) ??
+        toNum(quotes[symbol]?.price) ??
         toNum(p.avg_price) ??
         0;
       return s + qty * live;
@@ -432,21 +433,25 @@ export default function Portfolio({ username }) {
                 const seg = (p.segment || "delivery").toLowerCase();
 
                 const qty = toNum(p.qty) ?? 0;
-                const avg = toNum(p.avg_price) ?? 0;
-                const entry = toNum(p.entry_price) ?? avg;
+                const entry = toNum(p.entry_price) ?? toNum(p.avg_price) ?? 0;
                 const sl = toNum(p.stoploss) ?? 0;
                 const tgt = toNum(p.target) ?? 0;
 
-                const invest = qty * avg;
-                const q = quotes[symbol] || {};
-                const live = toNum(q.price) ?? toNum(p.current_price) ?? avg;
+                // Live label only
+                const live =
+                  toNum(p.current_price) ??
+                  toNum(quotes[symbol]?.price) ??
+                  toNum(p.avg_price) ??
+                  0;
 
-                const perShare = entry && live ? live - entry : 0;
-                const absPct = entry ? (perShare / entry) * 100 : 0;
-                const total = perShare * qty;
-
-                const currentVal = (toNum(live) ?? 0) * (qty ?? 0);
-                const cardPnL = currentVal - invest;
+                // ✅ Use backend-calculated fields (with safe fallbacks)
+                const perShare =
+                  toNum(p.pnl_per_share) ?? (toNum(live) - (entry ?? 0));
+                const total =
+                  toNum(p.pnl_total) ?? perShare * (qty ?? 0);
+                const absPct =
+                  toNum(p.pct) ??
+                  ((entry ? (perShare / entry) : 0) * 100);
 
                 const pnlColor =
                   total > 0
@@ -454,6 +459,10 @@ export default function Portfolio({ username }) {
                     : total < 0
                       ? "text-red-600"
                       : "text-gray-600";
+
+                const invest = qty * entry;
+                const currentVal = qty * live;
+                const cardPnL = currentVal - invest;
 
                 const footerPnlColor =
                   cardPnL > 0
@@ -505,7 +514,10 @@ export default function Portfolio({ username }) {
                           {total >= 0 ? (
                             <ArrowUpRight size={16} className="text-blue-700" />
                           ) : (
-                            <ArrowDownRight size={16} className="text-blue-700" />
+                            <ArrowDownRight
+                              size={16}
+                              className="text-blue-700"
+                            />
                           )}
                         </div>
                         <div className="text-right">
