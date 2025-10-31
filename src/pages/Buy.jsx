@@ -346,13 +346,10 @@ export default function Buy() {
       <button
         onClick={isAdd ? handleModifyPosition : handleSubmit}  // ✅ key change here
         disabled={submitting}
-<<<<<<< HEAD
-        className={`mt-6 w-full py-3 text-white text-lg font-semibold rounded-lg ${submitting ? "bg-green-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
-=======
         className={`mt-6 w-full py-3 text-white text-lg font-semibold rounded-lg ${submitting
           ? "bg-green-400 cursor-not-allowed"
           : "bg-green-600 hover:bg-green-700"
->>>>>>> 5299f6aa9e5a738d21d4ffce0dfdede11b50ca90
+
           }`}
       >
         {submitting
