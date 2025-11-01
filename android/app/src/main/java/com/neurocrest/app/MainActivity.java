@@ -20,7 +20,11 @@ public class MainActivity extends BridgeActivity {
         // Optional: quick native DNS test to confirm the emulator can resolve your backend host
         new Thread(() -> {
             try {
+<<<<<<< HEAD
                 String host = "backend-app-k52v.onrender.com";
+=======
+                String host = "https://paper-trading-backend-sqllite.onrender.com";
+>>>>>>> d635242dc066572f01cc44c88829fdcb151059b3
                 String ip = java.net.InetAddress.getByName(host).getHostAddress();
                 Log.d(TAG, "Resolved " + host + " -> " + ip);
             } catch (Exception e) {
