@@ -1,5 +1,15 @@
 {
   "appId": "com.neurocrest.app",
   "appName": "NeuroCrest",
-  "webDir": "dist"
+  "webDir": "dist",
+
+  "server": {
+    "url": "https://frontend-app-ten-opal.vercel.app",
+    "androidScheme": "https",
+    "cleartext": false
+  },
+
+  "android": {
+    "allowMixedContent": false
+  }
 }
