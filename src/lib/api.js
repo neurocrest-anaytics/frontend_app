@@ -14,7 +14,11 @@ const DEFAULTS = {
   emulator: "http://10.0.2.2:8000",   // ✅ Android Emulator alias
   local: "http://127.0.0.1:8000",     // ✅ Localhost (desktop)
   lan: "http://192.168.1.5:8000",     // ✅ Your PC IP for real devices on same Wi-Fi
+<<<<<<< HEAD
   prod: "https://backend-app-k52v.onrender.com"   // ✅ Production API
+=======
+  prod: "https://paper-trading-backend-sqllite.onrender.com"   // ✅ Production API
+>>>>>>> d635242dc066572f01cc44c88829fdcb151059b3
 };
 
 // ------------------------------------------
@@ -38,7 +42,14 @@ function inferBase() {
 }
 
 // ✅ Final API base URL
-export const API_BASE = inferBase();
+export const API_BASE = "http://192.168.1.5:8000";
+if (import.meta?.env?.DEV) {
+  console.log("[api] API_BASE =", API_BASE);
+  fetch(`${API_BASE}/healthz`)
+    .then(r => r.text())
+    .then(t => console.log("[api] /healthz =>", t))
+    .catch(e => console.error("[api] /healthz error:", e));
+}
 console.log("🔗 Using API Base:", API_BASE);
 
 // ------------------------------------------
