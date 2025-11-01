@@ -2,11 +2,7 @@
 <network-security-config>
   <domain-config cleartextTrafficPermitted="true">
     <!-- ✅ Replace with your backend domain -->
-<<<<<<< HEAD
     <domain includeSubdomains="true">backend-app-k52v.onrender.com</domain>
-=======
-    <domain includeSubdomains="true">https://paper-trading-backend-sqllite.onrender.com</domain>
 
->>>>>>> d635242dc066572f01cc44c88829fdcb151059b3
   </domain-config>
 </network-security-config>
