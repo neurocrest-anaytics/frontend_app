@@ -1,11 +1,11 @@
+// vite.config.(js|ts)
+import { VitePWA } from 'vite-plugin-pwa';
 
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-
-export default defineConfig({
-  plugins: [react()],
-  base: "/",
-  build: {
-    outDir: "dist"
-  }
-});
+export default {
+  plugins: [
+    VitePWA({
+      registerType: 'autoUpdate',
+      workbox: { cleanupOutdatedCaches: true }
+    })
+  ]
+};
