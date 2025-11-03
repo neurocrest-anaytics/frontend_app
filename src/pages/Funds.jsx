@@ -14,13 +14,12 @@ const formatINR = (v, decimals = 0) => {
   });
 };
 
-// Strip commas safely
 const uncomma = (s) => (s || "").toString().replace(/,/g, "");
 
 export default function Funds({ username }) {
   const [total, setTotal] = useState(0);
   const [available, setAvailable] = useState(0);
-  const [amountInput, setAmountInput] = useState(""); // text so we can allow commas & decimals
+  const [amountInput, setAmountInput] = useState("");
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
   const [ok, setOk] = useState("");

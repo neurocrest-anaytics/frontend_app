@@ -82,7 +82,7 @@ export default function Trade({ username }) {
           (arr || []).forEach((q) => (map[q.symbol] = q));
           setQuotes(map);
         })
-        .catch(() => {});
+        .catch(() => { });
     };
 
     fetchQuotes();
@@ -222,7 +222,7 @@ export default function Trade({ username }) {
       setSellPreviewData(data);
       setSellConfirmMsg(
         data?.message ||
-          `You have 0 qty of ${String(sym || "").toUpperCase()}. Do you still want to sell first?`
+        `You have 0 qty of ${String(sym || "").toUpperCase()}. Do you still want to sell first?`
       );
       setSellConfirmOpen(true);
     } catch (e) {
@@ -279,11 +279,10 @@ export default function Trade({ username }) {
               <button
                 key={t}
                 onClick={() => setTab(t)}
-                className={`pb-1 ${
-                  tab === t
-                    ? "text-blue-500 border-b-2 border-blue-500"
-                    : "text-gray-500"
-                }`}
+                className={`pb-1 ${tab === t
+                  ? "text-blue-500 border-b-2 border-blue-500"
+                  : "text-gray-500"
+                  }`}
               >
                 {t === "mylist" ? "My List" : "Must Watch"}
               </button>
@@ -382,9 +381,8 @@ export default function Trade({ username }) {
                     <div className="flex items-start space-x-2">
                       <div className="text-right">
                         <div
-                          className={`text-xl font-medium ${
-                            isPos ? "text-green-600" : "text-red-600"
-                          }`}
+                          className={`text-xl font-medium ${isPos ? "text-green-600" : "text-red-600"
+                            }`}
                         >
                           {q.price != null
                             ? Number(q.price).toLocaleString("en-IN")
@@ -392,9 +390,8 @@ export default function Trade({ username }) {
                         </div>
                         <div className="text-xs text-gray-600">
                           {q.change != null
-                            ? `${isPos ? "+" : ""}${Number(q.change).toFixed(2)} (${
-                                isPos ? "+" : ""
-                              }${Number(q.pct_change || 0).toFixed(2)}%)`
+                            ? `${isPos ? "+" : ""}${Number(q.change).toFixed(2)} (${isPos ? "+" : ""
+                            }${Number(q.pct_change || 0).toFixed(2)}%)`
                             : "--"}
                         </div>
                       </div>
