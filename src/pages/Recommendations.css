@@ -1,0 +1,249 @@
+.recommendations-container {
+  text-align: center;
+  padding: 20px;
+}
+
+.recommendation-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.rec-btn {
+  padding: 10px 25px;
+  border: 1.5px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rec-btn.active {
+  background-color: #2962ff;
+  color: white;
+  border-color: #2962ff;
+}
+
+.filters-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.filter-item label {
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #222;
+}
+
+.filter-item input,
+.filter-item select {
+  padding: 6px 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.signals-section {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 60px; /* spacing between Active and Closed blocks */
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+
+.signals-column {
+  flex: 0 0 340px; /* fixed width for both columns */
+  text-align: center;
+}
+
+
+.subtext {
+  font-size: 12px;
+  color: #666;
+}
+
+.signal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;  /* equal spacing between cards */
+  justify-items: center;
+  align-items: center;
+  margin-top: 10px;
+}
+
+
+.signal-card {
+  background-color: #66b3ff;
+  color: white;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  width: 140px;
+  height: 140px;
+  font-size: 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.signal-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.signal-card-chart {
+  background-color: #f5f9ff;
+  border-radius: 12px;
+  width: 250px;
+  height: 220px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.signal-card-chart:hover {
+  transform: scale(1.03);
+}
+
+.card-header,
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 600;
+  color: #222;
+}
+
+.chart-container {
+  flex-grow: 1;
+  margin: 5px 0;
+}
+
+.card-script {
+  color: #2962ff;
+}
+
+.card-confidence {
+  color: #00c853;
+}
+
+/* ---------- ADVANCED SIGNAL CARD STYLE ---------- */
+.signal-card-advanced {
+  background-color: #f5f9ff;
+  border-radius: 12px;
+  width: 320px;
+  height: 260px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.signal-card-advanced:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ---------- Header ---------- */
+.signal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 14px;
+  color: #222;
+}
+
+.signal-time {
+  color: #444;
+  font-size: 13px;
+}
+
+.signal-script {
+  color: #2962ff;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.signal-confidence {
+  color: #00c853;
+  font-size: 14px;
+}
+
+/* ---------- Chart Section ---------- */
+.chart-wrapper {
+  position: relative;
+  height: 130px;
+  background-color: #d7e3fc;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+
+.chart-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+
+.vertical-label {
+  position: absolute;
+  left: 3px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  font-size: 11px;
+  color: #222;
+  font-weight: 600;
+}
+
+.horizontal-label {
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: #222;
+  font-weight: 600;
+}
+
+.center-label {
+  position: absolute;
+  font-size: 12px;
+  color: white;
+  font-weight: 600;
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
+}
+
+/* ---------- Footer ---------- */
+.signal-footer {
+  font-size: 12px;
+  color: #111;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.signal-footer strong {
+  color: #000;
+}
