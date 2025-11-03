@@ -13,9 +13,7 @@ export default function Trade({ username }) {
   const [tab, setTab] = useState("mylist");
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
-  const [searching, setSearching] = useState(false);   // ✅ show "Searching…"
-  const [open, setOpen] = useState(false);             // ✅ explicit dropdown state
-  const [allScripts, setAllScripts] = useState([]);    // cached scripts
+  const [allScripts, setAllScripts] = useState([]);
   const [watchlist, setWatchlist] = useState([]);
   const [quotes, setQuotes] = useState({});
   const [selectedSymbol, setSelectedSymbol] = useState(null);
@@ -30,7 +28,7 @@ export default function Trade({ username }) {
   const [sellSymbol, setSellSymbol] = useState(null);
 
   const intervalRef = useRef(null);
-  const inputRef = useRef(null);                       // ✅ to manage focus/blur
+  const modalPollRef = useRef(null);
   const nav = useNavigate();
   const sellPreviewGuardRef = useRef({});
   const who = username || localStorage.getItem("username") || "";
@@ -41,7 +39,6 @@ export default function Trade({ username }) {
     preloadScripts();
   }, [username]);
 
-  // preload instrument list (fast local matches)
   function preloadScripts() {
     fetch(`${API}/search/scripts`)
       .then((r) => r.json())
@@ -83,20 +80,19 @@ export default function Trade({ username }) {
     }).then(() => fetchWatchlist());
   }
 
-  // quotes refresher
   useEffect(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     if (!watchlist.length) return;
 
     const fetchQuotes = () => {
-      fetch(`${API}/quotes?symbols=${watchlist.join(",")}`)
+      fetch(`${API}/quotes?symbols=${encodeURIComponent(watchlist.join(","))}`)
         .then((r) => r.json())
         .then((arr) => {
           const map = {};
           (arr || []).forEach((q) => (map[q.symbol] = q));
           setQuotes(map);
         })
-        .catch(() => {});
+        .catch(() => { });
     };
 
     fetchQuotes();
@@ -104,56 +100,135 @@ export default function Trade({ username }) {
     return () => clearInterval(intervalRef.current);
   }, [watchlist]);
 
-  // improved search logic — layered & case-insensitive
+  const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "SEPT", "OCT", "NOV", "DEC"];
+  const normMonth = (m) => (m === "SEPT" ? "SEP" : m || "");
+  function parseOptionish(q) {
+    const Q = String(q || "").toUpperCase().replace(/\s+/g, "");
+    if (!Q) return { raw: "", underlying: "", year2: "", month: "", strike: "" };
+    let month = "", mIdx = -1;
+    for (const m of MONTHS) {
+      const idx = Q.indexOf(m);
+      if (idx >= 0 && (mIdx === -1 || idx < mIdx || (idx === mIdx && m.length > month.length))) {
+        month = normMonth(m); mIdx = idx;
+      }
+    }
+    const cepe = Q.match(/(\d+)(CE|PE)$/);
+    const tailNum = Q.match(/(\d+)(?!.*\d)/);
+    const strike = cepe ? cepe[1] : (tailNum ? tailNum[1] : "");
+    let year2 = "";
+    if (mIdx >= 0) {
+      const beforeMonth = Q.slice(Math.max(0, mIdx - 4), mIdx);
+      const y = beforeMonth.match(/(\d{2})$/);
+      year2 = y ? y[1] : "";
+    }
+    let underlying = Q;
+    if (mIdx >= 0) {
+      if (year2) {
+        const yIdx = Q.indexOf(year2, Math.max(0, mIdx - 4));
+        underlying = Q.slice(0, yIdx);
+      } else {
+        underlying = Q.slice(0, mIdx);
+      }
+    } else if (tailNum) {
+      underlying = Q.slice(0, tailNum.index);
+    }
+    underlying = underlying.replace(/[^A-Z]/g, "");
+    return { raw: Q, underlying, year2, month, strike };
+  }
+  function buildSeeds({ underlying, year2, month }) {
+    const seeds = new Set();
+    if (!underlying && !month) return [];
+    const yy = year2 || String(new Date().getFullYear()).slice(-2);
+    if (underlying && month) {
+      seeds.add(`${underlying}${month}`);
+      seeds.add(`${underlying}${yy}${month}`);
+    } else if (underlying) {
+      seeds.add(underlying);
+    } else if (month) {
+      seeds.add(month); seeds.add(`${yy}${month}`);
+    }
+    return Array.from(seeds);
+  }
+  const symbolField = (s) => (s?.symbol || s?.tradingsymbol || "").toUpperCase().replace(/\s+/g, "");
+  const allowedExchange = (s) => ["NSE", "NFO", "BSE"].includes(String(s?.exchange || "").toUpperCase());
+
+  async function backendSearchSmart(parts) {
+    const { underlying, month, strike } = parts;
+    const seeds = buildSeeds(parts);
+    let bag = [];
+    for (const seed of seeds) {
+      try {
+        const res = await fetch(`${API}/search?q=${encodeURIComponent(seed)}`);
+        const data = await res.json().catch(() => []);
+        if (Array.isArray(data)) bag = bag.concat(data);
+      } catch { }
+    }
+    const seen = new Set();
+    const merged = [];
+    for (const s of bag) {
+      if (!allowedExchange(s)) continue;
+      const sym = symbolField(s);
+      if (!sym || seen.has(sym)) continue;
+      seen.add(sym); merged.push(s);
+    }
+    let filtered = merged;
+    if (month) filtered = filtered.filter((s) => symbolField(s).includes(month));
+    if (underlying) filtered = filtered.filter((s) => symbolField(s).includes(underlying));
+    if (strike) {
+      filtered = filtered.filter((s) => {
+        const sym = symbolField(s);
+        const m = sym.match(/(\d+)(CE|PE)$/);
+        return m ? m[1].startsWith(strike) : sym.includes(strike);
+      });
+    }
+    if (!month && !strike && underlying) {
+      filtered = merged.filter(
+        (s) =>
+          symbolField(s).includes(underlying) ||
+          String(s.name || "").toUpperCase().includes(underlying)
+      );
+    }
+    filtered.sort((a, b) => symbolField(a).localeCompare(symbolField(b)));
+    return filtered.slice(0, 50);
+  }
+
   const debouncedQuery = useMemo(() => query.trim(), [query]);
 
   useEffect(() => {
     if (!debouncedQuery) {
       setSuggestions([]);
-      setSearching(false);
-      setOpen(false);           // ✅ close if cleared
       return;
     }
-
-    setOpen(true);              // ✅ keep dropdown open while there's a query
-
-    // Local instant matches (optional)
-    const localMatches = Array.isArray(allScripts)
-      ? allScripts
-          .filter((s) => {
-            const q = debouncedQuery.toLowerCase();
-            return (
-              (s.symbol || "").toLowerCase().includes(q) ||
-              (s.name || "").toLowerCase().includes(q)
-            );
-          })
-          .slice(0, 10)
-      : [];
-    setSuggestions(localMatches);
-
-    // Backend query (uppercase + no spaces)
-    const qUpper = debouncedQuery.toUpperCase().replace(/\s+/g, "");
-
-    const timer = setTimeout(() => {
-      setSearching(true);
-      fetch(`${API}/search?q=${encodeURIComponent(qUpper)}`)
-        .then((r) => r.json())
-        .then((data) => {
-          if (!Array.isArray(data)) {
-            setSuggestions([]);
-            return;
-          }
-          const allowedExchanges = ["NSE", "NFO", "BSE"];
-          const clean = data.filter((s) =>
-            allowedExchanges.includes((s.exchange || "").toUpperCase())
-          );
-          clean.sort((a, b) => (a.symbol || "").localeCompare(b.symbol || ""));
-          setSuggestions(clean);
-        })
-        .catch(() => {})
-        .finally(() => setSearching(false));
-    }, 300);
-
+    const parts = parseOptionish(debouncedQuery);
+    const timer = setTimeout(async () => {
+      try {
+        const results = await backendSearchSmart(parts);
+        let finalList = results;
+        if ((!finalList || finalList.length === 0) && Array.isArray(allScripts) && allScripts.length) {
+          const { raw, underlying, month, strike } = parts;
+          finalList = allScripts
+            .filter(allowedExchange)
+            .filter((s) => {
+              const sym = symbolField(s);
+              const nm = String(s.name || "").toUpperCase();
+              if (!month && !strike && underlying) return sym.includes(underlying) || nm.includes(underlying);
+              if (!month && !strike && !underlying) return sym.includes(raw) || nm.includes(raw);
+              if (underlying && !(sym.includes(underlying) || nm.includes(underlying))) return false;
+              if (month && !sym.includes(month)) return false;
+              if (strike) {
+                const m = sym.match(/(\d+)(CE|PE)$/);
+                return m ? m[1].startsWith(strike) : sym.includes(strike);
+              }
+              return true;
+            })
+            .sort((a, b) => symbolField(a).localeCompare(symbolField(b)))
+            .slice(0, 50);
+        }
+        setSuggestions(Array.isArray(finalList) ? finalList : []);
+      } catch {
+        setSuggestions([]);
+      }
+    }, 200);
     return () => clearTimeout(timer);
   }, [debouncedQuery, allScripts]);
 
@@ -162,24 +237,44 @@ export default function Trade({ username }) {
   }
 
   function goDetail(sym) {
-    fetch(`${API}/quotes?symbols=${sym}`)
+    const s = String(sym || "").trim();
+    if (!s) return;
+
+    if (modalPollRef.current) clearInterval(modalPollRef.current);
+
+    fetch(`${API}/quotes?symbols=${encodeURIComponent(s)}`)
       .then((r) => r.json())
       .then((arr) => {
-        const latestQuote = arr.length > 0 ? arr[0] : {};
-        setSelectedSymbol(sym);
+        const latestQuote = Array.isArray(arr) && arr[0] ? arr[0] : {};
+        setSelectedSymbol(s);
         setSelectedQuote(latestQuote);
         setQuery("");
         setSuggestions([]);
-        setOpen(false);
       })
       .catch(() => {
-        setSelectedSymbol(sym);
-        setSelectedQuote(quotes[sym] || {});
+        setSelectedSymbol(s);
+        setSelectedQuote(quotes[s] || {});
         setQuery("");
         setSuggestions([]);
-        setOpen(false);
       });
+
+    modalPollRef.current = setInterval(() => {
+      fetch(`${API}/quotes?symbols=${encodeURIComponent(s)}`)
+        .then((r) => r.json())
+        .then((arr) => {
+          const latestQuote = Array.isArray(arr) && arr[0] ? arr[0] : null;
+          if (latestQuote) setSelectedQuote(latestQuote);
+        })
+        .catch(() => { });
+    }, 2000);
   }
+
+  useEffect(() => {
+    if (!selectedSymbol && modalPollRef.current) {
+      clearInterval(modalPollRef.current);
+      modalPollRef.current = null;
+    }
+  }, [selectedSymbol]);
 
   function handleAddToWatchlist() {
     fetch(`${API}/watchlist/${who}`, {
@@ -197,7 +292,6 @@ export default function Trade({ username }) {
     setSelectedSymbol(null);
   }
 
-  // SELL preview flow
   async function previewThenSell(sym, qty = 1, segment = "intraday") {
     if (!who) {
       alert("Please log in first.");
@@ -250,7 +344,7 @@ export default function Trade({ username }) {
       setSellPreviewData(data);
       setSellConfirmMsg(
         data?.message ||
-          `You have 0 qty of ${String(sym || "").toUpperCase()}. Do you still want to sell first?`
+        `You have 0 qty of ${String(sym || "").toUpperCase()}. Do you still want to sell first?`
       );
       setSellConfirmOpen(true);
     } catch (e) {
@@ -264,15 +358,11 @@ export default function Trade({ username }) {
     previewThenSell(selectedSymbol, 1, "intraday");
   }
 
-  // safe highlighter (escapes special chars)
-  function escapeRegex(s) {
-    return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  }
   function highlightMatch(text, q) {
-    if (!q) return text;
-    const safe = escapeRegex(q);
-    const regex = new RegExp(`(${safe})`, "ig");
-    return String(text).split(regex).map((part, i) =>
+    const str = String(text ?? "");
+    if (!q) return str;
+    const regex = new RegExp(`(${q})`, "ig");
+    return str.split(regex).map((part, i) =>
       regex.test(part) ? (
         <span key={i} className="font-bold text-blue-600">
           {part}
@@ -286,38 +376,19 @@ export default function Trade({ username }) {
   return (
     <div className="flex flex-col min-h-screen bg-gray-700">
       {/* Header */}
-      <div className="sticky top-0 z-50 p-4 bg-white rounded-b-2xl shadow">
-        {/* Row 1: Back button (left) + icons (right) */}
-        <div className="flex items-center justify-between">
-          <BackButton to="/menu" />
-
-          <div className="flex items-center gap-4">
-            <div
-              className="flex flex-col items-center cursor-pointer"
-              onClick={() => nav("/portfolio")}
-            >
-              <Briefcase size={22} className="text-gray-600 hover:text-blue-600" />
-              <span className="text-xs text-gray-500">Portfolio</span>
-            </div>
-            <div
-              className="flex flex-col items-center cursor-pointer"
-              onClick={() => nav("/history")}
-            >
-              <Clock size={22} className="text-gray-600 hover:text-blue-600" />
-              <span className="text-xs text-gray-500">History</span>
-            </div>
-            <div
-              className="flex flex-col items-center cursor-pointer"
-              onClick={() => nav("/profile")}
-            >
-              <User size={22} className="text-gray-600 hover:text-blue-600" />
-              <span className="text-xs text-gray-500">Profile</span>
+      <div className="sticky top-0 z-50 p-4 bg-white rounded-b-2xl shadow relative">
+        {/* Overlay row: align Back + Logo with the funds pill (do NOT change funds row margins) */}
+        <div className="absolute inset-x-0 top-2 px-1">
+          <div className="flex items-center justify-between">
+            {/* Back button */}
+            <div className="pointer-events-auto">
+              <BackButton to="/menu" />
             </div>
           </div>
         </div>
 
-        {/* Row 2: funds pill centered */}
-        <div className="mt-3 w-full flex justify-center">
+        {/* Row 1: Total Funds (unchanged margins) */}
+        <div className="mt-2 mb-2 w-full flex justify-center">
           <div className="w-fit max-w-[90%] inline-flex items-center gap-2 rounded bg-gray-700 text-gray-100 px-4 py-1.5 text-sm font-medium shadow whitespace-nowrap">
             <span>Total Funds: {moneyINR(totalFunds, { decimals: 0 })}</span>
             <span>|</span>
@@ -325,24 +396,43 @@ export default function Trade({ username }) {
           </div>
         </div>
 
-        {/* Row 3: title + tabs */}
-        <div className="mt-2 flex flex-col items-center">
-          <h1 className="text-2xl font-serif text-gray-800">Watchlist</h1>
-          <div className="flex mt-2 space-x-6 text-sm">
-            {["mylist", "mustwatch"].map((t) => (
-              <button
-                key={t}
-                onClick={() => setTab(t)}
-                className={`pb-1 ${
-                  tab === t
-                    ? "text-blue-500 border-b-2 border-blue-500"
-                    : "text-gray-500"
-                }`}
-              >
-                {t === "mylist" ? "My List" : "Must Watch"}
-              </button>
-            ))}
+        {/* Row 2: Portfolio / History / Profile */}
+        <div className="flex items-center justify-center gap-10">
+          <div className="flex flex-col items-center cursor-pointer" onClick={() => nav("/portfolio")}>
+            <Briefcase size={22} className="text-gray-600 hover:text-blue-600" />
+            <span className="text-xs text-gray-500">Portfolio</span>
           </div>
+          <div className="flex flex-col items-center cursor-pointer" onClick={() => nav("/history")}>
+            <Clock size={22} className="text-gray-600 hover:text-blue-600" />
+            <span className="text-xs text-gray-500">History</span>
+          </div>
+          <div className="flex flex-col items-center cursor-pointer" onClick={() => nav("/profile")}>
+            <User size={22} className="text-gray-600 hover:text-blue-600" />
+            <span className="text-xs text-gray-500">Profile</span>
+          </div>
+        </div>
+
+        {/* Row 3: Watchlist title */}
+        <div className="mt-2 flex justify-center">
+          <h1 className="text-2xl font-serif text-gray-800">Watchlist</h1>
+        </div>
+
+        {/* Row 4: Tabs (My List / Must Watch) */}
+        <div className="mt-2 flex items-center justify-center gap-10 text-sm">
+          <button
+            onClick={() => setTab("mylist")}
+            className={`pb-1 ${tab === "mylist" ? "text-blue-500 border-b-2 border-blue-500" : "text-gray-500"
+              }`}
+          >
+            My List
+          </button>
+          <button
+            onClick={() => setTab("mustwatch")}
+            className={`pb-1 ${tab === "mustwatch" ? "text-blue-500 border-b-2 border-blue-500" : "text-gray-500"
+              }`}
+          >
+            Must Watch
+          </button>
         </div>
       </div>
 
@@ -353,40 +443,25 @@ export default function Trade({ username }) {
             <div className="relative">
               <Search size={16} className="absolute top-3 left-3 text-gray-400" />
               <input
-                ref={inputRef}
                 type="text"
                 value={query}
                 onChange={handleSearch}
-                onFocus={() => setOpen(true)}                  // ✅ open on focus
-                onBlur={() => setTimeout(() => setOpen(false), 120)} // ✅ close shortly after blur
                 placeholder="Search & Add"
                 className="w-full pl-10 pr-4 py-2 rounded-lg text-gray-800"
               />
             </div>
-
-            {/* ✅ Keep dropdown open while typing; show Searching/No matches states */}
-            {open && (
-              <ul className="bg-white rounded-lg shadow mt-2 max-h-60 overflow-auto z-50 relative">
-                {searching && (
-                  <li className="px-4 py-2 text-sm text-gray-500">Searching…</li>
-                )}
-
-                {!searching && suggestions.length === 0 && (
-                  <li className="px-4 py-2 text-sm text-gray-500">
-                    No matches. Keep typing…
-                  </li>
-                )}
-
-                {!searching &&
-                  suggestions.map((s, i) => (
+            {suggestions.length > 0 && (
+              <ul className="bg-white rounded-lg shadow mt-2 max-h-60 overflow-auto">
+                {suggestions.map((s, i) => {
+                  const sym = s?.symbol || s?.tradingsymbol || "";
+                  return (
                     <li
-                      key={`${s.symbol}-${s.exchange}-${i}`}
-                      onMouseDown={(e) => e.preventDefault()} // keep focus so click works
-                      onClick={() => goDetail(s.symbol)}
+                      key={`${sym}-${i}`}
+                      onClick={() => goDetail(sym)}
                       className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                     >
                       <div className="font-semibold">
-                        {highlightMatch(s.symbol, query)}
+                        {highlightMatch(sym, query)}
                       </div>
                       <div className="text-sm text-gray-600">
                         {highlightMatch(s.name, query)}
@@ -395,7 +470,8 @@ export default function Trade({ username }) {
                         {(s.exchange || "NSE")} | {s.segment} | {s.instrument_type}
                       </div>
                     </li>
-                  ))}
+                  );
+                })}
               </ul>
             )}
           </div>
@@ -417,31 +493,18 @@ export default function Trade({ username }) {
                     onClick={() => goDetail(sym)}
                   >
                     <div>
-                      <div className="text-lg font-semibold text-gray-800">
-                        {sym}
-                      </div>
-                      <div className="text-xs text-gray-600">
-                        {q.exchange || "NSE"}
-                      </div>
+                      <div className="text-lg font-semibold text-gray-800">{sym}</div>
+                      <div className="text-xs text-gray-600">{q.exchange || "NSE"}</div>
                     </div>
                     <div className="flex items-start space-x-2">
                       <div className="text-right">
-                        <div
-                          className={`text-xl font-medium ${
-                            isPos ? "text-green-600" : "text-red-600"
-                          }`}
-                        >
-                          {q.price != null
-                            ? Number(q.price).toLocaleString("en-IN")
-                            : "--"}
+                        <div className={`text-xl font-medium ${isPos ? "text-green-600" : "text-red-600"}`}>
+                          {q.price != null ? Number(q.price).toLocaleString("en-IN") : "--"}
                         </div>
                         <div className="text-xs text-gray-600">
                           {q.change != null
-                            ? `${isPos ? "+" : ""}${Number(q.change).toFixed(
-                                2
-                              )} (${isPos ? "+" : ""}${Number(
-                                q.pct_change || 0
-                              ).toFixed(2)}%)`
+                            ? `${isPos ? "+" : ""}${Number(q.change).toFixed(2)} (${isPos ? "+" : ""
+                            }${Number(q.pct_change || 0).toFixed(2)}%)`
                             : "--"}
                         </div>
                       </div>
@@ -465,17 +528,11 @@ export default function Trade({ username }) {
 
       {/* Bottom Nav */}
       <div className="flex bg-gray-800 p-2 justify-around">
-        <button
-          onClick={() => setTab("mylist")}
-          className="flex flex-col items-center text-blue-400"
-        >
+        <button onClick={() => setTab("mylist")} className="flex flex-col items-center text-blue-400">
           <Search size={24} />
           <span className="text-xs">Watchlist</span>
         </button>
-        <button
-          onClick={() => nav("/orders")}
-          className="flex flex-col items-center text-gray-400"
-        >
+        <button onClick={() => nav("/orders")} className="flex flex-col items-center text-gray-400">
           <ClipboardList size={24} />
           <span className="text-xs">Orders</span>
         </button>
@@ -485,10 +542,24 @@ export default function Trade({ username }) {
       <ScriptDetailsModal
         symbol={selectedSymbol}
         quote={selectedQuote}
-        onClose={() => setSelectedSymbol(null)}
+        onClose={() => {
+          setSelectedSymbol(null);
+          if (modalPollRef.current) {
+            clearInterval(modalPollRef.current);
+            modalPollRef.current = null;
+          }
+        }}
         onAdd={handleAddToWatchlist}
         onBuy={handleBuy}
-        onSell={handleSell}
+        onSell={() => {
+          const sym = selectedSymbol;
+          setSelectedSymbol(null);
+          if (modalPollRef.current) {
+            clearInterval(modalPollRef.current);
+            modalPollRef.current = null;
+          }
+          previewThenSell(sym, 1, "intraday");
+        }}
       />
 
       {/* SELL confirmation modal */}
@@ -496,14 +567,10 @@ export default function Trade({ username }) {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-xl text-center max-w-sm w-full">
             <p className="mb-4 text-gray-800 font-semibold">
-              {sellConfirmMsg ||
-                `You have 0 qty of ${sellSymbol}. Do you still want to sell first?`}
+              {sellConfirmMsg || `You have 0 qty of ${sellSymbol}. Do you still want to sell first?`}
             </p>
             <div className="flex justify-center gap-4">
-              <button
-                className="bg-gray-400 text-white px-4 py-2 rounded"
-                onClick={() => setSellConfirmOpen(false)}
-              >
+              <button className="bg-gray-400 text-white px-4 py-2 rounded" onClick={() => setSellConfirmOpen(false)}>
                 NO
               </button>
               <button
@@ -511,13 +578,8 @@ export default function Trade({ username }) {
                 onClick={() => {
                   setSellConfirmOpen(false);
                   nav(`/sell/${sellSymbol}`, {
-                    state: {
-                      requestedQty: 1,
-                      allow_short: true,
-                      preview: sellPreviewData,
-                    },
+                    state: { requestedQty: 1, allow_short: true, preview: sellPreviewData },
                   });
-                  setSelectedSymbol(null);
                 }}
               >
                 YES
