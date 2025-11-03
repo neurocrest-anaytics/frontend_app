@@ -96,7 +96,7 @@ export default function Trade({ username }) {
           (arr || []).forEach((q) => (map[q.symbol] = q));
           setQuotes(map);
         })
-        .catch(() => { });
+        .catch(() => {});
     };
 
     fetchQuotes();
@@ -120,14 +120,14 @@ export default function Trade({ username }) {
     // Local instant matches (optional)
     const localMatches = Array.isArray(allScripts)
       ? allScripts
-        .filter((s) => {
-          const q = debouncedQuery.toLowerCase();
-          return (
-            (s.symbol || "").toLowerCase().includes(q) ||
-            (s.name || "").toLowerCase().includes(q)
-          );
-        })
-        .slice(0, 10)
+          .filter((s) => {
+            const q = debouncedQuery.toLowerCase();
+            return (
+              (s.symbol || "").toLowerCase().includes(q) ||
+              (s.name || "").toLowerCase().includes(q)
+            );
+          })
+          .slice(0, 10)
       : [];
     setSuggestions(localMatches);
 
@@ -150,7 +150,7 @@ export default function Trade({ username }) {
           clean.sort((a, b) => (a.symbol || "").localeCompare(b.symbol || ""));
           setSuggestions(clean);
         })
-        .catch(() => { })
+        .catch(() => {})
         .finally(() => setSearching(false));
     }, 300);
 
@@ -250,7 +250,7 @@ export default function Trade({ username }) {
       setSellPreviewData(data);
       setSellConfirmMsg(
         data?.message ||
-        `You have 0 qty of ${String(sym || "").toUpperCase()}. Do you still want to sell first?`
+          `You have 0 qty of ${String(sym || "").toUpperCase()}. Do you still want to sell first?`
       );
       setSellConfirmOpen(true);
     } catch (e) {
@@ -286,9 +286,38 @@ export default function Trade({ username }) {
   return (
     <div className="flex flex-col min-h-screen bg-gray-700">
       {/* Header */}
-      <div className="sticky top-0 z-50 p-4 bg-white rounded-b-2xl shadow relative">
-        <BackButton to="/menu" />
-        <div className="mt-2 mb-1 w-full flex justify-center">
+      <div className="sticky top-0 z-50 p-4 bg-white rounded-b-2xl shadow">
+        {/* Row 1: Back button (left) + icons (right) */}
+        <div className="flex items-center justify-between">
+          <BackButton to="/menu" />
+
+          <div className="flex items-center gap-4">
+            <div
+              className="flex flex-col items-center cursor-pointer"
+              onClick={() => nav("/portfolio")}
+            >
+              <Briefcase size={22} className="text-gray-600 hover:text-blue-600" />
+              <span className="text-xs text-gray-500">Portfolio</span>
+            </div>
+            <div
+              className="flex flex-col items-center cursor-pointer"
+              onClick={() => nav("/history")}
+            >
+              <Clock size={22} className="text-gray-600 hover:text-blue-600" />
+              <span className="text-xs text-gray-500">History</span>
+            </div>
+            <div
+              className="flex flex-col items-center cursor-pointer"
+              onClick={() => nav("/profile")}
+            >
+              <User size={22} className="text-gray-600 hover:text-blue-600" />
+              <span className="text-xs text-gray-500">Profile</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Row 2: funds pill centered */}
+        <div className="mt-3 w-full flex justify-center">
           <div className="w-fit max-w-[90%] inline-flex items-center gap-2 rounded bg-gray-700 text-gray-100 px-4 py-1.5 text-sm font-medium shadow whitespace-nowrap">
             <span>Total Funds: {moneyINR(totalFunds, { decimals: 0 })}</span>
             <span>|</span>
@@ -296,46 +325,23 @@ export default function Trade({ username }) {
           </div>
         </div>
 
-        <div className="flex flex-col items-center">
+        {/* Row 3: title + tabs */}
+        <div className="mt-2 flex flex-col items-center">
           <h1 className="text-2xl font-serif text-gray-800">Watchlist</h1>
           <div className="flex mt-2 space-x-6 text-sm">
             {["mylist", "mustwatch"].map((t) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
-                className={`pb-1 ${tab === t
-                  ? "text-blue-500 border-b-2 border-blue-500"
-                  : "text-gray-500"
-                  }`}
+                className={`pb-1 ${
+                  tab === t
+                    ? "text-blue-500 border-b-2 border-blue-500"
+                    : "text-gray-500"
+                }`}
               >
                 {t === "mylist" ? "My List" : "Must Watch"}
               </button>
             ))}
-          </div>
-        </div>
-
-        {/* Right icons */}
-        <div className="absolute right-5 top-20 flex items-center space-x-4">
-          <div
-            className="flex flex-col items-center cursor-pointer"
-            onClick={() => nav("/portfolio")}
-          >
-            <Briefcase size={22} className="text-gray-600 hover:text-blue-600" />
-            <span className="text-xs text-gray-500">Portfolio</span>
-          </div>
-          <div
-            className="flex flex-col items-center cursor-pointer"
-            onClick={() => nav("/history")}
-          >
-            <Clock size={22} className="text-gray-600 hover:text-blue-600" />
-            <span className="text-xs text-gray-500">History</span>
-          </div>
-          <div
-            className="flex flex-col items-center cursor-pointer"
-            onClick={() => nav("/profile")}
-          >
-            <User size={22} className="text-gray-600 hover:text-blue-600" />
-            <span className="text-xs text-gray-500">Profile</span>
           </div>
         </div>
       </div>
@@ -421,8 +427,9 @@ export default function Trade({ username }) {
                     <div className="flex items-start space-x-2">
                       <div className="text-right">
                         <div
-                          className={`text-xl font-medium ${isPos ? "text-green-600" : "text-red-600"
-                            }`}
+                          className={`text-xl font-medium ${
+                            isPos ? "text-green-600" : "text-red-600"
+                          }`}
                         >
                           {q.price != null
                             ? Number(q.price).toLocaleString("en-IN")
@@ -431,10 +438,10 @@ export default function Trade({ username }) {
                         <div className="text-xs text-gray-600">
                           {q.change != null
                             ? `${isPos ? "+" : ""}${Number(q.change).toFixed(
-                              2
-                            )} (${isPos ? "+" : ""}${Number(
-                              q.pct_change || 0
-                            ).toFixed(2)}%)`
+                                2
+                              )} (${isPos ? "+" : ""}${Number(
+                                q.pct_change || 0
+                              ).toFixed(2)}%)`
                             : "--"}
                         </div>
                       </div>
