@@ -1,16 +1,21 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, ClipboardList, User, Briefcase, Clock } from "lucide-react";
 import ScriptDetailsModal from "../components/ScriptDetailsModal";
 import BackButton from "../components/BackButton";
 import { moneyINR } from "../utils/format";
 
-const API = import.meta.env.VITE_BACKEND_BASE_URL || "https://paper-trading-backend.onrender.com";
+const API =
+  import.meta.env.VITE_BACKEND_BASE_URL ||
+  "https://paper-trading-backend.onrender.com";
 
 export default function Trade({ username }) {
   const [tab, setTab] = useState("mylist");
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
+  const [searching, setSearching] = useState(false);   // ✅ show "Searching…"
+  const [open, setOpen] = useState(false);             // ✅ explicit dropdown state
+  const [allScripts, setAllScripts] = useState([]);    // cached scripts
   const [watchlist, setWatchlist] = useState([]);
   const [quotes, setQuotes] = useState({});
   const [selectedSymbol, setSelectedSymbol] = useState(null);
@@ -18,7 +23,6 @@ export default function Trade({ username }) {
   const [totalFunds, setTotalFunds] = useState(0);
   const [availableFunds, setAvailableFunds] = useState(0);
 
-  // SELL preview / confirm state
   const [sellChecking, setSellChecking] = useState(false);
   const [sellConfirmOpen, setSellConfirmOpen] = useState(false);
   const [sellConfirmMsg, setSellConfirmMsg] = useState("");
@@ -26,17 +30,27 @@ export default function Trade({ username }) {
   const [sellSymbol, setSellSymbol] = useState(null);
 
   const intervalRef = useRef(null);
+  const inputRef = useRef(null);                       // ✅ to manage focus/blur
   const nav = useNavigate();
-
-  // 🔒 guard to avoid duplicate preview calls under React 18 StrictMode
   const sellPreviewGuardRef = useRef({});
-
   const who = username || localStorage.getItem("username") || "";
 
   useEffect(() => {
     fetchWatchlist();
     fetchFunds();
+    preloadScripts();
   }, [username]);
+
+  // preload instrument list (fast local matches)
+  function preloadScripts() {
+    fetch(`${API}/search/scripts`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) setAllScripts(data);
+        else setAllScripts([]);
+      })
+      .catch(() => setAllScripts([]));
+  }
 
   function fetchWatchlist() {
     fetch(`${API}/watchlist/${who}`)
@@ -55,8 +69,7 @@ export default function Trade({ username }) {
         setTotalFunds(data.total_funds || 0);
         setAvailableFunds(data.available_funds || 0);
       })
-      .catch((err) => {
-        console.error("Error loading funds:", err);
+      .catch(() => {
         setTotalFunds(0);
         setAvailableFunds(0);
       });
@@ -70,6 +83,7 @@ export default function Trade({ username }) {
     }).then(() => fetchWatchlist());
   }
 
+  // quotes refresher
   useEffect(() => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     if (!watchlist.length) return;
@@ -90,29 +104,64 @@ export default function Trade({ username }) {
     return () => clearInterval(intervalRef.current);
   }, [watchlist]);
 
-  function handleSearch(e) {
-    const q = e.target.value;
-    setQuery(q);
-    if (!q) {
+  // improved search logic — layered & case-insensitive
+  const debouncedQuery = useMemo(() => query.trim(), [query]);
+
+  useEffect(() => {
+    if (!debouncedQuery) {
       setSuggestions([]);
+      setSearching(false);
+      setOpen(false);           // ✅ close if cleared
       return;
     }
-    fetch(`${API}/search?q=${encodeURIComponent(q)}`)
-      .then((r) => r.json())
-      .then((data) => {
-        const lower = q.toLowerCase();
-        const filtered = (data || []).filter(
-          (s) =>
-            s.symbol.toLowerCase().includes(lower) ||
-            s.name.toLowerCase().includes(lower)
-        );
-        setSuggestions(filtered);
-      })
-      .catch(() => setSuggestions([]));
+
+    setOpen(true);              // ✅ keep dropdown open while there's a query
+
+    // Local instant matches (optional)
+    const localMatches = Array.isArray(allScripts)
+      ? allScripts
+        .filter((s) => {
+          const q = debouncedQuery.toLowerCase();
+          return (
+            (s.symbol || "").toLowerCase().includes(q) ||
+            (s.name || "").toLowerCase().includes(q)
+          );
+        })
+        .slice(0, 10)
+      : [];
+    setSuggestions(localMatches);
+
+    // Backend query (uppercase + no spaces)
+    const qUpper = debouncedQuery.toUpperCase().replace(/\s+/g, "");
+
+    const timer = setTimeout(() => {
+      setSearching(true);
+      fetch(`${API}/search?q=${encodeURIComponent(qUpper)}`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (!Array.isArray(data)) {
+            setSuggestions([]);
+            return;
+          }
+          const allowedExchanges = ["NSE", "NFO", "BSE"];
+          const clean = data.filter((s) =>
+            allowedExchanges.includes((s.exchange || "").toUpperCase())
+          );
+          clean.sort((a, b) => (a.symbol || "").localeCompare(b.symbol || ""));
+          setSuggestions(clean);
+        })
+        .catch(() => { })
+        .finally(() => setSearching(false));
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [debouncedQuery, allScripts]);
+
+  function handleSearch(e) {
+    setQuery(e.target.value);
   }
 
   function goDetail(sym) {
-    // fetch latest quote quickly for the modal
     fetch(`${API}/quotes?symbols=${sym}`)
       .then((r) => r.json())
       .then((arr) => {
@@ -121,13 +170,14 @@ export default function Trade({ username }) {
         setSelectedQuote(latestQuote);
         setQuery("");
         setSuggestions([]);
+        setOpen(false);
       })
-      .catch((err) => {
-        console.error("Failed to fetch immediate quote:", err);
+      .catch(() => {
         setSelectedSymbol(sym);
-        setSelectedQuote(quotes[sym] || {}); // fallback
+        setSelectedQuote(quotes[sym] || {});
         setQuery("");
         setSuggestions([]);
+        setOpen(false);
       });
   }
 
@@ -147,14 +197,12 @@ export default function Trade({ username }) {
     setSelectedSymbol(null);
   }
 
-  // ---- SELL preview → confirm OR navigate ----
+  // SELL preview flow
   async function previewThenSell(sym, qty = 1, segment = "intraday") {
     if (!who) {
       alert("Please log in first.");
       return;
     }
-
-    // 👇 build a signature and guard repeated calls (StrictMode/double-render)
     const signature = JSON.stringify({
       sym: String(sym || "").toUpperCase(),
       qty: Number(qty) || 1,
@@ -162,42 +210,24 @@ export default function Trade({ username }) {
     });
     if (sellPreviewGuardRef.current[signature]) return;
     sellPreviewGuardRef.current[signature] = true;
-    // auto-clear this signature after a short time so future distinct calls work
-    setTimeout(() => {
-      delete sellPreviewGuardRef.current[signature];
-    }, 1500);
+    setTimeout(() => delete sellPreviewGuardRef.current[signature], 1500);
 
     try {
       setSellChecking(true);
-
       const body = {
         username: who,
         script: String(sym || "").toUpperCase(),
         order_type: "SELL",
         qty: Number(qty) || 1,
         segment,
-        allow_short: false, // we ask first; don't short automatically
+        allow_short: false,
       };
-
-      console.log(
-        "[TRADE SELL preview] POST",
-        `${API}/orders/sell/preview`,
-        body
-      );
       const res = await fetch(`${API}/orders/sell/preview`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-
       const data = await res.json().catch(() => ({}));
-      console.log(
-        "[TRADE SELL preview] status:",
-        res.status,
-        "payload:",
-        data
-      );
-
       const needsConfirm =
         data?.needs_confirmation === true ||
         data?.code === "NEEDS_CONFIRM_SHORT" ||
@@ -205,7 +235,6 @@ export default function Trade({ username }) {
         Number(data?.owned_qty || 0) === 0;
 
       if (res.ok && !needsConfirm) {
-        // Owns some qty → go straight to Sell
         nav(`/sell/${sym}`, {
           state: {
             requestedQty: Number(qty) || 1,
@@ -217,7 +246,6 @@ export default function Trade({ username }) {
         return;
       }
 
-      // Show confirmation
       setSellSymbol(String(sym || "").toUpperCase());
       setSellPreviewData(data);
       setSellConfirmMsg(
@@ -226,7 +254,6 @@ export default function Trade({ username }) {
       );
       setSellConfirmOpen(true);
     } catch (e) {
-      console.error("TRADE SELL preview error:", e);
       alert("Unable to check holdings right now. Please try again.");
     } finally {
       setSellChecking(false);
@@ -234,14 +261,18 @@ export default function Trade({ username }) {
   }
 
   function handleSell() {
-    // called from the ScriptDetailsModal primary SELL button
     previewThenSell(selectedSymbol, 1, "intraday");
   }
 
+  // safe highlighter (escapes special chars)
+  function escapeRegex(s) {
+    return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
   function highlightMatch(text, q) {
     if (!q) return text;
-    const regex = new RegExp(`(${q})`, "ig");
-    return text.split(regex).map((part, i) =>
+    const safe = escapeRegex(q);
+    const regex = new RegExp(`(${safe})`, "ig");
+    return String(text).split(regex).map((part, i) =>
       regex.test(part) ? (
         <span key={i} className="font-bold text-blue-600">
           {part}
@@ -257,21 +288,14 @@ export default function Trade({ username }) {
       {/* Header */}
       <div className="sticky top-0 z-50 p-4 bg-white rounded-b-2xl shadow relative">
         <BackButton to="/menu" />
-        {/* 💰 Centered, narrower funds pill */}
         <div className="mt-2 mb-1 w-full flex justify-center">
-          <div
-            className="w-fit max-w-[90%] inline-flex items-center gap-2
-                          rounded bg-gray-700 text-gray-100
-                          px-4 py-1.5 text-sm font-medium shadow
-                          whitespace-nowrap"
-          >
+          <div className="w-fit max-w-[90%] inline-flex items-center gap-2 rounded bg-gray-700 text-gray-100 px-4 py-1.5 text-sm font-medium shadow whitespace-nowrap">
             <span>Total Funds: {moneyINR(totalFunds, { decimals: 0 })}</span>
             <span>|</span>
             <span>Available: {moneyINR(availableFunds, { decimals: 0 })}</span>
           </div>
         </div>
 
-        {/* Center Title & Tabs */}
         <div className="flex flex-col items-center">
           <h1 className="text-2xl font-serif text-gray-800">Watchlist</h1>
           <div className="flex mt-2 space-x-6 text-sm">
@@ -316,7 +340,6 @@ export default function Trade({ username }) {
         </div>
       </div>
 
-      {/* Watchlist (My List Tab Only) */}
       {tab === "mylist" && (
         <>
           {/* Search */}
@@ -324,32 +347,49 @@ export default function Trade({ username }) {
             <div className="relative">
               <Search size={16} className="absolute top-3 left-3 text-gray-400" />
               <input
+                ref={inputRef}
                 type="text"
                 value={query}
                 onChange={handleSearch}
+                onFocus={() => setOpen(true)}                  // ✅ open on focus
+                onBlur={() => setTimeout(() => setOpen(false), 120)} // ✅ close shortly after blur
                 placeholder="Search & Add"
                 className="w-full pl-10 pr-4 py-2 rounded-lg text-gray-800"
               />
             </div>
-            {suggestions.length > 0 && (
-              <ul className="bg-white rounded-lg shadow mt-2 max-h-60 overflow-auto">
-                {suggestions.map((s, i) => (
-                  <li
-                    key={i}
-                    onClick={() => goDetail(s.symbol)}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                  >
-                    <div className="font-semibold">
-                      {highlightMatch(s.symbol, query)}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {highlightMatch(s.name, query)}
-                    </div>
-                    <div className="text-xs text-gray-400">
-                      Sector: {highlightMatch(s.sector || "N/A", query)}
-                    </div>
+
+            {/* ✅ Keep dropdown open while typing; show Searching/No matches states */}
+            {open && (
+              <ul className="bg-white rounded-lg shadow mt-2 max-h-60 overflow-auto z-50 relative">
+                {searching && (
+                  <li className="px-4 py-2 text-sm text-gray-500">Searching…</li>
+                )}
+
+                {!searching && suggestions.length === 0 && (
+                  <li className="px-4 py-2 text-sm text-gray-500">
+                    No matches. Keep typing…
                   </li>
-                ))}
+                )}
+
+                {!searching &&
+                  suggestions.map((s, i) => (
+                    <li
+                      key={`${s.symbol}-${s.exchange}-${i}`}
+                      onMouseDown={(e) => e.preventDefault()} // keep focus so click works
+                      onClick={() => goDetail(s.symbol)}
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    >
+                      <div className="font-semibold">
+                        {highlightMatch(s.symbol, query)}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {highlightMatch(s.name, query)}
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        {(s.exchange || "NSE")} | {s.segment} | {s.instrument_type}
+                      </div>
+                    </li>
+                  ))}
               </ul>
             )}
           </div>
@@ -390,8 +430,11 @@ export default function Trade({ username }) {
                         </div>
                         <div className="text-xs text-gray-600">
                           {q.change != null
-                            ? `${isPos ? "+" : ""}${Number(q.change).toFixed(2)} (${isPos ? "+" : ""
-                            }${Number(q.pct_change || 0).toFixed(2)}%)`
+                            ? `${isPos ? "+" : ""}${Number(q.change).toFixed(
+                              2
+                            )} (${isPos ? "+" : ""}${Number(
+                              q.pct_change || 0
+                            ).toFixed(2)}%)`
                             : "--"}
                         </div>
                       </div>
@@ -438,7 +481,7 @@ export default function Trade({ username }) {
         onClose={() => setSelectedSymbol(null)}
         onAdd={handleAddToWatchlist}
         onBuy={handleBuy}
-        onSell={handleSell} // will call previewThenSell
+        onSell={handleSell}
       />
 
       {/* SELL confirmation modal */}
@@ -463,7 +506,7 @@ export default function Trade({ username }) {
                   nav(`/sell/${sellSymbol}`, {
                     state: {
                       requestedQty: 1,
-                      allow_short: true, // user agreed
+                      allow_short: true,
                       preview: sellPreviewData,
                     },
                   });
