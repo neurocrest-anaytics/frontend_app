@@ -4,11 +4,13 @@
   "webDir": "dist",
   "bundledWebRuntime": false,
   "server": {
+    "url": "https://frontend-app-ten-opal.vercel.app",
     "cleartext": false,
-    "androidScheme": "https",
-    "allowNavigation": []
+    "allowNavigation": ["frontend-app-ten-opal.vercel.app"]
   },
-  "android": { "allowMixedContent": false },
+  "android": {
+    "allowMixedContent": true
+  },
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 2000,
