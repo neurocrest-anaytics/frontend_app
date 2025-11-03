@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ClipboardList, Search, Briefcase, User, X, Clock } from "lucide-react";
 import BackButton from "../components/BackButton";
 import { toast } from "react-toastify";
+import useOpenTrades from "../hooks/useOpenTrades";
 
 const API = import.meta.env.VITE_BACKEND_BASE_URL || "https://paper-trading-backend.onrender.com";
 
@@ -81,8 +82,8 @@ const SegmentBadge = ({ segment }) => {
   return (
     <span
       className={`inline-flex items-center px-2 py-[2px] rounded-full text-[11px] border ${isIntra
-        ? "bg-indigo-50 text-indigo-700 border-indigo-200"
-        : "bg-amber-50 text-amber-700 border-amber-200"
+          ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+          : "bg-amber-50 text-amber-700 border-amber-200"
         }`}
       title="Segment"
     >
@@ -105,6 +106,7 @@ export default function Orders({ username }) {
   const [errorMsg, setErrorMsg] = useState("");
   const intervalRef = useRef(null);
   const navigate = useNavigate();
+  const { data: openTrades, isRefreshing, refresh } = useOpenTrades(username);
 
   // polling refs
   const dataPollRef = useRef(null);
@@ -218,7 +220,7 @@ export default function Orders({ username }) {
     }
   }, [location.state, loadData]);
 
-  // 🔁 ALSO refresh **whenever the user clicks a tab** (your ask)
+  // 🔁 ALSO refresh **whenever the user clicks a tab**
   useEffect(() => {
     loadData();
   }, [tab, loadData]);
@@ -290,21 +292,25 @@ export default function Orders({ username }) {
 
   const ordersToShow = isOrdersTab ? openOrders : positions;
 
-  // ---------- Total P&L (active positions only) ----------
+  // ---------- Total P&L (includes both active & closed) ----------
   const totalPnl = positions.reduce((sum, o) => {
-    if (o.inactive) return sum; // ignore closed/inactive rows
-
-    const backendTotal = toNum(o.script_pnl) ?? toNum(o.pnl_value);
-    if (backendTotal !== null) return sum + backendTotal;
-
-    const script = o.script || o.symbol;
-    const q = (script && quotes[(script || "").toUpperCase()]) || {};
-    const entry = toNum(o.price) ?? 0;
-    const live = toNum(q.price) ?? toNum(o.live_price) ?? entry;
     const qty = toNum(o.qty) ?? 0;
+    const entry = toNum(o.price) ?? 0;
+
+    // ✅ Freeze with exit_price if inactive
+    const effectivePrice =
+      o.inactive && o.exit_price != null
+        ? toNum(o.exit_price)
+        : (toNum(quotes[(o.script || o.symbol || "").toUpperCase()]?.price) ??
+          toNum(o.live_price) ??
+          entry);
+
     const isBuy = (o.type || o.order_type) === "BUY";
-    const perShare = entry && live ? (isBuy ? (live - entry) : (entry - live)) : 0;
+    const perShare = entry && effectivePrice
+      ? (isBuy ? (effectivePrice - entry) : (entry - effectivePrice))
+      : 0;
     const pnl = perShare * qty;
+
     return sum + (Number.isFinite(pnl) ? pnl : 0);
   }, 0);
 
@@ -463,18 +469,77 @@ export default function Orders({ username }) {
   // ---------- UI ----------
   return (
     <div className="relative min-h-screen flex flex-col bg-gray-100 dark:bg-gray-900">
-      <BackButton to="/menu" />
-      <div className="p-4">
-        <h2 className="text-2xl font-bold text-center text-gray-700 dark:text-white mb-10">
-          Orders
-        </h2>
 
-        <div className="sticky flex justify-center mb-4 space-x-6">
+      {/* keep original BackButton but hide it (header overlay will show the aligned one) */}
+      <div className="hidden">
+        <BackButton to="/menu" />
+      </div>
+
+      {/* HEADER (overlay row + icons row + title row + tabs row) */}
+      <div className="sticky top-0 z-50 p-4 bg-white rounded-b-2xl shadow relative">
+        {/* Overlay row: Back + Logo aligned like Trade.jsx */}
+        <div className="absolute inset-x-0 top-2 px-1">
+          <div className="flex items-center justify-between">
+            <div className="pointer-events-auto">
+              <BackButton to="/menu" />
+            </div>
+            <img
+              src="/logo.png"   /* change path if needed */
+              alt="Logo"
+              className="h-7 w-auto pointer-events-auto"
+            />
+          </div>
+        </div>
+
+        {/* Row 1: Portfolio / History / Profile */}
+        <div className="mt-8 flex items-center justify-center gap-10">
+          <div className="flex flex-col items-center cursor-pointer" onClick={() => navigate("/portfolio")}>
+            <Briefcase size={22} className="text-gray-600 dark:text-white hover:text-blue-600" />
+            <span className="text-xs text-gray-500 dark:text-white">Portfolio</span>
+          </div>
+          <div className="flex flex-col items-center cursor-pointer" onClick={() => navigate("/history")}>
+            <Clock size={22} className="text-gray-600 hover:text-blue-600" />
+            <span className="text-xs text-gray-500">History</span>
+          </div>
+          <div className="flex flex-col items-center cursor-pointer" onClick={() => navigate("/profile")}>
+            <User size={22} className="text-gray-600 dark:text-white hover:text-blue-600" />
+            <span className="text-xs text-gray-500 dark:text-white">Profile</span>
+          </div>
+        </div>
+
+        {/* Row 2: Title */}
+        <div className="mt-2 flex justify-center">
+          <h2 className="text-2xl font-bold text-center text-gray-700">Orders</h2>
+        </div>
+
+        {/* Row 3: Tabs (Open Trades / Positions) */}
+        <div className="mt-2 flex items-center justify-center gap-10 text-sm">
           {["open", "positions"].map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`pb-1 text-sm font-medium ${tab === t ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500 dark:text-gray-300"
+              className={`pb-1 text-sm font-medium ${tab === t
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-500"
+                }`}
+            >
+              {t === "open" ? "Open Trades" : "Positions"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ===== Body ===== */}
+      <div className="p-4">
+        {/* (Kept) original tabs bar, but hidden since tabs now live in header */}
+        <div className="sticky flex justify-center mb-4 space-x-6 hidden">
+          {["open", "positions"].map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`pb-1 text-sm font-medium ${tab === t
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-500 dark:text-gray-300"
                 }`}
             >
               {t === "open" ? "Open Trades" : "Positions"}
@@ -482,6 +547,7 @@ export default function Orders({ username }) {
           ))}
         </div>
 
+        {/* ===== Total P&L (Positions only) ===== */}
         {tab !== "open" && (
           <div className="mb-4 text-center">
             <div className="inline-block px-4 py-2 bg-white dark:bg-gray-800 rounded-xl shadow text-xl font-semibold">
@@ -493,6 +559,20 @@ export default function Orders({ username }) {
           </div>
         )}
 
+        {/* ===== Refresh Indicator ===== */}
+        {tab === "open" && (
+          <div className="flex justify-center mb-3 text-sm text-gray-500 dark:text-gray-300">
+            {isRefreshing ? (
+              <span>Refreshing open trades...</span>
+            ) : (
+              <button onClick={refresh} className="text-blue-600 hover:underline">
+                Refresh Now
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* ===== List Rendering ===== */}
         {loading ? (
           <div className="text-center text-gray-500 dark:text-gray-400">Loading...</div>
         ) : errorMsg ? (
@@ -506,13 +586,21 @@ export default function Orders({ username }) {
             {ordersToShow.map((o, i) => {
               const script = (o.script || o.symbol || "N/A").toUpperCase();
               const q = quotes[script] || {};
-              const live = toNum(q.price) ?? toNum(o.live_price) ?? toNum(o.price) ?? 0;
+
+              // ✅ Use exit_price for inactive (closed) SELL scripts
+              const live =
+                o.inactive && o.exit_price != null
+                  ? toNum(o.exit_price)
+                  : toNum(q.price) ??
+                  toNum(o.live_price) ??
+                  toNum(o.price) ??
+                  0;
 
               // timestamp (time + date)
               const dtRaw = pickDateTime(o);
               const dt = parseDate(dtRaw);
 
-              const side = (o.type || o.order_type) || "";
+              const side = o.type || o.order_type || "";
               const isBuy = side === "BUY";
               const isSell = !isBuy;
 
@@ -521,38 +609,34 @@ export default function Orders({ username }) {
                 ? toNum(o.trigger_price) ?? toNum(o.price) ?? 0
                 : toNum(o.price) ?? 0;
 
-              // ===== Right-side figures (corrected) =====
               const qty = toNum(o.qty) ?? 0;
 
-              // BUY  : live - entry
-              // SELL : entry - live
-              // BUY  : live - entry
-              // SELL : entry - live
+              // ✅ Freeze calculations for inactive rows using exit_price
+              const effectivePrice =
+                o.inactive && o.exit_price != null ? toNum(o.exit_price) : live;
+
+              // ✅ Simple and universal: profit = (exit - entry)
               const perShare =
-                entryPrice && live ? (isBuy ? (live - entryPrice) : (entryPrice - live)) : 0;
+                entryPrice && effectivePrice ? effectivePrice - entryPrice : 0;
 
               const pct = entryPrice ? (perShare / entryPrice) * 100 : 0;
-
               const total = perShare * qty;
 
+              // ✅ Color purely on profit/loss sign — no side-based bias
               const pnlUp = total >= 0;
               const pnlColor = pnlUp ? "text-green-600" : "text-red-600";
               const arrow = pnlUp ? "↗" : "↘";
 
               const sl = toNum(o.stoploss);
               const tgt = toNum(o.target);
-
-
-
-              //const disabledRow = ((isSell && !o.short_first) || o.status === "Closed");
               const disabledRow = !!o.inactive;
 
               return (
                 <div
                   key={o.id ?? `${script}-${dtRaw ?? ""}-${i}`}
                   className={`p-4 rounded-xl shadow ${disabledRow
-                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                    : "bg-white dark:bg-gray-800 hover:shadow-md cursor-pointer"
+                      ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      : "bg-white dark:bg-gray-800 hover:shadow-md cursor-pointer"
                     }`}
                   onClick={() => {
                     if (disabledRow) return;
@@ -580,8 +664,12 @@ export default function Orders({ username }) {
                       <div className="flex items-center gap-2 mt-1">
                         <SegmentBadge segment={o.segment} />
                         <span className="text-xs text-gray-600">
-                          Live: <span className="font-semibold text-gray-800">{money(live)}</span>
+                          {o.inactive && o.exit_price != null ? "Exit" : "Live"}:{" "}
+                          <span className="font-semibold text-gray-800">
+                            {money(o.inactive && o.exit_price != null ? o.exit_price : live)}
+                          </span>
                         </span>
+
                         <span className="text-[11px] text-gray-500 border rounded px-1">
                           {o.exchange || "NSE"}
                         </span>
@@ -597,6 +685,15 @@ export default function Orders({ username }) {
                         {(perShare >= 0 ? "+" : "") + perShare.toFixed(4)} (
                         {(pct >= 0 ? "+" : "") + pct.toFixed(2)}%)
                       </div>
+                      {/* ✅ Exit Price shown neatly below P&L */}
+                      {!isOrdersTab && o.exit_price != null && (
+                        <div className="text-xs text-gray-600 mt-1">
+                          Exit Price:{" "}
+                          <span className="font-semibold text-gray-800">
+                            {money(o.exit_price)}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -670,11 +767,17 @@ export default function Orders({ username }) {
               // Positions modal actions
               <div className="grid grid-cols-3 gap-3">
                 <button
-                  onClick={() => handleAdd(selectedOrder)}
-                  className="bg-blue-600 text-white px-3 py-1 rounded"
+                  className="bg-green-600 text-white px-5 py-2 rounded-md hover:bg-green-700"
+                  onClick={() => {
+                    const sym = getSymbol(selectedOrder);
+                    console.log("Navigating to Add:", sym);
+                    setShowActions(false);
+                    navigate(`/add/${sym}`, { state: { fromAdd: true } });
+                  }}
                 >
                   Add
                 </button>
+
                 <button
                   onClick={() => handleExit(selectedOrder)}
                   className="bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg"
@@ -687,8 +790,8 @@ export default function Orders({ username }) {
         </div>
       )}
 
-      {/* Floating Icons */}
-      <div className="absolute right-5 top-20 flex items-center space-x-4 z-50">
+      {/* Floating Icons (kept but hidden since header now has them) */}
+      <div className="absolute right-5 top-20 flex items-center space-x-4 z-50 hidden">
         <div className="flex flex-col items-center cursor-pointer" onClick={() => navigate("/portfolio")}>
           <Briefcase size={22} className="text-gray-600 dark:text-white hover:text-blue-600" />
           <span className="text-xs text-gray-500 dark:text-white">Portfolio</span>

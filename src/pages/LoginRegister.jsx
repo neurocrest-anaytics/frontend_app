@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { Eye, EyeOff } from "lucide-react";
+import "../index.css"; // ✅ ensure gradient CSS is loaded
 
 export default function LoginRegister({ onLoginSuccess }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -64,9 +65,6 @@ export default function LoginRegister({ onLoginSuccess }) {
         } else {
           setMessage("✅ " + data.message);
           setMessageType("success");
-          // Optional: switch to login after successful registration
-          // setIsLogin(true);
-          // setPassword(""); setConfirm("");
         }
       } else {
         console.error("[NEUROCREST] Auth error payload:", data);
@@ -115,42 +113,41 @@ export default function LoginRegister({ onLoginSuccess }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center">
-      {/* BRAND HEADER: logo (bigger) + NEUROCREST on one line, tagline under NEUROCREST */}
-      <header className="pt-8">
-        <div className="flex items-center gap-3">
-          <img
-            src="/public/logo1.png"
-            alt="NeuroCrest"
-            className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 select-none"
-            draggable="false"
-            onError={(e) => {
-              const tried = e.currentTarget.getAttribute("data-tried") || "";
-              if (!tried) {
-                e.currentTarget.setAttribute("data-tried", "brandpng");
-                e.currentTarget.src = "/logo1.png";
-              } else if (tried === "brandpng") {
-                e.currentTarget.setAttribute("data-tried", "rootpng");
-                e.currentTarget.src = "/brand/logo.svg";
-              } else {
-                e.currentTarget.style.display = "none";
-              }
-            }}
-          />
-          <div className="flex flex-col">
-            <h1 className="gradient-text-animated text-4xl sm:text-5xl font-extrabold tracking-wide m-0 leading-tight text-emerald-400">
-              NEUROCREST
-            </h1>
-            <span className="mt-1 text-sm sm:text-base text-gray-600">
-              Your All-in-One AI Trading Mentor
-            </span>
-          </div>
-        </div>
+    <div className="min-h-screen bg-gray-100 flex flex-col justify-center items-center">
+      {/* HEADER */}
+      <header className="flex flex-col items-center justify-center mb-6">
+        <img
+          src="/public/logo1.png"
+          alt="NeuroCrest"
+          className="h-20 w-20 sm:h-24 sm:w-24 md:h-28 md:w-28 select-none mb-3"
+          draggable="false"
+          onError={(e) => {
+            const tried = e.currentTarget.getAttribute("data-tried") || "";
+            if (!tried) {
+              e.currentTarget.setAttribute("data-tried", "brandpng");
+              e.currentTarget.src = "/logo1.png";
+            } else if (tried === "brandpng") {
+              e.currentTarget.setAttribute("data-tried", "rootpng");
+              e.currentTarget.src = "/brand/logo.svg";
+            } else {
+              e.currentTarget.style.display = "none";
+            }
+          }}
+        />
+
+        <h1 className="neurocrest-text text-4xl sm:text-5xl font-extrabold tracking-wide leading-tight text-center">
+          NEUROCREST
+        </h1>
+
+        <span className="mt-1 text-sm sm:text-base text-gray-600 text-center">
+          Your All-in-One AI Trading Mentor
+        </span>
       </header>
+
 
       {/* AUTH CARD */}
       <main className="w-full flex justify-center px-4">
-        <div className="bg-white p-6 rounded-xl shadow-lg w-96 space-y-4 mt-4">
+        <div className="bg-white p-8 rounded-2xl shadow-lg w-[460px] space-y-5 mt-4">
           <h2 className="text-2xl font-bold text-center">
             {isLogin ? "Login" : "Register"}
           </h2>
@@ -190,7 +187,6 @@ export default function LoginRegister({ onLoginSuccess }) {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-3">
-            {/* Username */}
             <input
               type="text"
               placeholder="Username"
@@ -200,7 +196,6 @@ export default function LoginRegister({ onLoginSuccess }) {
               className="w-full border border-gray-300 rounded px-3 py-2"
             />
 
-            {/* Password with show/hide */}
             <div className="relative">
               <input
                 type={showPwd ? "text" : "password"}
@@ -221,7 +216,6 @@ export default function LoginRegister({ onLoginSuccess }) {
               </button>
             </div>
 
-            {/* Confirm Password (Register only) */}
             {!isLogin && (
               <div className="relative">
                 <input
@@ -234,7 +228,9 @@ export default function LoginRegister({ onLoginSuccess }) {
                 />
                 <button
                   type="button"
-                  aria-label={showPwd2 ? "Hide confirm password" : "Show confirm password"}
+                  aria-label={
+                    showPwd2 ? "Hide confirm password" : "Show confirm password"
+                  }
                   onClick={() => setShowPwd2((s) => !s)}
                   className="absolute inset-y-0 right-2 flex items-center text-gray-500 hover:text-gray-700"
                   tabIndex={-1}
