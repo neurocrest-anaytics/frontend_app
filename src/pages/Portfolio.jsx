@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import HeaderBackRow from "../components/HeaderBackRow";
 
 // ---------- API base (prod-safe) ----------
 const API_BASE = (
@@ -357,7 +358,7 @@ export default function Portfolio({ username }) {
 
   return (
     <div className="p-4">
-      <BackButton to="/menu" />
+      <HeaderBackRow backTo="/menu" />
       <h2 className="text-center text-xl font-bold text-blue-600">
         Portfolio
       </h2>
