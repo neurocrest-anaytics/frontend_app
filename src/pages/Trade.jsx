@@ -379,9 +379,9 @@ export default function Trade({ username }) {
       <div className="sticky top-0 z-50 p-4 bg-white rounded-b-2xl shadow relative">
         {/* Overlay row: align Back + Logo with the funds pill (do NOT change funds row margins) */}
         <div className="absolute inset-x-0 top-2 px-1">
-          <div className="flex items-center justify-between">
+          <div className="mt-1 grid grid-cols-[auto_1fr_auto] items-center">
             {/* Back button */}
-            <div className="pointer-events-auto">
+            <div className="pl-2">
               <BackButton to="/menu" />
             </div>
           </div>
