@@ -8,6 +8,7 @@ import {
   useStripe,
 } from "@stripe/react-stripe-js";
 import BackButton from "../components/BackButton";
+import HeaderBackRow from "../components/HeaderBackRow";
 
 const API = import.meta.env.VITE_BACKEND_BASE_URL || "http://127.0.0.1:8000";
 
@@ -212,7 +213,7 @@ export default function Payments() {
     <div className="min-h-screen bg-gray-100 px-4 py-6">
       <div className="max-w-3xl mx-auto space-y-4">
         {/* Back to Profile */}
-        <BackButton to="/profile" />
+        <HeaderBackRow backTo="/profile" />
 
         <h1 className="text-2xl font-bold">Payments</h1>
 
