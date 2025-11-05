@@ -376,25 +376,67 @@ export default function Trade({ username }) {
   return (
     <div className="flex flex-col min-h-screen bg-gray-700">
       {/* Header */}
-      <div className="sticky top-0 z-50 p-4 bg-white rounded-b-2xl shadow relative">
-        {/* Overlay row: align Back + Logo with the funds pill (do NOT change funds row margins) */}
-        <div className="absolute inset-x-0 top-2 px-1">
-          <div className="mt-1 grid grid-cols-[auto_1fr_auto] items-center">
-            {/* Back button */}
-            <div className="pl-2">
-              <BackButton to="/menu" />
-            </div>
-          </div>
-        </div>
+<div className="sticky top-0 z-50 p-4 bg-white rounded-b-2xl shadow">
+  {/* Row 1: Total Funds (unchanged) */}
+  <div className="mt-2 mb-2 w-full flex justify-center">
+    <div className="w-fit max-w-[90%] inline-flex items-center gap-2 rounded bg-gray-700 text-gray-100 px-4 py-1.5 text-sm font-medium shadow whitespace-nowrap">
+      <span>Total Funds: {moneyINR(totalFunds, { decimals: 0 })}</span>
+      <span>|</span>
+      <span>Available: {moneyINR(availableFunds, { decimals: 0 })}</span>
+    </div>
+  </div>
 
-        {/* Row 1: Total Funds (unchanged margins) */}
-        <div className="mt-2 mb-2 w-full flex justify-center">
-          <div className="w-fit max-w-[90%] inline-flex items-center gap-2 rounded bg-gray-700 text-gray-100 px-4 py-1.5 text-sm font-medium shadow whitespace-nowrap">
-            <span>Total Funds: {moneyINR(totalFunds, { decimals: 0 })}</span>
-            <span>|</span>
-            <span>Available: {moneyINR(availableFunds, { decimals: 0 })}</span>
-          </div>
+  {/* Row 2: Back (left) + Portfolio / History / Profile (centered) */}
+  <div className="mt-1 grid grid-cols-[auto_1fr_auto] items-center">
+    {/* Back on the left */}
+    <div className="pl-2">
+      <BackButton to="/menu" />
+    </div>
+
+    {/* Center group: unchanged UI */}
+    <div className="justify-self-center">
+      <div className="flex items-center justify-center gap-10">
+        <div className="flex flex-col items-center cursor-pointer" onClick={() => nav("/portfolio")}>
+          <Briefcase size={22} className="text-gray-600 hover:text-blue-600" />
+          <span className="text-xs text-gray-500">Portfolio</span>
         </div>
+        <div className="flex flex-col items-center cursor-pointer" onClick={() => nav("/history")}>
+          <Clock size={22} className="text-gray-600 hover:text-blue-600" />
+          <span className="text-xs text-gray-500">History</span>
+        </div>
+        <div className="flex flex-col items-center cursor-pointer" onClick={() => nav("/profile")}>
+          <User size={22} className="text-gray-600 hover:text-blue-600" />
+          <span className="text-xs text-gray-500">Profile</span>
+        </div>
+      </div>
+    </div>
+
+    {/* empty right cell keeps the middle perfectly centered */}
+    <div />
+  </div>
+
+  {/* Row 3: Watchlist title */}
+  <div className="mt-2 flex justify-center">
+    <h1 className="text-2xl font-serif text-gray-800">Watchlist</h1>
+  </div>
+
+  {/* Row 4: Tabs */}
+  <div className="mt-2 flex items-center justify-center gap-10 text-sm">
+    <button
+      onClick={() => setTab("mylist")}
+      className={`pb-1 ${tab === "mylist" ? "text-blue-500 border-b-2 border-blue-500" : "text-gray-500"}`}
+    >
+      My List
+    </button>
+    <button
+      onClick={() => setTab("mustwatch")}
+      className={`pb-1 ${tab === "mustwatch" ? "text-blue-500 border-b-2 border-blue-500" : "text-gray-500"}`}
+    >
+      Must Watch
+    </button>
+  </div>
+</div>
+
 
         {/* Row 2: Portfolio / History / Profile */}
         <div className="flex items-center justify-center gap-10">
