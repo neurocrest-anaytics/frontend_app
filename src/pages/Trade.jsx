@@ -375,7 +375,7 @@ export default function Trade({ username }) {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-700">
-      {/* Header */}
+{/* Header */}
 <div className="sticky top-0 z-50 p-4 bg-white rounded-b-2xl shadow">
   {/* Row 1: Total Funds (unchanged) */}
   <div className="mt-2 mb-2 w-full flex justify-center">
@@ -437,22 +437,6 @@ export default function Trade({ username }) {
   </div>
 </div>
 
-
-        {/* Row 2: Portfolio / History / Profile */}
-        <div className="flex items-center justify-center gap-10">
-          <div className="flex flex-col items-center cursor-pointer" onClick={() => nav("/portfolio")}>
-            <Briefcase size={22} className="text-gray-600 hover:text-blue-600" />
-            <span className="text-xs text-gray-500">Portfolio</span>
-          </div>
-          <div className="flex flex-col items-center cursor-pointer" onClick={() => nav("/history")}>
-            <Clock size={22} className="text-gray-600 hover:text-blue-600" />
-            <span className="text-xs text-gray-500">History</span>
-          </div>
-          <div className="flex flex-col items-center cursor-pointer" onClick={() => nav("/profile")}>
-            <User size={22} className="text-gray-600 hover:text-blue-600" />
-            <span className="text-xs text-gray-500">Profile</span>
-          </div>
-        </div>
 
         {/* Row 3: Watchlist title */}
         <div className="mt-2 flex justify-center">
