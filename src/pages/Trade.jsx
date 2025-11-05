@@ -380,12 +380,7 @@ export default function Trade({ username }) {
       <div className="sticky top-0 z-50 p-4 bg-white rounded-b-2xl shadow">
         
 
-        {/* Row 2: Back (left) + Portfolio / History / Profile (centered) */}
-        <div className="mt-1 grid grid-cols-[auto_1fr_auto] items-center">
-          {/* Back on the left */}
-          <div className="pl-2 pt-1">
-            <BackButton to="/menu" />
-          </div>
+       
 
           {/* Row 1: Total Funds (unchanged margins) */}
         <div className="mt-2 mb-2 w-full flex justify-center">
@@ -395,6 +390,13 @@ export default function Trade({ username }) {
             <span>Available: {moneyINR(availableFunds, { decimals: 0 })}</span>
           </div>
         </div>
+
+         {/* Row 2: Back (left) + Portfolio / History / Profile (centered) */}
+        <div className="mt-1 grid grid-cols-[auto_1fr_auto] items-center">
+          {/* Back on the left */}
+          <div className="pl-2 pt-1">
+            <BackButton to="/menu" />
+          </div>
 
           {/* Center group: unchanged UI */}
           <div className="justify-self-center">
