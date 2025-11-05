@@ -8,6 +8,7 @@ import {
   useElements,
   useStripe,
 } from "@stripe/react-stripe-js";
+import HeaderBackRow from "../components/HeaderBackRow";
 
 const API = import.meta.env.VITE_BACKEND_BASE_URL || "http://127.0.0.1:8000";
 
@@ -210,7 +211,7 @@ export default function Profile({ username, logout }) {
 
   return (
     <div className="min-h-screen bg-white p-4">
-      <BackButton to="/menu" />
+      <HeaderBackRow backTo="/menu" />
       <h2 className="text-xl font-bold text-center text-blue-600 mb-6">ACCOUNT</h2>
 
       {/* Avatar and Info (email first, then name; funds hidden) */}
