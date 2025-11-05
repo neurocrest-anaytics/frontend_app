@@ -391,7 +391,7 @@ export default function Trade({ username }) {
         <div className="mt-1 grid grid-cols-[auto_1fr_auto] items-center">
           {/* Back on the left */}
           <div className="pl-2 pt-1">
-            <BackButton to="/menu" >
+            <BackButton to="/menu" />
           </div>
 
           {/* Center group: unchanged UI */}
