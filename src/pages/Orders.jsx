@@ -5,6 +5,7 @@ import { ClipboardList, Search, Briefcase, User, X, Clock } from "lucide-react";
 import BackButton from "../components/BackButton";
 import { toast } from "react-toastify";
 import useOpenTrades from "../hooks/useOpenTrades";
+import HeaderBackRow from "../components/HeaderBackRow";
 
 const API = import.meta.env.VITE_BACKEND_BASE_URL || "https://paper-trading-backend.onrender.com";
 
@@ -472,7 +473,7 @@ export default function Orders({ username }) {
 
       {/* keep original BackButton but hide it (header overlay will show the aligned one) */}
       <div className="hidden">
-        <BackButton to="/menu" />
+        <HeaderBackRow backTo="/menu" />>
       </div>
 
       {/* HEADER (overlay row + icons row + title row + tabs row) */}
