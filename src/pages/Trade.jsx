@@ -390,7 +390,7 @@ export default function Trade({ username }) {
         {/* Row 2: Back (left) + Portfolio / History / Profile (centered) */}
         <div className="mt-1 grid grid-cols-[auto_1fr_auto] items-center">
           {/* Back on the left */}
-          <div className="pl-3 pt-2">
+          <div className="pl-2 pt-1">
             <BackButton to="/menu" inline />
           </div>
 
