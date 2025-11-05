@@ -378,14 +378,7 @@ export default function Trade({ username }) {
     <div className="flex flex-col min-h-screen bg-gray-700">
       {/* Header */}
       <div className="sticky top-0 z-50 p-4 bg-white rounded-b-2xl shadow">
-        {/* Row 1: Total Funds (unchanged margins) */}
-        <div className="mt-2 mb-2 w-full flex justify-center">
-          <div className="w-fit max-w-[90%] inline-flex items-center gap-2 rounded bg-gray-700 text-gray-100 px-4 py-1.5 text-sm font-medium shadow whitespace-nowrap">
-            <span>Total Funds: {moneyINR(totalFunds, { decimals: 0 })}</span>
-            <span>|</span>
-            <span>Available: {moneyINR(availableFunds, { decimals: 0 })}</span>
-          </div>
-        </div>
+        
 
         {/* Row 2: Back (left) + Portfolio / History / Profile (centered) */}
         <div className="mt-1 grid grid-cols-[auto_1fr_auto] items-center">
@@ -393,6 +386,15 @@ export default function Trade({ username }) {
           <div className="pl-2 pt-1">
             <BackButton to="/menu" />
           </div>
+
+          {/* Row 1: Total Funds (unchanged margins) */}
+        <div className="mt-2 mb-2 w-full flex justify-center">
+          <div className="w-fit max-w-[90%] inline-flex items-center gap-2 rounded bg-gray-700 text-gray-100 px-4 py-1.5 text-sm font-medium shadow whitespace-nowrap">
+            <span>Total Funds: {moneyINR(totalFunds, { decimals: 0 })}</span>
+            <span>|</span>
+            <span>Available: {moneyINR(availableFunds, { decimals: 0 })}</span>
+          </div>
+        </div>
 
           {/* Center group: unchanged UI */}
           <div className="justify-self-center">
