@@ -1,6 +1,7 @@
 // frontend/src/pages/Feedback.jsx
 import React, { useState } from "react";
 import BackButton from "../components/BackButton";
+import HeaderBackRow from "../components/HeaderBackRow";
 
 export default function Feedback() {
   const [tab, setTab] = useState("feedback");
@@ -74,7 +75,7 @@ export default function Feedback() {
 
   return (
     <div className="min-h-screen bg-white p-6">
-      <BackButton to="/menu" />
+      <HeaderBackRow backTo="/menu" />
       <h2 className="text-2xl font-bold text-center text-blue-700 mb-6">📬 Feedback & Contact</h2>
 
       {/* Tabs */}
