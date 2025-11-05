@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import BackButton from "../components/BackButton";
+import HeaderBackRow from "../components/HeaderBackRow";
 
 export default function Notes() {
   const { symbol } = useParams();                // from /notes/:symbol
@@ -61,6 +62,7 @@ export default function Notes() {
   return (
     <div className="min-h-screen bg-white flex flex-col p-4">
       <div className="flex items-center justify-between mb-4">
+        <HeaderBackRow backTo="/menu" />
         <h1 className="text-center text-xl font-bold text-blue-600">Notes for {sym}</h1>
       </div>
 
