@@ -1,6 +1,7 @@
 // frontend/src/pages/Funds.jsx
 import React, { useEffect, useState } from "react";
 import BackButton from "../components/BackButton";
+import HeaderBackRow from "../components/HeaderBackRow";
 
 const API = "http://localhost:8000";
 
