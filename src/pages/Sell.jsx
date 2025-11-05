@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import BackButton from "../components/BackButton";
+import HeaderBackRow from "../components/HeaderBackRow";
 
 const API = "http://localhost:8000"; // backend API base
 
@@ -198,7 +199,7 @@ useEffect(() => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:max-w-xl md:mx-auto flex flex-col justify-between">
-      <BackButton to="/orders" />
+      <HeaderBackRow backTo="/menu" />
       <div className="space-y-5">
         <h2 className="text-2xl font-bold text-center text-red-600">
           {isAdd
