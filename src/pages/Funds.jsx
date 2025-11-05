@@ -121,7 +121,7 @@ export default function Funds({ username }) {
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:max-w-xl md:mx-auto">
-      <BackButton to="/profile" />
+      <HeaderBackRow backTo="/profile" />
       <h2 className="text-2xl font-bold text-center mb-4">Funds</h2>
 
       {loading ? (
