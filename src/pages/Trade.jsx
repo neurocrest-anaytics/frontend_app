@@ -1,3 +1,4 @@
+// src/pages/Trade.jsx
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, ClipboardList, User, Briefcase, Clock } from "lucide-react";
@@ -92,7 +93,7 @@ export default function Trade({ username }) {
           (arr || []).forEach((q) => (map[q.symbol] = q));
           setQuotes(map);
         })
-        .catch(() => { });
+        .catch(() => {});
     };
 
     fetchQuotes();
@@ -161,7 +162,7 @@ export default function Trade({ username }) {
         const res = await fetch(`${API}/search?q=${encodeURIComponent(seed)}`);
         const data = await res.json().catch(() => []);
         if (Array.isArray(data)) bag = bag.concat(data);
-      } catch { }
+      } catch {}
     }
     const seen = new Set();
     const merged = [];
@@ -265,7 +266,7 @@ export default function Trade({ username }) {
           const latestQuote = Array.isArray(arr) && arr[0] ? arr[0] : null;
           if (latestQuote) setSelectedQuote(latestQuote);
         })
-        .catch(() => { });
+        .catch(() => {});
     }, 2000);
   }
 
@@ -344,7 +345,7 @@ export default function Trade({ username }) {
       setSellPreviewData(data);
       setSellConfirmMsg(
         data?.message ||
-        `You have 0 qty of ${String(sym || "").toUpperCase()}. Do you still want to sell first?`
+          `You have 0 qty of ${String(sym || "").toUpperCase()}. Do you still want to sell first?`
       );
       setSellConfirmOpen(true);
     } catch (e) {
@@ -375,68 +376,54 @@ export default function Trade({ username }) {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-700">
-{/* Header */}
-<div className="sticky top-0 z-50 p-4 bg-white rounded-b-2xl shadow">
-  {/* Row 1: Total Funds (unchanged) */}
-  <div className="mt-2 mb-2 w-full flex justify-center">
-    <div className="w-fit max-w-[90%] inline-flex items-center gap-2 rounded bg-gray-700 text-gray-100 px-4 py-1.5 text-sm font-medium shadow whitespace-nowrap">
-      <span>Total Funds: {moneyINR(totalFunds, { decimals: 0 })}</span>
-      <span>|</span>
-      <span>Available: {moneyINR(availableFunds, { decimals: 0 })}</span>
-    </div>
-  </div>
-
-  {/* Row 2: Back (left) + Portfolio / History / Profile (centered) */}
-  <div className="mt-1 grid grid-cols-[auto_1fr_auto] items-center">
-    {/* Back on the left */}
-    <div className="pl-2">
-      <BackButton to="/menu" />
-    </div>
-
-    {/* Center group: unchanged UI */}
-    <div className="justify-self-center">
-      <div className="flex items-center justify-center gap-10">
-        <div className="flex flex-col items-center cursor-pointer" onClick={() => nav("/portfolio")}>
-          <Briefcase size={22} className="text-gray-600 hover:text-blue-600" />
-          <span className="text-xs text-gray-500">Portfolio</span>
+      {/* Header */}
+      <div className="sticky top-0 z-50 p-4 bg-white rounded-b-2xl shadow">
+        {/* Row 1: Total Funds (unchanged margins) */}
+        <div className="mt-2 mb-2 w-full flex justify-center">
+          <div className="w-fit max-w-[90%] inline-flex items-center gap-2 rounded bg-gray-700 text-gray-100 px-4 py-1.5 text-sm font-medium shadow whitespace-nowrap">
+            <span>Total Funds: {moneyINR(totalFunds, { decimals: 0 })}</span>
+            <span>|</span>
+            <span>Available: {moneyINR(availableFunds, { decimals: 0 })}</span>
+          </div>
         </div>
-        <div className="flex flex-col items-center cursor-pointer" onClick={() => nav("/history")}>
-          <Clock size={22} className="text-gray-600 hover:text-blue-600" />
-          <span className="text-xs text-gray-500">History</span>
+
+        {/* Row 2: Back (left) + Portfolio / History / Profile (centered) */}
+        <div className="mt-1 grid grid-cols-[auto_1fr_auto] items-center">
+          {/* Back on the left */}
+          <div className="pl-2">
+            <BackButton to="/menu" />
+          </div>
+
+          {/* Center group: unchanged UI */}
+          <div className="justify-self-center">
+            <div className="flex items-center justify-center gap-10">
+              <div
+                className="flex flex-col items-center cursor-pointer"
+                onClick={() => nav("/portfolio")}
+              >
+                <Briefcase size={22} className="text-gray-600 hover:text-blue-600" />
+                <span className="text-xs text-gray-500">Portfolio</span>
+              </div>
+              <div
+                className="flex flex-col items-center cursor-pointer"
+                onClick={() => nav("/history")}
+              >
+                <Clock size={22} className="text-gray-600 hover:text-blue-600" />
+                <span className="text-xs text-gray-500">History</span>
+              </div>
+              <div
+                className="flex flex-col items-center cursor-pointer"
+                onClick={() => nav("/profile")}
+              >
+                <User size={22} className="text-gray-600 hover:text-blue-600" />
+                <span className="text-xs text-gray-500">Profile</span>
+              </div>
+            </div>
+          </div>
+
+          {/* empty right cell keeps the middle perfectly centered */}
+          <div />
         </div>
-        <div className="flex flex-col items-center cursor-pointer" onClick={() => nav("/profile")}>
-          <User size={22} className="text-gray-600 hover:text-blue-600" />
-          <span className="text-xs text-gray-500">Profile</span>
-        </div>
-      </div>
-    </div>
-
-    {/* empty right cell keeps the middle perfectly centered */}
-    <div />
-  </div>
-
-  {/* Row 3: Watchlist title */}
-  <div className="mt-2 flex justify-center">
-    <h1 className="text-2xl font-serif text-gray-800">Watchlist</h1>
-  </div>
-
-  {/* Row 4: Tabs */}
-  <div className="mt-2 flex items-center justify-center gap-10 text-sm">
-    <button
-      onClick={() => setTab("mylist")}
-      className={`pb-1 ${tab === "mylist" ? "text-blue-500 border-b-2 border-blue-500" : "text-gray-500"}`}
-    >
-      My List
-    </button>
-    <button
-      onClick={() => setTab("mustwatch")}
-      className={`pb-1 ${tab === "mustwatch" ? "text-blue-500 border-b-2 border-blue-500" : "text-gray-500"}`}
-    >
-      Must Watch
-    </button>
-  </div>
-</div>
-
 
         {/* Row 3: Watchlist title */}
         <div className="mt-2 flex justify-center">
@@ -447,15 +434,13 @@ export default function Trade({ username }) {
         <div className="mt-2 flex items-center justify-center gap-10 text-sm">
           <button
             onClick={() => setTab("mylist")}
-            className={`pb-1 ${tab === "mylist" ? "text-blue-500 border-b-2 border-blue-500" : "text-gray-500"
-              }`}
+            className={`pb-1 ${tab === "mylist" ? "text-blue-500 border-b-2 border-blue-500" : "text-gray-500"}`}
           >
             My List
           </button>
           <button
             onClick={() => setTab("mustwatch")}
-            className={`pb-1 ${tab === "mustwatch" ? "text-blue-500 border-b-2 border-blue-500" : "text-gray-500"
-              }`}
+            className={`pb-1 ${tab === "mustwatch" ? "text-blue-500 border-b-2 border-blue-500" : "text-gray-500"}`}
           >
             Must Watch
           </button>
@@ -529,8 +514,7 @@ export default function Trade({ username }) {
                         </div>
                         <div className="text-xs text-gray-600">
                           {q.change != null
-                            ? `${isPos ? "+" : ""}${Number(q.change).toFixed(2)} (${isPos ? "+" : ""
-                            }${Number(q.pct_change || 0).toFixed(2)}%)`
+                            ? `${isPos ? "+" : ""}${Number(q.change).toFixed(2)} (${isPos ? "+" : ""}${Number(q.pct_change || 0).toFixed(2)}%)`
                             : "--"}
                         </div>
                       </div>
