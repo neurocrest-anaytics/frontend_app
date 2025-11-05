@@ -1,13 +1,14 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import BackButton from "../components/BackButton";
+import HeaderBackRow from "../components/HeaderBackRow";
 
 export default function Settings() {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen p-4 max-w-md mx-auto">
-      <BackButton to="/profile" /> 
+      <HeaderBackRow backTo="/profile" />
       <h2 className="text-2xl font-semibold text-center mb-6">Settings</h2>
 
       {/* Theme Toggle */}
