@@ -473,7 +473,7 @@ export default function Orders({ username }) {
 
       {/* keep original BackButton but hide it (header overlay will show the aligned one) */}
       <div className="hidden">
-        <HeaderBackRow backTo="/menu" />><HeaderBackRow backTo="/menu" />
+        <HeaderBackRow backTo="/menu" />
 
       </div>
 
