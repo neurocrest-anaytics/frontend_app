@@ -29,7 +29,7 @@ export default function useOpenTrades(username, {
     setRefreshing(true);
 
     try {
-      const res = await fetch(`${API}/orders/${encodeURIComponent(username)}/open`, {
+      const res = await fetch(`${API}/orders/${encodeURIComponent(username)}`, {
         signal: ctl.signal,
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -39,9 +39,11 @@ export default function useOpenTrades(username, {
         setData(json);
         sessionStorage.setItem(`open_trades_${username}`, JSON.stringify(json));
       }
-    } catch (err) {
-      console.warn("OpenTrades refresh failed:", err.message);
-    } finally {
+ } catch (err) {
+  if (err?.name === "AbortError") return; // ✅ ignore abort
+  console.warn("OpenTrades refresh failed:", err?.message || err);
+} finally {
+
       if (abortRef.current === ctl) abortRef.current = null;
       setRefreshing(false);
     }
