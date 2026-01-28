@@ -2,9 +2,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import BackButton from "../components/BackButton";
-HEAD
-import HeaderBackRow from "../components/HeaderBackRow";
-
 import {
   TrendingDown,
   DollarSign,
@@ -19,7 +16,6 @@ import {
   ArrowUpRight,
   ArrowDownRight,
 } from "lucide-react";
-
 
 import { useTheme } from "../context/ThemeContext";
 
@@ -171,39 +167,6 @@ export default function Sell() {
   const [dayHigh, setDayHigh] = useState(null);
   const [dayLow, setDayLow] = useState(null);
 
-  HEAD
-  // -------- Check market time on mount --------
-  // -------- Check market time on mount --------
-  useEffect(() => {
-    // Get current UTC time
-    const nowUTC = new Date();
-    const hours = nowUTC.getUTCHours();
-    const minutes = nowUTC.getUTCMinutes();
-
-    // ---- Define UTC market hours ----
-    // For example: Indian market 09:15–15:30 IST = 03:45–10:00 UTC
-    const MARKET_OPEN_UTC = { h: 3, m: 30 };
-    const MARKET_CLOSE_UTC = { h: 10, m: 30 };
-
-    // Convert to comparable numbers (minutes since midnight)
-    const nowMinutes = hours * 60 + minutes;
-    const openMinutes = MARKET_OPEN_UTC.h * 60 + MARKET_OPEN_UTC.m;
-    const closeMinutes = MARKET_CLOSE_UTC.h * 60 + MARKET_CLOSE_UTC.m;
-
-    const isMarketOpen = nowMinutes >= openMinutes && nowMinutes <= closeMinutes;
-
-    // Check only when not modifying/adding
-    if (!isMarketOpen && !isModify && !isAdd) {
-      const confirmProceed = window.confirm(
-        "⚠️ Market (UTC 03:30–10:30) is closed. Do you still want to place a SELL order?"
-      );
-      if (!confirmProceed) {
-        nav(`/script/${symbol}`);
-      }
-    }
-  }, [nav, symbol, isModify, isAdd]);
-
-
   useEffect(() => {
     if (!symbol) return;
 
@@ -256,7 +219,6 @@ export default function Sell() {
     const id = setInterval(checkMarket, 30_000);
     return () => clearInterval(id);
   }, [orderMode]);
-
 
   // -------- Live price polling --------
   useEffect(() => {
@@ -517,10 +479,10 @@ export default function Sell() {
         payload.price = px;
       }
 
-      // ====
+      // ================================
       // ✅ SELL FIRST + LIMIT validation
       // Limit price must be ABOVE live price
-      // ====
+      // ================================
       if (
         orderMode === "LIMIT" &&
         (allowShort || isSellFirstModify) === true &&
@@ -536,9 +498,9 @@ export default function Sell() {
         }
       }
 
-      // ====
+      // ================================
       // ✅ SELL validation: Stoploss & Target
-      // ====
+      // ================================
       // ✅ SELL validation: Stoploss & Target (skip for EXIT)
       if (!isExit) {
         const entryPrice =
@@ -647,26 +609,12 @@ export default function Sell() {
     }
   };
 
-  HEAD
-  return (
-    <div className="min-h-screen bg-gray-100 p-4 md:max-w-xl md:mx-auto flex flex-col justify-between">
-      <HeaderBackRow backTo="/menu" />
-      <div className="space-y-5">
-        <h2 className="text-2xl font-bold text-center text-red-600">
-          {isAdd
-            ? `ADD TO ${symbol}`
-            : isModify
-              ? "MODIFY ORDER"
-              : `SELL ${symbol}`}
-        </h2>
-
   const handleModifyPosition = async () => {
     if (submitting) return;
-        setSubmitting(true);
-        setErrorMsg("");
-        f801d30 (Initial Commit)
+    setSubmitting(true);
+    setErrorMsg("");
 
-        try {
+    try {
       // ✅ Anchor datetime MUST be present for modify to work correctly
       const anchor =
         prefill?.positionDatetime ||
@@ -674,33 +622,33 @@ export default function Sell() {
         prefill?.datetime ||
         "";
 
-        if (!anchor) {
+      if (!anchor) {
         throw new Error(
-        "Missing position datetime for Modify. Please open Modify from the Positions card."
+          "Missing position datetime for Modify. Please open Modify from the Positions card."
         );
       }
 
-        // ✅ Build payload WITHOUT sending nulls that cause FastAPI 422
-        const payload = {
-          username,
-          script: String(symbol || "").toUpperCase(),
+      // ✅ Build payload WITHOUT sending nulls that cause FastAPI 422
+      const payload = {
+        username,
+        script: String(symbol || "").toUpperCase(),
 
         // Only include new_qty for FNO; otherwise OMIT the key
-        ...(isFNO ? {new_qty: Number(lotQty) } : { }),
+        ...(isFNO ? { new_qty: Number(lotQty) } : {}),
 
         // stoploss/target: send only if user typed something, else omit
         ...(stoploss !== "" && stoploss !== null && stoploss !== undefined
-        ? {stoploss: Number(stoploss) }
-        : { }),
+          ? { stoploss: Number(stoploss) }
+          : {}),
         ...(target !== "" && target !== null && target !== undefined
-        ? {target: Number(target) }
-        : { }),
+          ? { target: Number(target) }
+          : {}),
 
         // ✅ keep these if your backend model accepts them (safe if extra="ignore")
-        ...(orderMode ? {price_type: orderMode } : { }),
+        ...(orderMode ? { price_type: orderMode } : {}),
         ...(orderMode === "LIMIT" && price !== "" && price !== null && price !== undefined
-        ? {limit_price: Number(price) }
-        : { }),
+          ? { limit_price: Number(price) }
+          : {}),
 
         // ✅ segment + short_first + anchor
         segment: String(segment || prefill?.segment || "intraday").toLowerCase(),
@@ -708,448 +656,448 @@ export default function Sell() {
         position_datetime: anchor,
       };
 
-        const res = await fetch(`${API}/orders/positions/modify`, {
-          method: "PUT",
-        headers: {"Content-Type": "application/json" },
+      const res = await fetch(`${API}/orders/positions/modify`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-        // ✅ Parse response safely (FastAPI sometimes returns non-JSON on error)
-        let data = { };
-        const text = await res.text();
-        try {
-          data = text ? JSON.parse(text) : {};
+      // ✅ Parse response safely (FastAPI sometimes returns non-JSON on error)
+      let data = {};
+      const text = await res.text();
+      try {
+        data = text ? JSON.parse(text) : {};
       } catch {
-          data = {};
+        data = {};
       }
 
-        if (!res.ok) {
+      if (!res.ok) {
         const msg =
-        typeof data?.detail === "string"
-        ? data.detail
-        : data?.detail?.message ||
-        data?.message ||
-        `Error modifying position (${res.status})`;
+          typeof data?.detail === "string"
+            ? data.detail
+            : data?.detail?.message ||
+            data?.message ||
+            `Error modifying position (${res.status})`;
         throw new Error(msg);
       }
 
-        setSuccessText("Position modified successfully!");
-        setSuccessModal(true);
+      setSuccessText("Position modified successfully!");
+      setSuccessModal(true);
 
       // ✅ redirect back to positions after success
       setTimeout(() => {
-          setSuccessModal(false);
+        setSuccessModal(false);
         goBack(true);
       }, 1500);
     } catch (err) {
       const msg =
         typeof err?.message === "string"
-        ? err.message
-        : err?.detail?.message || "Server error";
-        setErrorMsg(msg);
+          ? err.message
+          : err?.detail?.message || "Server error";
+      setErrorMsg(msg);
     } finally {
-          setSubmitting(false);
+      setSubmitting(false);
     }
   };
 
 
-        const priceDirection =
-        livePrice && prevPrice
+  const priceDirection =
+    livePrice && prevPrice
       ? livePrice > prevPrice
         ? "up"
         : livePrice < prevPrice
           ? "down"
-        : "same"
-        : "same";
+          : "same"
+      : "same";
 
-        const dayRange =
-        Number.isFinite(dayHigh) &&
-        Number.isFinite(dayLow) &&
-        Number.isFinite(livePrice) &&
-        dayHigh !== dayLow
-        ? ((livePrice - dayLow) / (dayHigh - dayLow)) * 100
-        : 50;
+  const dayRange =
+    Number.isFinite(dayHigh) &&
+      Number.isFinite(dayLow) &&
+      Number.isFinite(livePrice) &&
+      dayHigh !== dayLow
+      ? ((livePrice - dayLow) / (dayHigh - dayLow)) * 100
+      : 50;
 
-        return (
+  return (
+    <div
+      className={`min-h-screen ${bgClass} ${textClass} relative transition-colors duration-300 overflow-hidden`}
+    >
+      {/* Background Blobs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-500/20 rounded-full blur-3xl animate-pulse"></div>
         <div
-          className={`min-h-screen ${bgClass} ${textClass} relative transition-colors duration-300 overflow-hidden`}
-        >
-          {/* Background Blobs */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-500/20 rounded-full blur-3xl animate-pulse"></div>
-            <div
-              className="absolute bottom-0 right-1/4 w-96 h-96 bg-rose-500/20 rounded-full blur-3xl animate-pulse"
-              style={{ animationDelay: "1s" }}
-            ></div>
-            <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-red-400/10 rounded-full blur-3xl"></div>
-          </div>
+          className="absolute bottom-0 right-1/4 w-96 h-96 bg-rose-500/20 rounded-full blur-3xl animate-pulse"
+          style={{ animationDelay: "1s" }}
+        ></div>
+        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-red-400/10 rounded-full blur-3xl"></div>
+      </div>
 
-          {/* Content Container */}
-          <div className="relative z-10 max-w-2xl mx-auto px-4 py-6 min-h-screen flex flex-col">
-            {/* Header */}
-            <div className={`${glassClass} rounded-2xl p-4 mb-6 shadow-2xl`}>
-              <div className="grid grid-cols-3 items-center">
-                {/* Left */}
-                <div className="justify-self-start">
-                  <BackButton to={returnTo || (isAddMode ? "/portfolio" : "/orders")} />
-                </div>
+      {/* Content Container */}
+      <div className="relative z-10 max-w-2xl mx-auto px-4 py-6 min-h-screen flex flex-col">
+        {/* Header */}
+        <div className={`${glassClass} rounded-2xl p-4 mb-6 shadow-2xl`}>
+          <div className="grid grid-cols-3 items-center">
+            {/* Left */}
+            <div className="justify-self-start">
+              <BackButton to={returnTo || (isAddMode ? "/portfolio" : "/orders")} />
+            </div>
 
-                {/* Center (ALWAYS centered) */}
-                <div className="justify-self-center text-center">
-                  <div className="flex items-center justify-center gap-3">
-                    <div className="relative">
-                      <TrendingDown className="w-6 h-6 text-red-400 animate-pulse" />
-                      {marketOpen && (
-                        <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-ping" />
-                      )}
-                    </div>
-
-                    <div className="text-center">
-                      <h2 className="whitespace-nowrap font-bold text-lg bg-gradient-to-r from-red-400 to-rose-400 bg-clip-text text-transparent">
-                        {isExit
-                          ? `EXIT ${displaySymbol}`
-                          : isAdd
-                            ? `ADD ${displaySymbol}`
-                            : isModify
-                              ? `MODIFY ${displaySymbol}`
-                              : `SELL ${displaySymbol}`}
-                      </h2>
-
-                      <p className={`text-xs ${textSecondaryClass}`}>
-                        {marketOpen ? "Market Open" : "Market Closed"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right */}
-                <div className="justify-self-end">
-                  {!isModify && !isAdd && !isPositionModify && !isExit && (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        nav(`/buy/${symbol}`, {
-                          state: {
-                            ...prefill,
-                            qty,
-                            exchange,
-                            segment,
-                            stoploss,
-                            target,
-                            orderMode,
-                            price,
-                          },
-                        })
-                      }
-                      className={`px-4 py-2 rounded-xl font-bold text-sm shadow-lg border transition-all
-            ${isDark
-                          ? "bg-emerald-500/15 border-emerald-400/25 text-emerald-100 hover:bg-emerald-500/25"
-                          : "bg-emerald-100 border-emerald-200 text-emerald-700 hover:bg-emerald-200"
-                        }`}
-                    >
-                      BUY
-                    </button>
+            {/* Center (ALWAYS centered) */}
+            <div className="justify-self-center text-center">
+              <div className="flex items-center justify-center gap-3">
+                <div className="relative">
+                  <TrendingDown className="w-6 h-6 text-red-400 animate-pulse" />
+                  {marketOpen && (
+                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-ping" />
                   )}
+                </div>
+
+                <div className="text-center">
+                  <h2 className="whitespace-nowrap font-bold text-lg bg-gradient-to-r from-red-400 to-rose-400 bg-clip-text text-transparent">
+                    {isExit
+                      ? `EXIT ${displaySymbol}`
+                      : isAdd
+                        ? `ADD ${displaySymbol}`
+                        : isModify
+                          ? `MODIFY ${displaySymbol}`
+                          : `SELL ${displaySymbol}`}
+                  </h2>
+
+                  <p className={`text-xs ${textSecondaryClass}`}>
+                    {marketOpen ? "Market Open" : "Market Closed"}
+                  </p>
                 </div>
               </div>
             </div>
 
-
-            {/* Error Message */}
-            {errorMsg && (
-              <div
-                className={`${glassClass} rounded-2xl p-4 mb-6 border-red-500/50 shadow-lg`}
-              >
-                <div className="flex items-center space-x-3">
-                  <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-                  <p className="text-sm text-red-400">{String(errorMsg)}</p>
-                </div>
-              </div>
-            )}
-
-            {/* Main Form Card */}
-            <div className={`${glassClass} rounded-3xl p-6 mb-6 shadow-2xl space-y-6 flex-1`}>
-              {/* Live Price Card */}
-              {isFNO ? (
-                <div className={`${glassClass} rounded-2xl p-5 space-y-4`}>
-                  <div className="flex justify-between items-center">
-                    <span className={`text-sm ${textSecondaryClass}`}>Live Price</span>
-                    <span className="text-xl font-bold text-red-400">
-                      ₹{livePrice != null ? livePrice.toFixed(2) : "--"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className={`text-sm ${textSecondaryClass}`}>Total Investment</span>
-                    <span className="text-xl font-bold text-blue-400">
-                      {totalInvestment > 0 ? `₹${totalInvestment.toFixed(2)}` : "--"}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
-                    <div>
-                      <label className={`text-xs ${textSecondaryClass} mb-2 flex items-center space-x-1`}>
-                        <Package className="w-4 h-4" />
-                        <span>Quantity (Lots)</span>
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        value={qty}
-                        disabled={isPureModify}
-                        onChange={(e) => setQty(e.target.value)}
-                        className={`w-full px-4 py-3 ${glassClass} rounded-xl ${textClass} placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all ${isPureModify ? "cursor-not-allowed opacity-50" : ""
-                          }`}
-                      />
-                    </div>
-                    <div>
-                      <label className={`text-xs ${textSecondaryClass} mb-2 flex items-center space-x-1`}>
-                        <Layers className="w-4 h-4" />
-                        <span>Total Lots</span>
-                      </label>
-                      <input
-                        type="number"
-                        value={lotQty}
-                        disabled
-                        className={`w-full px-4 py-3 ${glassClass} rounded-xl ${textClass} text-center cursor-not-allowed opacity-50`}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className={`${glassClass} rounded-2xl p-5`}>
-                  <div className="text-center space-y-4">
-                    <p className={`text-sm ${textSecondaryClass} flex items-center justify-center space-x-2`}>
-                      <BarChart3 className="w-4 h-4" />
-                      <span>Live Price</span>
-                    </p>
-
-                    <div className="flex items-center justify-center space-x-3">
-                      <div
-                        className={`text-4xl font-bold ${priceDirection === "up"
-                          ? "text-green-400"
-                          : priceDirection === "down"
-                            ? "text-red-400"
-                            : isDark
-                              ? "text-white"
-                              : "text-slate-900"
-                          }`}
-                      >
-                        ₹{livePrice != null ? livePrice.toFixed(2) : "--"}
-                      </div>
-
-                      {priceDirection === "up" && (
-                        <ArrowUpRight className="w-6 h-6 text-green-400 animate-bounce" />
-                      )}
-                      {priceDirection === "down" && (
-                        <ArrowDownRight className="w-6 h-6 text-red-400 animate-bounce" />
-                      )}
-                    </div>
-
-                    {/* Change badge */}
-                    <div className="flex items-center justify-center">
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm font-semibold ${priceChange >= 0
-                          ? "bg-green-500/20 text-green-300"
-                          : "bg-red-500/20 text-red-300"
-                          }`}
-                      >
-                        {priceChange >= 0 ? "+" : ""}
-                        {Number.isFinite(priceChange) ? priceChange.toFixed(2) : "0.00"} (
-                        {priceChangePercent >= 0 ? "+" : ""}
-                        {Number.isFinite(priceChangePercent) ? priceChangePercent.toFixed(2) : "0.00"}%)
-                      </span>
-                    </div>
-
-                    {/* Day range line */}
-                    {dayHigh != null && dayLow != null && (
-                      <div className="space-y-2">
-                        <div className={`flex justify-between text-xs ${textSecondaryClass}`}>
-                          <span>Day Low: ₹{dayLow}</span>
-                          <span>Day High: ₹{dayHigh}</span>
-                        </div>
-
-                        <div className="relative w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                          <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 opacity-40" />
-                          <div
-                            className="absolute top-0 h-full w-4 bg-white shadow-lg transition-all duration-300"
-                            style={{ left: `${dayRange}%` }}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+            {/* Right */}
+            <div className="justify-self-end">
+              {!isModify && !isAdd && !isPositionModify && !isExit && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    nav(`/buy/${symbol}`, {
+                      state: {
+                        ...prefill,
+                        qty,
+                        exchange,
+                        segment,
+                        stoploss,
+                        target,
+                        orderMode,
+                        price,
+                      },
+                    })
+                  }
+                  className={`px-4 py-2 rounded-xl font-bold text-sm shadow-lg border transition-all
+            ${isDark
+                      ? "bg-emerald-500/15 border-emerald-400/25 text-emerald-100 hover:bg-emerald-500/25"
+                      : "bg-emerald-100 border-emerald-200 text-emerald-700 hover:bg-emerald-200"
+                    }`}
+                >
+                  BUY
+                </button>
               )}
+            </div>
+          </div>
+        </div>
 
-              {/* Order Type Selection */}
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => !isPositionModify && setOrderMode("MARKET")}
-                  disabled={isPositionModify || isExit}
-                  className={`py-4 rounded-xl font-semibold transition-all ${orderMode === "MARKET"
-                    ? "bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg shadow-red-500/50"
-                    : `${glassClass} ${cardHoverClass} ${isPositionModify ? "opacity-50 cursor-not-allowed" : ""}`
-                    }`}
-                >
-                  <div className="flex items-center justify-center gap-2">
-                    <Zap className="w-5 h-5" />
-                    <span>Market</span>
-                  </div>
-                </button>
 
-                <button
-                  onClick={() => !isPositionModify && marketOpen && setOrderMode("LIMIT")}
-                  disabled={!marketOpen || isPositionModify || isExit}
-                  className={`py-4 rounded-xl font-semibold transition-all ${orderMode === "LIMIT"
-                    ? "bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg shadow-red-500/50"
-                    : `${glassClass} ${cardHoverClass} ${(!marketOpen || isPositionModify) ? "opacity-50 cursor-not-allowed" : ""}`
-                    }`}
-                >
-                  <div className="flex items-center justify-center gap-2">
-                    <Target className="w-5 h-5" />
-                    <span>Limit</span>
-                  </div>
-                </button>
+        {/* Error Message */}
+        {errorMsg && (
+          <div
+            className={`${glassClass} rounded-2xl p-4 mb-6 border-red-500/50 shadow-lg`}
+          >
+            <div className="flex items-center space-x-3">
+              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+              <p className="text-sm text-red-400">{String(errorMsg)}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Main Form Card */}
+        <div className={`${glassClass} rounded-3xl p-6 mb-6 shadow-2xl space-y-6 flex-1`}>
+          {/* Live Price Card */}
+          {isFNO ? (
+            <div className={`${glassClass} rounded-2xl p-5 space-y-4`}>
+              <div className="flex justify-between items-center">
+                <span className={`text-sm ${textSecondaryClass}`}>Live Price</span>
+                <span className="text-xl font-bold text-red-400">
+                  ₹{livePrice != null ? livePrice.toFixed(2) : "--"}
+                </span>
               </div>
-
-
-              {/* Quantity Input for Non-FNO */}
-              {!isFNO && (
+              <div className="flex justify-between items-center">
+                <span className={`text-sm ${textSecondaryClass}`}>Total Investment</span>
+                <span className="text-xl font-bold text-blue-400">
+                  {totalInvestment > 0 ? `₹${totalInvestment.toFixed(2)}` : "--"}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
                 <div>
-                  <label className={`text-sm ${textSecondaryClass} mb-2 flex items-center space-x-1`}>
+                  <label className={`text-xs ${textSecondaryClass} mb-2 flex items-center space-x-1`}>
                     <Package className="w-4 h-4" />
-                    <span>Quantity</span>
+                    <span>Quantity (Lots)</span>
                   </label>
                   <input
                     type="number"
+                    min="1"
                     value={qty}
                     disabled={isPureModify}
                     onChange={(e) => setQty(e.target.value)}
-                    placeholder="Enter quantity"
                     className={`w-full px-4 py-3 ${glassClass} rounded-xl ${textClass} placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all ${isPureModify ? "cursor-not-allowed opacity-50" : ""
                       }`}
                   />
-                  {!isPureModify && (
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {quickPresets.map((preset) => (
-                        <button
-                          key={preset}
-                          type="button"
-                          onClick={() => setQty(String(preset))}
-                          className={`px-3 py-1 ${glassClass} rounded-lg text-xs font-semibold ${cardHoverClass} transition-all hover:scale-105 ${Number(qty) === preset ? "ring-2 ring-red-500/70" : ""
-                            }`}
-                        >
-                          {preset}x
-                        </button>
-                      ))}
-                    </div>
-                  )}
                 </div>
-              )}
-
-              {/* Limit Price Input */}
-              <div>
-                <label className={`text-sm ${textSecondaryClass} mb-2 flex items-center space-x-1`}>
-                  <DollarSign className="w-4 h-4" />
-                  <span>Limit Price</span>
-                </label>
-                <input
-                  type="number"
-                  value={orderMode === "LIMIT" ? price : ""}
-                  onChange={(e) => {
-                    setPrice(e.target.value);
-                    userEditedPrice.current = true;
-                  }}
-                  placeholder={orderMode === "LIMIT" ? "Enter Limit Price" : "Disabled for Market orders"}
-                  className={`w-full px-4 py-3 ${glassClass} rounded-xl ${textClass} placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all ${orderMode === "MARKET" || isPureModify || !marketOpen || isExit ? "cursor-not-allowed opacity-50" : ""}
-`}
-                  disabled={orderMode === "MARKET" || !marketOpen || isPositionModify || isExit}
-                />
-              </div>
-
-              {/* Segment Selection */}
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => !isPositionModify && setSegment("intraday")}
-                  disabled={isPositionModify || isExit}
-                  className={`py-4 rounded-xl font-semibold transition-all ${segment === "intraday"
-                    ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
-                    : `${glassClass} ${cardHoverClass}`
-                    } ${isPositionModify ? "cursor-not-allowed" : ""}`}
-                >
-                  Intraday
-                </button>
-
-                <button
-                  onClick={() => !isPositionModify && setSegment("delivery")}
-                  disabled={isPositionModify || isExit}
-                  className={`py-4 rounded-xl font-semibold transition-all ${segment === "delivery"
-                    ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
-                    : `${glassClass} ${cardHoverClass}`
-                    } ${isPositionModify ? "opacity-50 cursor-not-allowed" : ""}`}
-                >
-                  Delivery
-                </button>
-              </div>
-
-              {/* Stoploss & Target */}
-              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className={`text-sm ${textSecondaryClass} mb-2 flex items-center space-x-1`}>
-                    <Shield className="w-4 h-4" />
-                    <span>Stoploss</span>
+                  <label className={`text-xs ${textSecondaryClass} mb-2 flex items-center space-x-1`}>
+                    <Layers className="w-4 h-4" />
+                    <span>Total Lots</span>
                   </label>
                   <input
                     type="number"
-                    value={stoploss}
-                    onChange={(e) => setStoploss(e.target.value)}
-                    disabled={isAddMode || isExit}
-                    placeholder="Optional"
-                    className={`w-full px-4 py-3 ${glassClass} rounded-xl ${textClass} placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all ${isAddMode ? "cursor-not-allowed opacity-50" : ""
-                      }`}
-                  />
-                </div>
-                <div>
-                  <label className={`text-sm ${textSecondaryClass} mb-2 flex items-center space-x-1`}>
-                    <Target className="w-4 h-4" />
-                    <span>Target</span>
-                  </label>
-                  <input
-                    type="number"
-                    value={target}
-                    onChange={(e) => setTarget(e.target.value)}
-                    disabled={isAddMode || isExit}
-                    placeholder="Optional"
-                    className={`w-full px-4 py-3 ${glassClass} rounded-xl ${textClass} placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all ${isAddMode ? "cursor-not-allowed opacity-50" : ""
-                      }`}
+                    value={lotQty}
+                    disabled
+                    className={`w-full px-4 py-3 ${glassClass} rounded-xl ${textClass} text-center cursor-not-allowed opacity-50`}
                   />
                 </div>
               </div>
             </div>
+          ) : (
+            <div className={`${glassClass} rounded-2xl p-5`}>
+              <div className="text-center space-y-4">
+                <p className={`text-sm ${textSecondaryClass} flex items-center justify-center space-x-2`}>
+                  <BarChart3 className="w-4 h-4" />
+                  <span>Live Price</span>
+                </p>
 
-            {/* Submit Button */}
-            <button
-              onClick={handleSubmit}
-              disabled={submitting}
-              className={`w-full py-4 rounded-2xl text-white text-lg font-bold shadow-2xl transition-all ${submitting
-                ? "bg-gradient-to-r from-red-400 to-rose-400 cursor-not-allowed opacity-50"
-                : "bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 hover:shadow-red-500/50 hover:scale-[1.02]"
-                }`}
-            >
-              {submitting ? "Processing…" : isExit ? "EXIT" : isAdd ? "Add to Position" : isModify ? "Save Changes" : "SELL"}
-            </button>
-          </div>
+                <div className="flex items-center justify-center space-x-3">
+                  <div
+                    className={`text-4xl font-bold ${priceDirection === "up"
+                      ? "text-green-400"
+                      : priceDirection === "down"
+                        ? "text-red-400"
+                        : isDark
+                          ? "text-white"
+                          : "text-slate-900"
+                      }`}
+                  >
+                    ₹{livePrice != null ? livePrice.toFixed(2) : "--"}
+                  </div>
 
-          {/* Success Modal */}
-          {successModal && (
-            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4 animate-fadeIn">
-              <div className={`${glassClass} rounded-3xl p-8 text-center max-w-sm w-full shadow-2xl`}>
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-red-500/20 to-rose-500/20 flex items-center justify-center mx-auto mb-4 animate-pulse">
-                  <CheckCircle2 className="w-10 h-10 text-red-400" />
+                  {priceDirection === "up" && (
+                    <ArrowUpRight className="w-6 h-6 text-green-400 animate-bounce" />
+                  )}
+                  {priceDirection === "down" && (
+                    <ArrowDownRight className="w-6 h-6 text-red-400 animate-bounce" />
+                  )}
                 </div>
-                <p className="text-xl font-bold text-red-400">{successText || "Order saved"}</p>
+
+                {/* Change badge */}
+                <div className="flex items-center justify-center">
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-semibold ${priceChange >= 0
+                      ? "bg-green-500/20 text-green-300"
+                      : "bg-red-500/20 text-red-300"
+                      }`}
+                  >
+                    {priceChange >= 0 ? "+" : ""}
+                    {Number.isFinite(priceChange) ? priceChange.toFixed(2) : "0.00"} (
+                    {priceChangePercent >= 0 ? "+" : ""}
+                    {Number.isFinite(priceChangePercent) ? priceChangePercent.toFixed(2) : "0.00"}%)
+                  </span>
+                </div>
+
+                {/* Day range line */}
+                {dayHigh != null && dayLow != null && (
+                  <div className="space-y-2">
+                    <div className={`flex justify-between text-xs ${textSecondaryClass}`}>
+                      <span>Day Low: ₹{dayLow}</span>
+                      <span>Day High: ₹{dayHigh}</span>
+                    </div>
+
+                    <div className="relative w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 opacity-40" />
+                      <div
+                        className="absolute top-0 h-full w-4 bg-white shadow-lg transition-all duration-300"
+                        style={{ left: `${dayRange}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
+
+          {/* Order Type Selection */}
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => !isPositionModify && setOrderMode("MARKET")}
+              disabled={isPositionModify || isExit}
+              className={`py-4 rounded-xl font-semibold transition-all ${orderMode === "MARKET"
+                ? "bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg shadow-red-500/50"
+                : `${glassClass} ${cardHoverClass} ${isPositionModify ? "opacity-50 cursor-not-allowed" : ""}`
+                }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Zap className="w-5 h-5" />
+                <span>Market</span>
+              </div>
+            </button>
+
+            <button
+              onClick={() => !isPositionModify && marketOpen && setOrderMode("LIMIT")}
+              disabled={!marketOpen || isPositionModify || isExit}
+              className={`py-4 rounded-xl font-semibold transition-all ${orderMode === "LIMIT"
+                ? "bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg shadow-red-500/50"
+                : `${glassClass} ${cardHoverClass} ${(!marketOpen || isPositionModify) ? "opacity-50 cursor-not-allowed" : ""}`
+                }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Target className="w-5 h-5" />
+                <span>Limit</span>
+              </div>
+            </button>
+          </div>
+
+
+          {/* Quantity Input for Non-FNO */}
+          {!isFNO && (
+            <div>
+              <label className={`text-sm ${textSecondaryClass} mb-2 flex items-center space-x-1`}>
+                <Package className="w-4 h-4" />
+                <span>Quantity</span>
+              </label>
+              <input
+                type="number"
+                value={qty}
+                disabled={isPureModify}
+                onChange={(e) => setQty(e.target.value)}
+                placeholder="Enter quantity"
+                className={`w-full px-4 py-3 ${glassClass} rounded-xl ${textClass} placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all ${isPureModify ? "cursor-not-allowed opacity-50" : ""
+                  }`}
+              />
+              {!isPureModify && (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {quickPresets.map((preset) => (
+                    <button
+                      key={preset}
+                      type="button"
+                      onClick={() => setQty(String(preset))}
+                      className={`px-3 py-1 ${glassClass} rounded-lg text-xs font-semibold ${cardHoverClass} transition-all hover:scale-105 ${Number(qty) === preset ? "ring-2 ring-red-500/70" : ""
+                        }`}
+                    >
+                      {preset}x
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Limit Price Input */}
+          <div>
+            <label className={`text-sm ${textSecondaryClass} mb-2 flex items-center space-x-1`}>
+              <DollarSign className="w-4 h-4" />
+              <span>Limit Price</span>
+            </label>
+            <input
+              type="number"
+              value={orderMode === "LIMIT" ? price : ""}
+              onChange={(e) => {
+                setPrice(e.target.value);
+                userEditedPrice.current = true;
+              }}
+              placeholder={orderMode === "LIMIT" ? "Enter Limit Price" : "Disabled for Market orders"}
+              className={`w-full px-4 py-3 ${glassClass} rounded-xl ${textClass} placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all ${orderMode === "MARKET" || isPureModify || !marketOpen || isExit ? "cursor-not-allowed opacity-50" : ""}
+`}
+              disabled={orderMode === "MARKET" || !marketOpen || isPositionModify || isExit}
+            />
+          </div>
+
+          {/* Segment Selection */}
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => !isPositionModify && setSegment("intraday")}
+              disabled={isPositionModify || isExit}
+              className={`py-4 rounded-xl font-semibold transition-all ${segment === "intraday"
+                ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
+                : `${glassClass} ${cardHoverClass}`
+                } ${isPositionModify ? "cursor-not-allowed" : ""}`}
+            >
+              Intraday
+            </button>
+
+            <button
+              onClick={() => !isPositionModify && setSegment("delivery")}
+              disabled={isPositionModify || isExit}
+              className={`py-4 rounded-xl font-semibold transition-all ${segment === "delivery"
+                ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
+                : `${glassClass} ${cardHoverClass}`
+                } ${isPositionModify ? "opacity-50 cursor-not-allowed" : ""}`}
+            >
+              Delivery
+            </button>
+          </div>
+
+          {/* Stoploss & Target */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className={`text-sm ${textSecondaryClass} mb-2 flex items-center space-x-1`}>
+                <Shield className="w-4 h-4" />
+                <span>Stoploss</span>
+              </label>
+              <input
+                type="number"
+                value={stoploss}
+                onChange={(e) => setStoploss(e.target.value)}
+                disabled={isAddMode || isExit}
+                placeholder="Optional"
+                className={`w-full px-4 py-3 ${glassClass} rounded-xl ${textClass} placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all ${isAddMode ? "cursor-not-allowed opacity-50" : ""
+                  }`}
+              />
+            </div>
+            <div>
+              <label className={`text-sm ${textSecondaryClass} mb-2 flex items-center space-x-1`}>
+                <Target className="w-4 h-4" />
+                <span>Target</span>
+              </label>
+              <input
+                type="number"
+                value={target}
+                onChange={(e) => setTarget(e.target.value)}
+                disabled={isAddMode || isExit}
+                placeholder="Optional"
+                className={`w-full px-4 py-3 ${glassClass} rounded-xl ${textClass} placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all ${isAddMode ? "cursor-not-allowed opacity-50" : ""
+                  }`}
+              />
+            </div>
+          </div>
         </div>
-        );
+
+        {/* Submit Button */}
+        <button
+          onClick={handleSubmit}
+          disabled={submitting}
+          className={`w-full py-4 rounded-2xl text-white text-lg font-bold shadow-2xl transition-all ${submitting
+            ? "bg-gradient-to-r from-red-400 to-rose-400 cursor-not-allowed opacity-50"
+            : "bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 hover:shadow-red-500/50 hover:scale-[1.02]"
+            }`}
+        >
+          {submitting ? "Processing…" : isExit ? "EXIT" : isAdd ? "Add to Position" : isModify ? "Save Changes" : "SELL"}
+        </button>
+      </div>
+
+      {/* Success Modal */}
+      {successModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4 animate-fadeIn">
+          <div className={`${glassClass} rounded-3xl p-8 text-center max-w-sm w-full shadow-2xl`}>
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-red-500/20 to-rose-500/20 flex items-center justify-center mx-auto mb-4 animate-pulse">
+              <CheckCircle2 className="w-10 h-10 text-red-400" />
+            </div>
+            <p className="text-xl font-bold text-red-400">{successText || "Order saved"}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

@@ -6,10 +6,6 @@ export function startHeartbeat() {
   // Ping every 45s while the tab is open
   setInterval(() => {
     fetch(`${BASE}/healthz`, { method: "GET", cache: "no-store" })
-    HEAD
       .catch(() => { }); // silent
-
-      .catch (() => { }); // silent
-
-}, 45000);
+  }, 45000);
 }
