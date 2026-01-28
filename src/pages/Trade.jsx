@@ -17,6 +17,10 @@ import {
   Activity,
   LineChart,
   AlertCircle,
+  HEAD
+=======
+  Plus,
+>>>>>>> f801d30 (Initial Commit)
 } from "lucide-react";
 import ScriptDetailsModal from "../components/ScriptDetailsModal";
 import BackButton from "../components/BackButton";
@@ -27,11 +31,21 @@ import SwipeNav from "../components/SwipeNav";
 import HeaderActions from "../components/HeaderActions";
 import { useTheme } from "../context/ThemeContext";
 import AppHeader from "../components/AppHeader";
+HEAD
 
 
 const API =
   import.meta.env.VITE_BACKEND_BASE_URL ||
   "https://paper-trading-backend.onrender.com";
+=======
+
+
+const API = (import.meta.env.VITE_BACKEND_BASE_URL ||
+  "https://paper-trading-backend.onrender.com")
+  .trim()
+  .replace(/\/+$/, "");
+
+>>>>>>> f801d30 (Initial Commit)
 
 export default function Trade({ username }) {
   const { isDark } = useTheme();
@@ -287,19 +301,35 @@ export default function Trade({ username }) {
     }
 
     // ✅ STRIKE should be digits AFTER month (e.g. NIFTY26JAN23500CE -> 23500)
-// ❌ Do NOT treat "26" (year) as strike in NIFTY26JAN
-let strike = "";
+    HEAD
+    // ❌ Do NOT treat "26" (year) as strike in NIFTY26JAN
+    let strike = "";
 
-if (mIdx >= 0 && month) {
-  // digits immediately after month
-  const afterMonth = Q.slice(mIdx + month.length);
-  const mStrike = afterMonth.match(/^(\d+)/);
-  strike = mStrike ? mStrike[1] : "";
-} else {
-  // fallback (no month case)
-  const tailNum = Q.match(/(\d+)(?!.*\d)/);
-  strike = tailNum ? tailNum[1] : "";
-}
+    if (mIdx >= 0 && month) {
+      // digits immediately after month
+      const afterMonth = Q.slice(mIdx + month.length);
+      const mStrike = afterMonth.match(/^(\d+)/);
+      strike = mStrike ? mStrike[1] : "";
+    } else {
+      // fallback (no month case)
+      const tailNum = Q.match(/(\d+)(?!.*\d)/);
+      strike = tailNum ? tailNum[1] : "";
+    }
+=======
+    // ❌ Do NOT treat "26" (year) as strike in NIFTY26JAN
+    let strike = "";
+
+    if (mIdx >= 0 && month) {
+      // digits immediately after month
+      const afterMonth = Q.slice(mIdx + month.length);
+      const mStrike = afterMonth.match(/^(\d+)/);
+      strike = mStrike ? mStrike[1] : "";
+    } else {
+      // fallback (no month case)
+      const tailNum = Q.match(/(\d+)(?!.*\d)/);
+      strike = tailNum ? tailNum[1] : "";
+    }
+>>>>>>> f801d30 (Initial Commit)
 
 
     let year2 = "";
@@ -326,10 +356,22 @@ if (mIdx >= 0 && month) {
     return { raw: Qraw, underlying, year2, month, strike, deriv };
   }
 
+  HEAD
   function buildSeeds({ underlying, year2, month }) {
     const seeds = new Set();
     if (!underlying && !month) return [];
     const yy = year2 || String(new Date().getFullYear()).slice(-2);
+=======
+  function buildSeeds({ raw, underlying, year2, month, strike, deriv }) {
+    const seeds = new Set();
+    if (raw) seeds.add(raw); // ✅ always include raw
+
+    if (!underlying && !month) return Array.from(seeds);
+
+    const yy = year2 || String(new Date().getFullYear()).slice(-2);
+
+    // broad seeds
+>>>>>>> f801d30 (Initial Commit)
     if (underlying && month) {
       seeds.add(`${underlying}${month}`);
       seeds.add(`${underlying}${yy}${month}`);
@@ -339,6 +381,7 @@ if (mIdx >= 0 && month) {
       seeds.add(month);
       seeds.add(`${yy}${month}`);
     }
+    HEAD
     return Array.from(seeds);
   }
 
@@ -347,6 +390,38 @@ if (mIdx >= 0 && month) {
   const allowedExchange = (s) =>
     ["NSE", "NFO", "BSE"].includes(String(s?.exchange || "").toUpperCase());
 
+=======
+
+    // ✅ precise seeds (fixes missing strikes/futures due to top-50 cut)
+    if (underlying && month && strike) {
+      seeds.add(`${underlying}${yy}${month}${strike}`);
+      seeds.add(`${underlying}${month}${strike}`);
+      if (deriv) {
+        seeds.add(`${underlying}${yy}${month}${strike}${deriv}`);
+        seeds.add(`${underlying}${month}${strike}${deriv}`);
+      }
+    }
+
+    if (underlying && month && deriv && !strike) {
+      // FUT case like BAJAJ-AUTO26JANFUT
+      seeds.add(`${underlying}${yy}${month}${deriv}`);
+      seeds.add(`${underlying}${month}${deriv}`);
+    }
+
+    return Array.from(seeds).filter(Boolean);
+  }
+
+
+  // ✅ normalize symbols/names so "-" "_" spaces don't break filtering
+  const norm = (v) => String(v || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const symbolField = (s) => norm(s?.symbol || s?.tradingsymbol || "");
+  const nameField = (s) => norm(s?.name || "");
+
+  const allowedExchange = (s) =>
+    ["NSE", "NFO", "BSE"].includes(String(s?.exchange || "").toUpperCase());
+
+
+>>>>>>> f801d30 (Initial Commit)
   function isPlainEquityQuery(q) {
     const Q = String(q || "").toUpperCase().trim();
     if (!Q) return false;
@@ -365,7 +440,12 @@ if (mIdx >= 0 && month) {
 
     for (const seed of seeds) {
       try {
+        HEAD
         const res = await fetch(`${API}/search?q=${encodeURIComponent(seed)}`);
+=======
+        const res = await fetch(`${API}/search/?q=${encodeURIComponent(seed)}`)
+          ;
+>>>>>>> f801d30 (Initial Commit)
         const data = await res.json().catch(() => []);
         if (Array.isArray(data)) bag = bag.concat(data);
       } catch { }
@@ -402,10 +482,16 @@ if (mIdx >= 0 && month) {
 
     if (!month && !strike && underlying && !deriv) {
       filtered = merged.filter(
-        (s) =>
-          symbolField(s).includes(underlying) ||
-          String(s.name || "").toUpperCase().includes(underlying)
+        HEAD
+          (s) =>
+        symbolField(s).includes(underlying) ||
+        String(s.name || "").toUpperCase().includes(underlying)
       );
+=======
+        (s) => symbolField(s).includes(underlying) || nameField(s).includes(underlying)
+      );
+
+>>>>>>> f801d30 (Initial Commit)
     }
 
     filtered.sort((a, b) => symbolField(a).localeCompare(symbolField(b)));
@@ -422,6 +508,21 @@ if (mIdx >= 0 && month) {
 
     const timer = setTimeout(async () => {
       try {
+        HEAD
+=======
+        // ✅ 1) Always try direct backend search with EXACT user input first
+        const directRes = await fetch(
+          `${API}/search?q=${encodeURIComponent(debouncedQuery)}`
+        );
+        const directData = await directRes.json().catch(() => []);
+
+        if (Array.isArray(directData) && directData.length > 0) {
+          setSuggestions(directData.slice(0, 50));
+          return;
+        }
+
+        // ✅ 2) If direct search returns empty, then use your smart parsing logic
+>>>>>>> f801d30 (Initial Commit)
         if (isPlainEquityQuery(debouncedQuery)) {
           const res = await fetch(
             `${API}/search?q=${encodeURIComponent(debouncedQuery)}`
@@ -445,7 +546,11 @@ if (mIdx >= 0 && month) {
             .filter(allowedExchange)
             .filter((s) => {
               const sym = symbolField(s);
+              HEAD
               const nm = String(s.name || "").toUpperCase();
+=======
+              const nm = nameField(s);
+>>>>>>> f801d30 (Initial Commit)
 
               if (deriv && !sym.endsWith(deriv)) return false;
               if (underlying && !(sym.includes(underlying) || nm.includes(underlying)))
@@ -490,6 +595,7 @@ if (mIdx >= 0 && month) {
     setQuery("");
     setSuggestions([]);
     nav(`/buy/${encodeURIComponent(s)}`);
+    HEAD
   }
 
   function openSell(e, sym) {
@@ -502,6 +608,89 @@ if (mIdx >= 0 && month) {
     // uses your existing SELL preview + confirmation flow
     previewThenSell(s, 1, "intraday");
   }
+
+  function goDetail(sym) {
+    const s = String(sym || "").trim();
+    if (!s) return;
+
+    if (modalPollRef.current) clearInterval(modalPollRef.current);
+
+    fetch(`${API}/quotes?symbols=${encodeURIComponent(s)}`)
+      .then((r) => r.json())
+      .then((arr) => {
+        const latestQuote = Array.isArray(arr) && arr[0] ? arr[0] : {};
+        setSelectedSymbol(s);
+        setSelectedQuote(latestQuote);
+        setQuery("");
+        setSuggestions([]);
+      })
+      .catch(() => {
+        setSelectedSymbol(s);
+        setSelectedQuote(quotes[s] || {});
+=======
+  }
+
+  function openSell(e, sym) {
+    e?.stopPropagation?.();
+    const s = String(sym || "").toUpperCase().trim();
+    if (!s) return;
+
+    setQuery("");
+    setSuggestions([]);
+    // uses your existing SELL preview + confirmation flow
+    previewThenSell(s, 1, "intraday");
+  }
+  function addFromSearchToWatchlist(e, sym) {
+    e?.stopPropagation?.();
+    const s = String(sym || "").toUpperCase().trim();
+    if (!s) return;
+
+    // ✅ Must Watch tab → local storage list
+    if (tab === "mustwatch") {
+      addToMustWatch(s);
+      setQuery("");
+      setSuggestions([]);
+      return;
+    }
+
+    // ✅ My List tab → backend watchlist
+    if (!who) return;
+
+    const already =
+      Array.isArray(watchlist) &&
+      watchlist.some((x) => String(x || "").toUpperCase().trim() === s);
+
+    if (already) {
+      setQuery("");
+      setSuggestions([]);
+      return;
+    }
+
+    fetch(`${API}/watchlist/${who}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ symbol: s }),
+    })
+      .then(() => fetchWatchlist())
+      .finally(() => {
+>>>>>>> f801d30 (Initial Commit)
+        setQuery("");
+        setSuggestions([]);
+      });
+
+    modalPollRef.current = setInterval(() => {
+      fetch(`${API}/quotes?symbols=${encodeURIComponent(s)}`)
+        .then((r) => r.json())
+        .then((arr) => {
+          const latestQuote = Array.isArray(arr) && arr[0] ? arr[0] : null;
+          if (latestQuote) setSelectedQuote(latestQuote);
+        })
+        .catch(() => { });
+    }, 2000);
+  }
+
+  HEAD
+=======
 
   function goDetail(sym) {
     const s = String(sym || "").trim();
@@ -536,6 +725,7 @@ if (mIdx >= 0 && month) {
     }, 2000);
   }
 
+>>>>>>> f801d30 (Initial Commit)
   useEffect(() => {
     if (!selectedSymbol && modalPollRef.current) {
       clearInterval(modalPollRef.current);
@@ -677,142 +867,169 @@ if (mIdx >= 0 && month) {
         <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl"></div>
       </div>
 
- <AppHeader />
+      HEAD
+      <AppHeader />
 
       {/* MAIN CONTENT */}
-    <div className="w-full px-3 sm:px-4 md:px-6 py-6 relative pb-24">
-        <div className="space-y-6">
-          {/* Tabs + Funds (same line) */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            {/* Tabs: My List / Must Watch */}
-            <div
-              className={`flex p-1.5 rounded-2xl ${glassClass} w-fit shadow-lg`}
-            >
-              {["mylist", "mustwatch"].map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setTab(t)}
-                  className={`px-6 py-2.5 rounded-xl font-medium transition-all ${tab === t
-                    ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
-                    : textSecondaryClass
-                    }`}
-                >
-                  {t === "mylist" ? "My List" : "Must Watch"}
-                </button>
-              ))}
-            </div>
+      <div className="w-full px-3 sm:px-4 md:px-6 py-6 relative pb-24">
+=======
+      <AppHeader />
 
-            {/* Funds on right side */}
-            <div
-              className={[
-                glassClass,
-                "rounded-2xl shadow-lg w-fit sm:ml-auto",
-                "px-4 py-3",
-              ].join(" ")}
-            >
-              <div className="flex items-center justify-between gap-3">
-                {/* Total Funds */}
-                <div>
-                  <div
-                    className={`text-[10px] tracking-widest font-semibold uppercase ${textSecondaryClass}`}
+        {/* MAIN CONTENT */}
+        <div className="w-full px-3 sm:px-4 md:px-6 py-6 relative pb-24">
+>>>>>>> f801d30 (Initial Commit)
+          <div className="space-y-6">
+            {/* Tabs + Funds (same line) */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              {/* Tabs: My List / Must Watch */}
+              <div
+                className={`flex p-1.5 rounded-2xl ${glassClass} w-fit shadow-lg`}
+              >
+                {["mylist", "mustwatch"].map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTab(t)}
+                    className={`px-6 py-2.5 rounded-xl font-medium transition-all ${tab === t
+                      ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
+                      : textSecondaryClass
+                      }`}
                   >
-                    Total Funds
+                    {t === "mylist" ? "My List" : "Must Watch"}
+                  </button>
+                ))}
+              </div>
+
+              {/* Funds on right side */}
+              <div
+                className={[
+                  glassClass,
+                  "rounded-2xl shadow-lg w-fit sm:ml-auto",
+                  "px-4 py-3",
+                ].join(" ")}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  {/* Total Funds */}
+                  <div>
+                    <div
+                      className={`text-[10px] tracking-widest font-semibold uppercase ${textSecondaryClass}`}
+                    >
+                      Total Funds
+                    </div>
+                    <div className="mt-1 text-base font-extrabold">
+                      {moneyINR(totalFunds, { decimals: 0 })}
+                    </div>
                   </div>
-                  <div className="mt-1 text-base font-extrabold">
-                    {moneyINR(totalFunds, { decimals: 0 })}
+
+                  {/* Divider */}
+                  <div
+                    className={`h-8 w-px ${isDark ? "bg-white/15" : "bg-slate-900/10"
+                      }`}
+                  />
+
+                  {/* Available */}
+                  <div className="text-right">
+                    <div
+                      className={`text-[10px] tracking-widest font-semibold uppercase ${textSecondaryClass}`}
+                    >
+                      Available
+                    </div>
+                    <div className="mt-1 text-base font-extrabold text-cyan-400">
+                      {moneyINR(availableFunds, { decimals: 0 })}
+                    </div>
                   </div>
                 </div>
+              </div>
+            </div>
 
-                {/* Divider */}
-                <div
-                  className={`h-8 w-px ${isDark ? "bg-white/15" : "bg-slate-900/10"
+            {/* ✅ Note ONLY on Must Watch */}
+            {tab === "mustwatch" && (
+              <div className={`${glassClass} rounded-2xl p-4 shadow-lg`}>
+                <div className={`text-sm ${textSecondaryClass}`}>
+                  * Enable automatic daily script additions from our recommendations —{" "}
+                  <span
+                    className={`${isDark ? "text-cyan-300" : "text-blue-700"
+                      } font-semibold`}
+                  >
+                    contact Support to activate.
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Search Bar (shared) */}
+            <div className="flex justify-left">
+              <div ref={searchBoxRef} className="relative w-full max-w-4xl">
+
+                <Search
+                  className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 z-10 ${isDark ? "text-slate-200" : "text-slate-500"
                     }`}
                 />
+                <input
+                  type="text"
+                  value={query}
+                  onChange={handleSearch}
+                  placeholder="Search & Add"
+                  className={`w-full pl-12 pr-4 py-3 rounded-2xl ${glassClass} ${textClass} placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-lg transition-all`}
+                />
 
-                {/* Available */}
-                <div className="text-right">
-                  <div
-                    className={`text-[10px] tracking-widest font-semibold uppercase ${textSecondaryClass}`}
+                {suggestions.length > 0 && (
+                  <ul
+                    className={`absolute left-0 right-0 ${glassClass} rounded-2xl shadow-2xl mt-3 max-h-80 overflow-auto z-10`}
                   >
-                    Available
-                  </div>
-                  <div className="mt-1 text-base font-extrabold text-cyan-400">
-                    {moneyINR(availableFunds, { decimals: 0 })}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ✅ Note ONLY on Must Watch */}
-          {tab === "mustwatch" && (
-            <div className={`${glassClass} rounded-2xl p-4 shadow-lg`}>
-              <div className={`text-sm ${textSecondaryClass}`}>
-                * Enable automatic daily script additions from our recommendations —{" "}
-                <span
-                  className={`${isDark ? "text-cyan-300" : "text-blue-700"
-                    } font-semibold`}
-                >
-                  contact Support to activate.
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Search Bar (shared) */}
-          <div className="flex justify-left">
-            <div ref={searchBoxRef} className="relative w-full max-w-4xl">
-
-              <Search
-                className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 z-10 ${isDark ? "text-slate-200" : "text-slate-500"
-                  }`}
-              />
-              <input
-                type="text"
-                value={query}
-                onChange={handleSearch}
-                placeholder="Search & Add"
-                className={`w-full pl-12 pr-4 py-3 rounded-2xl ${glassClass} ${textClass} placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-lg transition-all`}
-              />
-
-              {suggestions.length > 0 && (
-                <ul
-                  className={`absolute left-0 right-0 ${glassClass} rounded-2xl shadow-2xl mt-3 max-h-80 overflow-auto z-10`}
-                >
-                  {suggestions.map((s, i) => {
-                    const sym = s?.symbol || s?.tradingsymbol || "";
-                    return (
-                      <li
-                        key={`${sym}-${i}`}
-                        onClick={() => goDetail(sym)}
-                        className={`px-4 py-3 ${cardHoverClass} cursor-pointer transition-all ${i !== suggestions.length - 1
-                          ? `border-b ${isDark ? "border-white/10" : "border-white/40"}`
-                          : ""
-                          }`}
-                      >
-                        <div className="flex items-center justify-between gap-4">
-                          {/* Left: Symbol + name */}
-                          <div className="min-w-0">
-                            <div className="font-semibold text-lg truncate">
-                              {highlightMatch(sym, query)}
+                    {suggestions.map((s, i) => {
+                      const sym = s?.symbol || s?.tradingsymbol || "";
+                      return (
+                        <li
+                          key={`${sym}-${i}`}
+                          onClick={() => goDetail(sym)}
+                          className={`px-4 py-3 ${cardHoverClass} cursor-pointer transition-all ${i !== suggestions.length - 1
+                            ? `border-b ${isDark ? "border-white/10" : "border-white/40"}`
+                            : ""
+                            }`}
+                        >
+                          <div className="flex items-center justify-between gap-4">
+                            {/* Left: Symbol + name */}
+                            <div className="min-w-0">
+                              <div className="font-semibold text-lg truncate">
+                                {highlightMatch(sym, query)}
+                              </div>
+                              <div className={`text-sm ${textSecondaryClass} truncate`}>
+                                {highlightMatch(s.name, query)}
+                              </div>
+                              <div className={`text-xs ${textSecondaryClass} mt-1`}>
+                                {(s.exchange || "NSE")} | {s.segment} | {s.instrument_type}
+                              </div>
                             </div>
-                            <div className={`text-sm ${textSecondaryClass} truncate`}>
-                              {highlightMatch(s.name, query)}
-                            </div>
-                            <div className={`text-xs ${textSecondaryClass} mt-1`}>
-                              {(s.exchange || "NSE")} | {s.segment} | {s.instrument_type}
-                            </div>
-                          </div>
 
-                          {/* Right: Chart icon */}
-                          {/* Right: Buy / Sell / Chart */}
-                          <div className="shrink-0 self-center flex items-center gap-2">
-                            <button
-                              title="Buy"
-                              onClick={(e) => openBuy(e, sym)}
-                              className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold tracking-wide border transition-all ${isDark
+                            {/* Right: Chart icon */}
+                            {/* Right: Buy / Sell / Chart */}
+                            <div className="shrink-0 self-center flex items-center gap-2">
+                              HEAD
+=======
+                            {/* ✅ (+) Add to watchlist */}
+                              <button
+                                title={tab === "mustwatch" ? "Add to Must Watch" : "Add to Watchlist"}
+                                onClick={(e) => addFromSearchToWatchlist(e, sym)}
+                                className={`p-2 rounded-xl border transition-all ${isDark
+                                  ? "border-white/10 hover:bg-white/10"
+                                  : "border-white/40 hover:bg-white/80"
+                                  }`}
+                              >
+                                <Plus className={`w-4 h-4 ${isDark ? "text-cyan-300" : "text-blue-700"}`} />
+                              </button>
+
+>>>>>>> f801d30 (Initial Commit)
+                              <button
+                                title="Buy"
+                                onClick={(e) => openBuy(e, sym)}
+                                className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold tracking-wide border transition-all ${isDark
+    HEAD
                                 ? "bg-emerald-500/15 text-emerald-200 border-emerald-400/25 hover:bg-emerald-500/25"
-                                : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                              : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+=======
+                                  ? "bg-emerald-500/15 text-emerald-200 border-emerald-400/25 hover:bg-emerald-500/25"
+                                  : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+>>>>>>> f801d30 (Initial Commit)
                                 }`}
                             >
                               BUY
@@ -822,320 +1039,335 @@ if (mIdx >= 0 && month) {
                               title="Sell"
                               onClick={(e) => openSell(e, sym)}
                               className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold tracking-wide border transition-all ${isDark
+    HEAD
                                 ? "bg-rose-500/15 text-rose-200 border-rose-400/25 hover:bg-rose-500/25"
-                                : "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100"
+                            : "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100"
+=======
+                                  ? "bg-rose-500/15 text-rose-200 border-rose-400/25 hover:bg-rose-500/25"
+                                  : "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100"
+>>>>>>> f801d30 (Initial Commit)
                                 }`}
                             >
-                              SELL
-                            </button>
+                            SELL
+                          </button>
 
-                            <button
-                              title="Open chart"
-                              onClick={(e) => openChart(e, sym)}
-                              className={`p-2 rounded-xl border transition-all ${isDark
-                                ? "border-white/10 hover:bg-white/10"
-                                : "border-white/40 hover:bg-white/80"
-                                }`}
-                            >
-                              <LineChart className={`w-4 h-4 ${isDark ? "text-cyan-300" : "text-blue-700"}`} />
-                            </button>
-                          </div>
+                          <button
+                            title="Open chart"
+                            onClick={(e) => openChart(e, sym)}
+                            HEAD
+                            className={`p-2 rounded-xl border transition-all ${isDark
+                              ? "border-white/10 hover:bg-white/10"
+                              : "border-white/40 hover:bg-white/80"
+=======
+                              className={`p-2 rounded-xl border transition-all ${isDark ? "border-white/10 hover:bg-white/10" : "border-white/40 hover:bg-white/80"
+>>>>>>> f801d30 (Initial Commit)
+                              }`}
+                          >
+                            <LineChart className={`w-4 h-4 ${isDark ? "text-cyan-300" : "text-blue-700"}`} />
+                          </button>
+                        </div>
 
+    HEAD
+=======
+
+>>>>>>> f801d30 (Initial Commit)
                         </div>
                       </li>
 
-                    );
+              );
                   })}
-                </ul>
+            </ul>
               )}
+          </div>
+        </div>
+
+        {/* LIST AREA */}
+        {tab === "mustwatch" ? (
+          <div className="space-y-4">
+            {mustWatchlist.length === 0 ? (
+              <div className={`text-center ${textSecondaryClass} mt-20 text-lg`}>
+                No scripts in your Must Watch list.
+              </div>
+            ) : (
+              mustWatchlist.map((sym) => {
+                const q = quotes[sym] || {};
+                const isPos = Number(q.change || 0) >= 0;
+
+                return (
+                  <div
+                    key={sym}
+                    className={`${glassClass} p-5 rounded-3xl ${cardHoverClass} cursor-pointer transition-all duration-300 shadow-xl`}
+                    onClick={() => goDetail(sym)}
+                  >
+                    <div className="flex justify-between items-center mb-3">
+                      <div>
+                        <div className="flex items-end h-full">
+                          <div className="flex items-end gap-2">
+                            <div className="text-2xl font-bold leading-none">
+                              {sym}
+                            </div>
+
+                            <span
+                              className={`px-0.5 py-[0.1px] rounded-md text-[10px] font-normal ${isDark
+                                ? "bg-blue-500/20 text-blue-300 border border-blue-400/30"
+                                : "bg-blue-100 text-blue-700 border border-blue-200"
+                                }`}
+                            >
+                              {q.exchange || "NSE"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start justify-end gap-3">
+                        <div className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <div
+                              className={`text-3xl font-bold ${isPos ? "text-emerald-400" : "text-rose-400"
+                                }`}
+                            >
+                              {q.price != null
+                                ? Number(q.price).toLocaleString("en-IN", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })
+                                : "--"}
+                            </div>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeFromMustWatch(sym);
+                              }}
+                              className={`w-5 h-5 rounded-md font-extrabold flex items-center justify-center transition-all shadow-lg ${isDark
+                                ? "bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 border border-rose-400/30"
+                                : "bg-rose-100 text-rose-600 hover:bg-rose-200 border border-rose-200"
+                                }`}
+                              title="Remove"
+                            >
+                              -
+                            </button>
+                          </div>
+
+                          <div
+                            className={`mt-1 text-sm font-semibold flex items-center justify-end gap-2 ${isPos ? "text-emerald-400" : "text-rose-400"
+                              }`}
+                          >
+                            {q.change != null && (
+                              <>
+                                <span>
+                                  {isPos ? "+" : ""}
+                                  {Number(q.change).toFixed(2)}
+                                </span>
+                                <span>
+                                  ({Number(q.pct_change || 0).toFixed(2)}%)
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {watchlist.length === 0 ? (
+              <div className={`text-center ${textSecondaryClass} mt-20 text-lg`}>
+                No scripts in your watchlist.
+              </div>
+            ) : (
+              watchlist.map((sym) => {
+                const q = quotes[sym] || {};
+                const isPos = Number(q.change || 0) >= 0;
+
+                return (
+                  <div
+                    key={sym}
+                    className={`${glassClass} p-5 rounded-3xl ${cardHoverClass} cursor-pointer transition-all duration-300 shadow-xl`}
+                    onClick={() => goDetail(sym)}
+                  >
+                    <div className="flex justify-between items-center mb-3">
+                      <div>
+                        <div className="flex items-end h-full">
+                          <div className="flex items-end gap-2">
+                            <div className="text-2xl font-bold leading-none">
+                              {sym}
+                            </div>
+
+                            <span
+                              className={`px-0.5 py-[0.1px] rounded-md text-[10px] font-normal ${isDark
+                                ? "bg-blue-500/20 text-blue-300 border border-blue-400/30"
+                                : "bg-blue-100 text-blue-700 border border-blue-200"
+                                }`}
+                            >
+                              {q.exchange || "NSE"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start justify-end gap-3">
+                        <div className="text-right">
+                          {/* Line 1: Live price + (-) */}
+                          <div className="flex items-center justify-end gap-2">
+                            <div
+                              className={`text-3xl font-bold ${isPos ? "text-emerald-400" : "text-rose-400"
+                                }`}
+                            >
+                              {q.price != null
+                                ? Number(q.price).toLocaleString("en-IN", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })
+                                : "--"}
+                            </div>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveFromWatchlist(sym);
+                              }}
+                              className={`w-5 h-5 rounded-md font-extrabold flex items-center justify-center transition-all shadow-lg ${isDark
+                                ? "bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 border border-rose-400/30"
+                                : "bg-rose-100 text-rose-600 hover:bg-rose-200 border border-rose-200"
+                                }`}
+                              title="Remove"
+                            >
+                              -
+                            </button>
+                          </div>
+
+                          {/* Line 2: Change + % + WhatsApp */}
+                          <div
+                            className={`mt-1 text-sm font-semibold flex items-center justify-end gap-2 ${isPos ? "text-emerald-400" : "text-rose-400"
+                              }`}
+                          >
+                            {q.change != null && (
+                              <>
+                                <span>
+                                  {isPos ? "+" : ""}
+                                  {Number(q.change).toFixed(2)}
+                                </span>
+                                <span>
+                                  ({Number(q.pct_change || 0).toFixed(2)}%)
+                                </span>
+                              </>
+                            )}
+
+                            {whatsappList.includes(sym) && (
+                              <FaWhatsapp
+                                className="text-green-400 text-[16px] ml-1"
+                                title="Added to WhatsApp Alerts"
+                              />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+
+      {/* SCRIPT DETAILS MODAL */ }
+  <ScriptDetailsModal
+    symbol={selectedSymbol}
+    quote={selectedQuote}
+    hasPosition={!!portfolioMap[selectedSymbol?.toUpperCase()]}
+    glassClass={glassClass}
+    cardHoverClass={cardHoverClass}
+    textClass={textClass}
+    textSecondaryClass={textSecondaryClass}
+    isDark={isDark}
+    onClose={() => {
+      setSelectedSymbol(null);
+      setSelectedQuote(null);
+      if (modalPollRef.current) {
+        clearInterval(modalPollRef.current);
+        modalPollRef.current = null;
+      }
+    }}
+    onAdd={handleAddToWatchlist}
+    onBuy={handleBuy}
+    onSell={() => {
+      const sym = selectedSymbol;
+      setSelectedSymbol(null);
+      setSelectedQuote(null);
+      if (modalPollRef.current) {
+        clearInterval(modalPollRef.current);
+        modalPollRef.current = null;
+      }
+      previewThenSell(sym, 1, "intraday");
+    }}
+  />
+
+
+  {/* SELL CONFIRMATION MODAL (Sell First style) */ }
+  {
+    sellConfirmOpen && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+        <div
+          className={`w-full max-w-md rounded-2xl border shadow-2xl ${isDark ? "bg-slate-900/90 border-white/10" : "bg-white/95 border-black/10"
+            }`}
+        >
+          <div className="p-6 text-center">
+            {/* Icon */}
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-rose-500/15">
+              <AlertCircle className="h-7 w-7 text-rose-400" />
+            </div>
+
+            {/* Title */}
+            <h3 className={`text-lg font-extrabold ${isDark ? "text-white" : "text-slate-900"}`}>
+              Sell First?
+            </h3>
+
+            {/* Message */}
+            <p className={`mt-2 text-sm ${isDark ? "text-white/70" : "text-slate-600"}`}>
+              {sellConfirmMsg ||
+                `You didn't buy ${sellSymbol}. Do you still want to sell first?`}
+            </p>
+
+            {/* Buttons */}
+            <div className="mt-6 flex items-center justify-center gap-3">
+              <button
+                onClick={() => setSellConfirmOpen(false)}
+                className={`px-5 py-2 rounded-xl font-semibold transition ${isDark
+                  ? "bg-white/10 text-white hover:bg-white/15"
+                  : "bg-slate-100 text-slate-800 hover:bg-slate-200"
+                  }`}
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={() => {
+                  setSellConfirmOpen(false);
+                  nav(`/sell/${sellSymbol}`, {
+                    state: {
+                      requestedQty: 1,
+                      allow_short: true,
+                      preview: sellPreviewData,
+                    },
+                  });
+                }}
+                className="px-5 py-2 rounded-xl font-semibold bg-rose-500 text-white hover:bg-rose-600 transition"
+              >
+                Yes, Sell
+              </button>
             </div>
           </div>
-
-          {/* LIST AREA */}
-          {tab === "mustwatch" ? (
-            <div className="space-y-4">
-              {mustWatchlist.length === 0 ? (
-                <div className={`text-center ${textSecondaryClass} mt-20 text-lg`}>
-                  No scripts in your Must Watch list.
-                </div>
-              ) : (
-                mustWatchlist.map((sym) => {
-                  const q = quotes[sym] || {};
-                  const isPos = Number(q.change || 0) >= 0;
-
-                  return (
-                    <div
-                      key={sym}
-                      className={`${glassClass} p-5 rounded-3xl ${cardHoverClass} cursor-pointer transition-all duration-300 shadow-xl`}
-                      onClick={() => goDetail(sym)}
-                    >
-                      <div className="flex justify-between items-center mb-3">
-                        <div>
-                          <div className="flex items-end h-full">
-                            <div className="flex items-end gap-2">
-                              <div className="text-2xl font-bold leading-none">
-                                {sym}
-                              </div>
-
-                              <span
-                                className={`px-0.5 py-[0.1px] rounded-md text-[10px] font-normal ${isDark
-                                  ? "bg-blue-500/20 text-blue-300 border border-blue-400/30"
-                                  : "bg-blue-100 text-blue-700 border border-blue-200"
-                                  }`}
-                              >
-                                {q.exchange || "NSE"}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-start justify-end gap-3">
-                          <div className="text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <div
-                                className={`text-3xl font-bold ${isPos ? "text-emerald-400" : "text-rose-400"
-                                  }`}
-                              >
-                                {q.price != null
-                                  ? Number(q.price).toLocaleString("en-IN", {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  })
-                                  : "--"}
-                              </div>
-
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  removeFromMustWatch(sym);
-                                }}
-                                className={`w-5 h-5 rounded-md font-extrabold flex items-center justify-center transition-all shadow-lg ${isDark
-                                  ? "bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 border border-rose-400/30"
-                                  : "bg-rose-100 text-rose-600 hover:bg-rose-200 border border-rose-200"
-                                  }`}
-                                title="Remove"
-                              >
-                                -
-                              </button>
-                            </div>
-
-                            <div
-                              className={`mt-1 text-sm font-semibold flex items-center justify-end gap-2 ${isPos ? "text-emerald-400" : "text-rose-400"
-                                }`}
-                            >
-                              {q.change != null && (
-                                <>
-                                  <span>
-                                    {isPos ? "+" : ""}
-                                    {Number(q.change).toFixed(2)}
-                                  </span>
-                                  <span>
-                                    ({Number(q.pct_change || 0).toFixed(2)}%)
-                                  </span>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {watchlist.length === 0 ? (
-                <div className={`text-center ${textSecondaryClass} mt-20 text-lg`}>
-                  No scripts in your watchlist.
-                </div>
-              ) : (
-                watchlist.map((sym) => {
-                  const q = quotes[sym] || {};
-                  const isPos = Number(q.change || 0) >= 0;
-
-                  return (
-                    <div
-                      key={sym}
-                      className={`${glassClass} p-5 rounded-3xl ${cardHoverClass} cursor-pointer transition-all duration-300 shadow-xl`}
-                      onClick={() => goDetail(sym)}
-                    >
-                      <div className="flex justify-between items-center mb-3">
-                        <div>
-                          <div className="flex items-end h-full">
-                            <div className="flex items-end gap-2">
-                              <div className="text-2xl font-bold leading-none">
-                                {sym}
-                              </div>
-
-                              <span
-                                className={`px-0.5 py-[0.1px] rounded-md text-[10px] font-normal ${isDark
-                                  ? "bg-blue-500/20 text-blue-300 border border-blue-400/30"
-                                  : "bg-blue-100 text-blue-700 border border-blue-200"
-                                  }`}
-                              >
-                                {q.exchange || "NSE"}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-start justify-end gap-3">
-                          <div className="text-right">
-                            {/* Line 1: Live price + (-) */}
-                            <div className="flex items-center justify-end gap-2">
-                              <div
-                                className={`text-3xl font-bold ${isPos ? "text-emerald-400" : "text-rose-400"
-                                  }`}
-                              >
-                                {q.price != null
-                                  ? Number(q.price).toLocaleString("en-IN", {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  })
-                                  : "--"}
-                              </div>
-
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleRemoveFromWatchlist(sym);
-                                }}
-                                className={`w-5 h-5 rounded-md font-extrabold flex items-center justify-center transition-all shadow-lg ${isDark
-                                  ? "bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 border border-rose-400/30"
-                                  : "bg-rose-100 text-rose-600 hover:bg-rose-200 border border-rose-200"
-                                  }`}
-                                title="Remove"
-                              >
-                                -
-                              </button>
-                            </div>
-
-                            {/* Line 2: Change + % + WhatsApp */}
-                            <div
-                              className={`mt-1 text-sm font-semibold flex items-center justify-end gap-2 ${isPos ? "text-emerald-400" : "text-rose-400"
-                                }`}
-                            >
-                              {q.change != null && (
-                                <>
-                                  <span>
-                                    {isPos ? "+" : ""}
-                                    {Number(q.change).toFixed(2)}
-                                  </span>
-                                  <span>
-                                    ({Number(q.pct_change || 0).toFixed(2)}%)
-                                  </span>
-                                </>
-                              )}
-
-                              {whatsappList.includes(sym) && (
-                                <FaWhatsapp
-                                  className="text-green-400 text-[16px] ml-1"
-                                  title="Added to WhatsApp Alerts"
-                                />
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          )}
         </div>
       </div>
-
-      {/* SCRIPT DETAILS MODAL */}
-      <ScriptDetailsModal
-        symbol={selectedSymbol}
-        quote={selectedQuote}
-        hasPosition={!!portfolioMap[selectedSymbol?.toUpperCase()]}
-        glassClass={glassClass}
-        cardHoverClass={cardHoverClass}
-        textClass={textClass}
-        textSecondaryClass={textSecondaryClass}
-        isDark={isDark}
-        onClose={() => {
-          setSelectedSymbol(null);
-          setSelectedQuote(null);
-          if (modalPollRef.current) {
-            clearInterval(modalPollRef.current);
-            modalPollRef.current = null;
-          }
-        }}
-        onAdd={handleAddToWatchlist}
-        onBuy={handleBuy}
-        onSell={() => {
-          const sym = selectedSymbol;
-          setSelectedSymbol(null);
-          setSelectedQuote(null);
-          if (modalPollRef.current) {
-            clearInterval(modalPollRef.current);
-            modalPollRef.current = null;
-          }
-          previewThenSell(sym, 1, "intraday");
-        }}
-      />
-
-
-      {/* SELL CONFIRMATION MODAL (Sell First style) */}
-      {sellConfirmOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div
-            className={`w-full max-w-md rounded-2xl border shadow-2xl ${isDark ? "bg-slate-900/90 border-white/10" : "bg-white/95 border-black/10"
-              }`}
-          >
-            <div className="p-6 text-center">
-              {/* Icon */}
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-rose-500/15">
-                <AlertCircle className="h-7 w-7 text-rose-400" />
-              </div>
-
-              {/* Title */}
-              <h3 className={`text-lg font-extrabold ${isDark ? "text-white" : "text-slate-900"}`}>
-                Sell First?
-              </h3>
-
-              {/* Message */}
-              <p className={`mt-2 text-sm ${isDark ? "text-white/70" : "text-slate-600"}`}>
-                {sellConfirmMsg ||
-                  `You didn't buy ${sellSymbol}. Do you still want to sell first?`}
-              </p>
-
-              {/* Buttons */}
-              <div className="mt-6 flex items-center justify-center gap-3">
-                <button
-                  onClick={() => setSellConfirmOpen(false)}
-                  className={`px-5 py-2 rounded-xl font-semibold transition ${isDark
-                    ? "bg-white/10 text-white hover:bg-white/15"
-                    : "bg-slate-100 text-slate-800 hover:bg-slate-200"
-                    }`}
-                >
-                  Cancel
-                </button>
-
-                <button
-                  onClick={() => {
-                    setSellConfirmOpen(false);
-                    nav(`/sell/${sellSymbol}`, {
-                      state: {
-                        requestedQty: 1,
-                        allow_short: true,
-                        preview: sellPreviewData,
-                      },
-                    });
-                  }}
-                  className="px-5 py-2 rounded-xl font-semibold bg-rose-500 text-white hover:bg-rose-600 transition"
-                >
-                  Yes, Sell
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    )
+  }
+    </div >
   );
 }
