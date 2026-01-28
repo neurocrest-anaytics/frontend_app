@@ -1,8 +1,8 @@
 HEAD
 import React, { useEffect, useMemo, useState } from "react";
-=======
+
 import React, { useEffect, useMemo, useRef, useState } from "react";
->>>>>>> f801d30 (Initial Commit)
+
 import { useLocation, useNavigate } from "react-router-dom";
 
 const API = (import.meta.env.VITE_BACKEND_BASE_URL || "http://127.0.0.1:8000")
@@ -10,7 +10,7 @@ const API = (import.meta.env.VITE_BACKEND_BASE_URL || "http://127.0.0.1:8000")
   .replace(/\/+$/, "");
 
 HEAD
-=======
+
 // ✅ Daily cache key (one check per day at 7:00 AM IST)
 const SUB_CACHE_KEY = "nc_sub_cache_v1";
 
@@ -81,7 +81,7 @@ function shouldRecheckNow(now = new Date()) {
 }
 
 // ---------- network ----------
->>>>>>> f801d30 (Initial Commit)
+
 async function getJSON(url) {
   const res = await fetch(url);
   const out = await res.json().catch(() => null);
@@ -99,9 +99,9 @@ export default function RequireSubscription({ children }) {
       localStorage.getItem("username") ||
       localStorage.getItem("user") ||
       "";
-=======
+
     const u = localStorage.getItem("username") || localStorage.getItem("user") || "";
->>>>>>> f801d30 (Initial Commit)
+
     return String(u || "").trim().toLowerCase();
   }, []);
 
@@ -110,11 +110,11 @@ export default function RequireSubscription({ children }) {
   const [active, setActive] = useState(false);
 
   // pages that must remain accessible
-=======
+
   const [locked, setLocked] = useState(false);
 
   // Pages that must remain accessible even when locked
->>>>>>> f801d30 (Initial Commit)
+
   const allowList = useMemo(
     () =>
       new Set([
@@ -142,209 +142,209 @@ export default function RequireSubscription({ children }) {
           return;
         }
 
-=======
-  // prevent duplicate check calls
-  const inFlightRef = useRef(false);
 
-  useEffect(() => {
-    let dead = false;
+        // prevent duplicate check calls
+        const inFlightRef = useRef(false);
 
-    const applyLockState = (isLocked) => {
-      if (dead) return;
-      setLocked(!!isLocked);
+        useEffect(() => {
+          let dead = false;
 
-      try {
-        if (isLocked) localStorage.setItem("force_payment", "1");
-        else localStorage.removeItem("force_payment");
-      } catch { }
-    };
+          const applyLockState = (isLocked) => {
+            if (dead) return;
+            setLocked(!!isLocked);
 
-    const handleRedirects = (isActive, isLocked) => {
-      // ✅ Locked => force to /payments from any protected page
-      if (isLocked && loc.pathname !== "/payments" && !allowList.has(loc.pathname)) {
-        try { localStorage.setItem("payment_expired_notice", "1"); } catch { }
-        nav("/payments", { replace: true });
-        return true;
-      }
+            try {
+              if (isLocked) localStorage.setItem("force_payment", "1");
+              else localStorage.removeItem("force_payment");
+            } catch { }
+          };
 
-      // ✅ Not active (edge) => keep same behavior: protected pages -> /payments
-      if (!isActive && loc.pathname !== "/payments" && !allowList.has(loc.pathname)) {
-        nav("/payments", { replace: true });
-        return true;
-      }
+          const handleRedirects = (isActive, isLocked) => {
+            // ✅ Locked => force to /payments from any protected page
+            if (isLocked && loc.pathname !== "/payments" && !allowList.has(loc.pathname)) {
+              try { localStorage.setItem("payment_expired_notice", "1"); } catch { }
+              nav("/payments", { replace: true });
+              return true;
+            }
 
-      return false;
-    };
+            // ✅ Not active (edge) => keep same behavior: protected pages -> /payments
+            if (!isActive && loc.pathname !== "/payments" && !allowList.has(loc.pathname)) {
+              nav("/payments", { replace: true });
+              return true;
+            }
 
-    const runDailyCheckIfNeeded = async () => {
-      // ✅ If not logged in: send to login for protected pages
-      if (!userId) {
-        try { localStorage.removeItem("force_payment"); } catch { }
-        applyLockState(false);
+            return false;
+          };
 
-        if (!allowList.has(loc.pathname)) {
-          nav("/login", { replace: true, state: { from: loc.pathname } });
-        }
+          const runDailyCheckIfNeeded = async () => {
+            // ✅ If not logged in: send to login for protected pages
+            if (!userId) {
+              try { localStorage.removeItem("force_payment"); } catch { }
+              applyLockState(false);
 
-        if (!dead) setLoading(false);
-        return;
-      }
+              if (!allowList.has(loc.pathname)) {
+                nav("/login", { replace: true, state: { from: loc.pathname } });
+              }
 
-      // ✅ First: try cached result (no network call on every page)
-      const cache = safeReadCache();
+              if (!dead) setLoading(false);
+              return;
+            }
 
-      // If cache exists and nextCheckAtMs is in future => use cached decision
-      if (cache && !shouldRecheckNow(new Date())) {
-        const isActive = !!cache.isActive;
-        const isLocked = !!cache.isLocked;
+            // ✅ First: try cached result (no network call on every page)
+            const cache = safeReadCache();
 
-        applyLockState(isLocked);
-        handleRedirects(isActive, isLocked);
+            // If cache exists and nextCheckAtMs is in future => use cached decision
+            if (cache && !shouldRecheckNow(new Date())) {
+              const isActive = !!cache.isActive;
+              const isLocked = !!cache.isLocked;
 
-        if (!dead) setLoading(false);
-        return;
-      }
+              applyLockState(isLocked);
+              handleRedirects(isActive, isLocked);
 
-      // ✅ If we should recheck (only at/after 7:00 AM IST), do ONE backend call
-      if (inFlightRef.current) {
-        // another tab/render is already checking; fall back to cache
-        const c2 = safeReadCache();
-        const isActive = !!c2?.isActive;
-        const isLocked = !!c2?.isLocked;
-        applyLockState(isLocked);
-        handleRedirects(isActive, isLocked);
-        if (!dead) setLoading(false);
-        return;
-      }
+              if (!dead) setLoading(false);
+              return;
+            }
 
-      inFlightRef.current = true;
+            // ✅ If we should recheck (only at/after 7:00 AM IST), do ONE backend call
+            if (inFlightRef.current) {
+              // another tab/render is already checking; fall back to cache
+              const c2 = safeReadCache();
+              const isActive = !!c2?.isActive;
+              const isLocked = !!c2?.isLocked;
+              applyLockState(isLocked);
+              handleRedirects(isActive, isLocked);
+              if (!dead) setLoading(false);
+              return;
+            }
 
-      try {
->>>>>>> f801d30 (Initial Commit)
-        const sub = await getJSON(
-          `${API}/payments/subscription/${encodeURIComponent(userId)}`
-        );
+            inFlightRef.current = true;
 
-        const isActive = !!sub?.active;
-        HEAD
+            try {
 
-        if (!dead) setActive(isActive);
+              const sub = await getJSON(
+                `${API}/payments/subscription/${encodeURIComponent(userId)}`
+              );
 
-        // If no active plan => force to /payments from ANY other page
-        if (!isActive && loc.pathname !== "/payments" && !allowList.has(loc.pathname)) {
-          nav("/payments", { replace: true });
-        }
-      } catch {
-        // if API fails, safest is to gate to payments
-        if (!allowList.has(loc.pathname)) nav("/payments", { replace: true });
-        if (!dead) setActive(false);
-      } finally {
-=======
-        const freeTrialStatus = sub?.free_trial_status || null;
+              const isActive = !!sub?.active;
+              HEAD
 
-        // 🔒 Locked only when NO active plan AND free trial is expired/unavailable
-        const isLocked =
-          !isActive &&
-          (freeTrialStatus === "expired" || freeTrialStatus === "unavailable");
+              if (!dead) setActive(isActive);
 
-        // ✅ cache for the rest of the day until next 7 AM IST
-        const nowMs = Date.now();
-        const nextCheckAtMs = isLocked
-          ? (nowMs + 60 * 1000) // recheck in 60s if locked
-          : getNext7amISTEpochMs(new Date(nowMs)); // daily if active
+              // If no active plan => force to /payments from ANY other page
+              if (!isActive && loc.pathname !== "/payments" && !allowList.has(loc.pathname)) {
+                nav("/payments", { replace: true });
+              }
+            } catch {
+              // if API fails, safest is to gate to payments
+              if (!allowList.has(loc.pathname)) nav("/payments", { replace: true });
+              if (!dead) setActive(false);
+            } finally {
+
+              const freeTrialStatus = sub?.free_trial_status || null;
+
+              // 🔒 Locked only when NO active plan AND free trial is expired/unavailable
+              const isLocked =
+                !isActive &&
+                (freeTrialStatus === "expired" || freeTrialStatus === "unavailable");
+
+              // ✅ cache for the rest of the day until next 7 AM IST
+              const nowMs = Date.now();
+              const nextCheckAtMs = isLocked
+                ? (nowMs + 60 * 1000) // recheck in 60s if locked
+                : getNext7amISTEpochMs(new Date(nowMs)); // daily if active
 
 
-        safeWriteCache({
-          userId,
-          checkedAtMs: nowMs,
-          nextCheckAtMs,
-          isActive,
-          isLocked,
-          freeTrialStatus,
-        });
+              safeWriteCache({
+                userId,
+                checkedAtMs: nowMs,
+                nextCheckAtMs,
+                isActive,
+                isLocked,
+                freeTrialStatus,
+              });
 
-        applyLockState(isLocked);
-        handleRedirects(isActive, isLocked);
-      } catch {
-        // ✅ If API fails: DO NOT recheck every page. Use cache if exists; else lock protected pages.
-        const c = safeReadCache();
-        const hasCache = !!c && c.userId === userId;
+              applyLockState(isLocked);
+              handleRedirects(isActive, isLocked);
+            } catch {
+              // ✅ If API fails: DO NOT recheck every page. Use cache if exists; else lock protected pages.
+              const c = safeReadCache();
+              const hasCache = !!c && c.userId === userId;
 
-        const isActive = hasCache ? !!c.isActive : false;
-        const isLocked = hasCache ? !!c.isLocked : true;
+              const isActive = hasCache ? !!c.isActive : false;
+              const isLocked = hasCache ? !!c.isLocked : true;
 
-        applyLockState(isLocked);
+              applyLockState(isLocked);
 
-        if (!allowList.has(loc.pathname)) {
-          nav("/payments", { replace: true });
-        }
+              if (!allowList.has(loc.pathname)) {
+                nav("/payments", { replace: true });
+              }
 
-        // write a nextCheckAt so we don't hammer backend on every page if it's down
-        if (!hasCache) {
-          const nowMs = Date.now();
-          safeWriteCache({
-            userId,
-            checkedAtMs: nowMs,
-            nextCheckAtMs: getNext7amISTEpochMs(new Date(nowMs)),
-            isActive: false,
-            isLocked: true,
-            freeTrialStatus: null,
-          });
-        }
-      } finally {
-        inFlightRef.current = false;
->>>>>>> f801d30 (Initial Commit)
-        if (!dead) setLoading(false);
-      }
-    };
+              // write a nextCheckAt so we don't hammer backend on every page if it's down
+              if (!hasCache) {
+                const nowMs = Date.now();
+                safeWriteCache({
+                  userId,
+                  checkedAtMs: nowMs,
+                  nextCheckAtMs: getNext7amISTEpochMs(new Date(nowMs)),
+                  isActive: false,
+                  isLocked: true,
+                  freeTrialStatus: null,
+                });
+              }
+            } finally {
+              inFlightRef.current = false;
 
-    HEAD
-    run();
-    return () => {
-      dead = true;
-    };
-  }, [userId, loc.pathname, nav, allowList]);
+              if (!dead) setLoading(false);
+            }
+          };
 
-  if (loading) return null; // or your loader UI
-=======
-    runDailyCheckIfNeeded();
+          HEAD
+          run();
+          return () => {
+            dead = true;
+          };
+        }, [userId, loc.pathname, nav, allowList]);
 
-    // ✅ Schedule the NEXT daily refresh while app is open
-    // This does NOT run per page; it runs once at next 7 AM IST.
-    const now = new Date();
-    const nextMs = getNext7amISTEpochMs(now);
-    const delay = Math.max(1000, nextMs - now.getTime());
+        if (loading) return null; // or your loader UI
 
-    const timer = setTimeout(() => {
-      // force recheck at 7 AM IST by setting nextCheckAtMs to past
-      const c = safeReadCache();
-      if (c && c.userId === userId) {
-        safeWriteCache({ ...c, nextCheckAtMs: Date.now() - 1000 });
-      }
-      // trigger check by re-running effect logic via small state update
-      // (simplest: just call the function again)
-      // eslint-disable-next-line no-inner-declarations
-      const rerun = async () => {
-        if (dead) return;
-        setLoading(true);
-        await runDailyCheckIfNeeded();
-      };
-      rerun();
-    }, delay);
+        runDailyCheckIfNeeded();
 
-    return () => {
-      dead = true;
-      clearTimeout(timer);
-    };
-    // ❗ IMPORTANT:
-    // We keep loc.pathname so redirects still happen,
-    // but the backend call happens only if daily recheck is due.
-  }, [userId, loc.pathname, nav, allowList]);
+        // ✅ Schedule the NEXT daily refresh while app is open
+        // This does NOT run per page; it runs once at next 7 AM IST.
+        const now = new Date();
+        const nextMs = getNext7amISTEpochMs(now);
+        const delay = Math.max(1000, nextMs - now.getTime());
+
+        const timer = setTimeout(() => {
+          // force recheck at 7 AM IST by setting nextCheckAtMs to past
+          const c = safeReadCache();
+          if (c && c.userId === userId) {
+            safeWriteCache({ ...c, nextCheckAtMs: Date.now() - 1000 });
+          }
+          // trigger check by re-running effect logic via small state update
+          // (simplest: just call the function again)
+          // eslint-disable-next-line no-inner-declarations
+          const rerun = async () => {
+            if (dead) return;
+            setLoading(true);
+            await runDailyCheckIfNeeded();
+          };
+          rerun();
+        }, delay);
+
+        return () => {
+          dead = true;
+          clearTimeout(timer);
+        };
+        // ❗ IMPORTANT:
+        // We keep loc.pathname so redirects still happen,
+        // but the backend call happens only if daily recheck is due.
+      }, [userId, loc.pathname, nav, allowList]);
 
   // Prevent a flash of protected pages while redirecting
   if (loading) return null;
   if (locked && !allowList.has(loc.pathname)) return null;
 
->>>>>>> f801d30 (Initial Commit)
+
   return children;
 }

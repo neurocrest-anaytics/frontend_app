@@ -8,9 +8,9 @@ import {
 import BackButton from "../components/BackButton";
 HEAD
 import HeaderBackRow from "../components/HeaderBackRow";
-=======
+
 import { useTheme } from "../context/ThemeContext";
->>>>>>> f801d30 (Initial Commit)
+
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -20,10 +20,10 @@ export default function Settings() {
     <div className="min-h-screen p-4 max-w-md mx-auto">
       <HeaderBackRow backTo="/profile" />
       <h2 className="text-2xl font-semibold text-center mb-6">Settings</h2>
-=======
+
   // ✅ GLOBAL THEME (from ThemeContext)
-  const {isDark} = useTheme();
->>>>>>> f801d30 (Initial Commit)
+      const {isDark} = useTheme();
+      f801d30 (Initial Commit)
 
       const bgClass = isDark
       ? "bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900"

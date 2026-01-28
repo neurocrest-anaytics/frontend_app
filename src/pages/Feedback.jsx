@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import BackButton from "../components/BackButton";
 HEAD
 import HeaderBackRow from "../components/HeaderBackRow";
-=======
+
 import {
   Sun,
   Moon,
@@ -30,26 +30,23 @@ function AlertModal({ open, title, message, onClose, isDark }) {
   return (
     <div className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/60 backdrop-blur-sm px-3">
       <div
-        className={`w-full max-w-md rounded-2xl shadow-2xl p-5 ${
-          isDark ? "bg-[#0b1220] border border-white/10" : "bg-white border border-black/10"
-        }`}
+        className={`w-full max-w-md rounded-2xl shadow-2xl p-5 ${isDark ? "bg-[#0b1220] border border-white/10" : "bg-white border border-black/10"
+          }`}
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3">
           <div>
             <div
-              className={`text-[17px] font-semibold tracking-tight ${
-                isDark ? "text-blue-300" : "text-blue-700"
-              }`}
+              className={`text-[17px] font-semibold tracking-tight ${isDark ? "text-blue-300" : "text-blue-700"
+                }`}
               style={{ fontFamily: "'Segoe UI', Inter, system-ui" }}
             >
               {title || "Alert"}
             </div>
 
             <div
-              className={`mt-3 text-[14.5px] leading-[1.7] whitespace-pre-line ${
-                isDark ? "text-slate-300" : "text-slate-600"
-              }`}
+              className={`mt-3 text-[14.5px] leading-[1.7] whitespace-pre-line ${isDark ? "text-slate-300" : "text-slate-600"
+                }`}
               style={{ fontFamily: "Inter, system-ui, sans-serif" }}
             >
               {message}
@@ -58,9 +55,8 @@ function AlertModal({ open, title, message, onClose, isDark }) {
 
           <button
             onClick={onClose}
-            className={`w-9 h-9 rounded-xl grid place-items-center ${
-              isDark ? "bg-white/10 hover:bg-white/15" : "bg-black/5 hover:bg-black/10"
-            } transition`}
+            className={`w-9 h-9 rounded-xl grid place-items-center ${isDark ? "bg-white/10 hover:bg-white/15" : "bg-black/5 hover:bg-black/10"
+              } transition`}
             title="Close"
             type="button"
           >
@@ -81,7 +77,7 @@ function AlertModal({ open, title, message, onClose, isDark }) {
     </div>
   );
 }
->>>>>>> f801d30 (Initial Commit)
+
 
 export default function Feedback() {
   const [tab, setTab] = useState("feedback");
@@ -225,7 +221,7 @@ export default function Feedback() {
     < div className = "min-h-screen bg-white p-6" >
       <HeaderBackRow backTo="/menu" />
       <h2 className="text-2xl font-bold text-center text-blue-700 mb-6">📬 Feedback & Contact</h2>
-=======
+
     <div className={`min-h-screen ${bgClass} ${textClass} relative transition-colors duration-300 overflow-hidden`}>
       {/* ✅ Styled popup like Chart.jsx */}
       <AlertModal
@@ -235,7 +231,7 @@ export default function Feedback() {
         onClose={closePopup}
         isDark={isDark}
       />
->>>>>>> f801d30 (Initial Commit)
+                    f801d30 (Initial Commit)
 
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>

@@ -9,14 +9,6 @@ import React, {
 import { useNavigate } from "react-router-dom";
 import BackButton from "../components/BackButton";
 import {
-  HEAD
-  Elements,
-  PaymentElement,
-  useElements,
-  useStripe,
-} from "@stripe/react-stripe-js";
-import HeaderBackRow from "../components/HeaderBackRow";
-=======
   User,
   Wallet,
   CreditCard,
@@ -33,7 +25,6 @@ import { useTheme } from "../context/ThemeContext";
 import { loadStripe } from "@stripe/stripe-js";
 import { PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { Home, Sun, Moon, Clock } from "lucide-react";
->>>>>>> f801d30 (Initial Commit)
 
 const API = import.meta.env.VITE_BACKEND_BASE_URL || "http://127.0.0.1:8000";
 
@@ -462,17 +453,6 @@ export default function Profile({ username, logout }) {
 
   // ================= UI =================
   return (
-    HEAD
-    < div className = "min-h-screen bg-white p-4" >
-      <HeaderBackRow backTo="/menu" />
-      <h2 className="text-xl font-bold text-center text-blue-600 mb-6">ACCOUNT</h2>
-
-  {/* Avatar and Info (email first, then name; funds hidden) */ }
-  <div className="flex flex-col items-center mb-6">
-    <div className="w-20 h-20 rounded-full bg-gray-300" />
-    <h3 className="font-semibold">{username}</h3>
-    {/* Available Funds removed */}
-=======
     <div
       className={`min-h-screen ${bgClass} ${textClass} relative transition-colors duration-300 overflow-hidden`}
     >
@@ -490,7 +470,6 @@ export default function Profile({ username, logout }) {
           className={`absolute top-1/2 left-1/2 w-96 h-96 rounded-full blur-3xl ${isDark ? "bg-blue-400/10" : "bg-blue-300/15"
             }`}
         ></div>
->>>>>>> f801d30 (Initial Commit)
       </div>
 
       {/* Content Container */}
@@ -1061,5 +1040,5 @@ export default function Profile({ username, logout }) {
         </div>
       )}
     </div>
-    );
+  );
 }

@@ -35,7 +35,7 @@
 }
 
 .filter-item {
-  HEAD=======width: 200px;
+  HEADwidth: 200px;
   >>>>>>>f801d30 (Initial Commit) display: flex;
   flex-direction: column;
   text-align: left;
@@ -47,28 +47,26 @@
   HEAD color: #222;
 }
 
-=======color: inherit;
+color: inherit;
 /* ✅ let theme decide */
 }
 
 
->>>>>>>f801d30 (Initial Commit) .filter-item input,
 .filter-item select {
   padding: 6px 10px;
   border-radius: 5px;
   border: 1px solid #ccc;
 }
 
-HEAD=======
+HEAD
 
 /* -------- Signal Section Layout -------- */
->>>>>>>f801d30 (Initial Commit) .signals-section {
   display: flex;
   justify-content: center;
   align-items: flex-start;
   HEAD gap: 60px;
   /* spacing between Active and Closed blocks */
-  =======gap: 40px;
+  gap: 40px;
   >>>>>>>f801d30 (Initial Commit) flex-wrap: wrap;
   margin-top: 20px;
 }
@@ -79,7 +77,7 @@ HEAD .signals-column {
   text-align: center;
 }
 
-=======.left-section {
+.left-section {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -91,7 +89,6 @@ HEAD .signals-column {
   text-align: center;
 }
 
->>>>>>>f801d30 (Initial Commit) .subtext {
   font-size: 12px;
   color: #666;
 }
@@ -101,7 +98,7 @@ HEAD .signals-column {
   grid-template-columns: repeat(2, 1fr);
   HEAD gap: 15px;
   /* equal spacing between cards */
-  =======gap: 15px;
+  gap: 15px;
   >>>>>>>f801d30 (Initial Commit) justify-items: center;
   align-items: center;
   margin-top: 10px;
@@ -258,7 +255,7 @@ HEAD .signal-card {
   text-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
 }
 
-=======
+
 
 /* ---------------- Signal Card ---------------- */
 .signal-card-advanced {
@@ -364,7 +361,6 @@ HEAD .signal-card {
   font-size: 13px;
 }
 
->>>>>>>f801d30 (Initial Commit)
 
 /* ---------- Footer ---------- */
 .signal-footer {
@@ -373,7 +369,7 @@ HEAD .signal-card {
   display: flex;
   flex-direction: column;
   HEAD gap: 3px;
-  =======gap: 2px;
+  gap: 2px;
   text-align: left;
   >>>>>>>f801d30 (Initial Commit)
 }
@@ -382,7 +378,7 @@ HEAD .signal-card {
   color: #000;
 }
 
-HEAD=======.alert-description-box {
+HEAD.alert-description-box {
   background: #fff8c4;
   border-top: 1px solid #e0c75a;
   border-bottom: 1px solid #e0c75a;
@@ -470,10 +466,10 @@ HEAD=======.alert-description-box {
   color: #111;
 }
 
-/* =========================================================
+/* =
    ✅ Clean Line Layout (Only Live Prices Below)
-   ========================================================= */
-/* ======= HORIZONTAL PRICE DIAGRAM STYLING ======= */
+   = */
+/*  HORIZONTAL PRICE DIAGRAM STYLING  */
 
 /* Clean diagram container */
 .clean-line-layout {
@@ -510,7 +506,7 @@ HEAD=======.alert-description-box {
   text-align: right !important;
 }
 
-/* ======== Indicator Layout ======== */
+/* = Indicator Layout = */
 .indicator-container {
   position: relative;
   width: 100%;
@@ -616,9 +612,9 @@ HEAD=======.alert-description-box {
   z-index: 6;
 }
 
-/* ==========================================================
+/* ==
    LAYER CONTROL — FIX OVERLAPPING OF MARKERS
-========================================================== */
+== */
 
 /* Default markers (SUP / RES / ST / T) stay at the back */
 .marker .shape {
@@ -712,9 +708,9 @@ HEAD=======.alert-description-box {
   width: 100%;
 }
 
-/* =========================================================
+/* =
    PRICE BUBBLES (Signal Price & Live Price)
-   ========================================================= */
+   = */
 /* -------- SMALL TRADINGVIEW STYLE BUBBLES -------- */
 .price-bubble {
   position: absolute;
@@ -754,9 +750,9 @@ HEAD=======.alert-description-box {
   z-index: 6;
 }
 
-/* =========================================================
+/* =
    FINAL MOBILE FIX — FORCE EVERYTHING INTO ONE COLUMN
-   ========================================================= */
+   = */
 @media (max-width: 768px) {
 
   /* Force Active + Closed Signals to stack vertically */
@@ -951,9 +947,9 @@ HEAD=======.alert-description-box {
 
 }
 
-/* ============================================================
+/* ====
    NEW — 3-SECTION SIGNAL CARD LAYOUT (HEADER / CHART / FOOTER)
-   ============================================================ */
+   ==== */
 
 .signal-card {
   width: 280px;
@@ -1117,12 +1113,12 @@ HEAD=======.alert-description-box {
 
 
 
-/* ===============================
+/* ===
    DESKTOP — Legend floats right
-   =============================== */
-/* ===============================
+   === */
+/* ===
    CLOSED SIGNAL SPEEDOMETER ROW
-   =============================== */
+   === */
 
 .closed-speedometer-row {
   width: 100%;
@@ -1141,13 +1137,13 @@ HEAD=======.alert-description-box {
   }
 }
 
-/* ============================================================
+/* ====
    FIX FOR 1030px → 1650px SCREENS (prevent overlapping)
    Legend stays centered below filters
-   ============================================================ */
-/* ===============================
+   ==== */
+/* ===
    LEGEND ROW (NO OVERLAP)
-   =============================== */
+   === */
 .legend-row {
   width: 100%;
   display: flex;
@@ -1158,10 +1154,10 @@ HEAD=======.alert-description-box {
 }
 
 
-/* ============================================
+/* ==
    MOBILE FIX — Force each filter into its own row
    (< 768px)
-   ============================================ */
+   == */
 @media (max-width: 768px) {
 
   /* Make filter rows vertical */
@@ -1187,9 +1183,9 @@ HEAD=======.alert-description-box {
   }
 
   /* Fix legend on mobile – centered */
-  /* ===============================
+  /* ===
    LEGEND ROW (NO OVERLAP)
-   =============================== */
+   === */
   .legend-row {
     width: 100%;
     display: flex;
@@ -1201,9 +1197,9 @@ HEAD=======.alert-description-box {
 
 }
 
-/* =====================================================
+/* ====
    FINAL THEME CONTROL — ONLY SOURCE OF TRUTH
-   ===================================================== */
+   ==== */
 
 /* ---------- LIGHT THEME ---------- */
 .theme-light .filter-item label {
@@ -1264,13 +1260,13 @@ HEAD=======.alert-description-box {
   font-weight: 600;
 }
 
-/* =====================================================
+/* ====
    FIX: Alert Description Text Not Visible (Dark Theme)
-   ===================================================== */
+   ==== */
 
-/* =====================================================
+/* ====
    🔥 FINAL HARD OVERRIDE — ALERT TEXT VISIBILITY
-   ===================================================== */
+   ==== */
 
 /* Force color on the box */
 .theme-dark .alert-description-box {
@@ -1292,13 +1288,13 @@ HEAD=======.alert-description-box {
   color: #0e0d0d !important;
 }
 
-/* =====================================================
+/* ====
    ADVANCED FILTER CONTAINER (TOP SECTION ONLY)
-   ===================================================== */
+   ==== */
 
-/* =====================================================
+/* ====
    ADVANCED FILTER CONTAINER — PREMIUM (Landing style)
-   ===================================================== */
+   ==== */
 
 .advanced-filter-wrapper {
   margin: 20px auto 30px;
@@ -1361,10 +1357,10 @@ HEAD=======.alert-description-box {
 }
 
 
-/* =====================================================
+/* ====
    FIX: Active/Closed title not visible in DARK theme
    + Add animated grow-shrink dots
-   ===================================================== */
+   ==== */
 
 /* Make heading text visible in dark theme */
 .theme-dark .active-title,
@@ -1424,9 +1420,9 @@ HEAD=======.alert-description-box {
   }
 }
 
-/* =====================================================
+/* ====
    FIX: Accuracy Gauge text not visible in DARK theme
-   ===================================================== */
+   ==== */
 
 /* Percentage value inside gauge */
 .theme-dark svg text {
@@ -1440,10 +1436,10 @@ HEAD=======.alert-description-box {
   /* soft blue */
 }
 
-/* =====================================================
+/* ====
    PREMIUM DROPDOWN STYLE
    Inspired by Landing.jsx cards
-   ===================================================== */
+   ==== */
 
 .filter-item select,
 .filter-item input {
@@ -1503,9 +1499,9 @@ HEAD=======.alert-description-box {
   color-scheme: dark;
 }
 
-/* =====================================================
+/* ====
    CUSTOM DROPDOWN (Trade.jsx quality)
-   ===================================================== */
+   ==== */
 
 .custom-dd-wrapper {
   position: relative;
@@ -1607,14 +1603,14 @@ HEAD=======.alert-description-box {
   font-weight: 600;
 }
 
-/* =====================================================
+/* ====
    FINAL FIX — Date picker icon visibility (Dark theme)
-   ===================================================== */
+   ==== */
 
 /* Base date input */
-/* =====================================================
+/* ====
    FINAL POLISH — Date input icon (Dark theme)
-   ===================================================== */
+   ==== */
 
 .filter-item input[type="date"] {
   position: relative;
@@ -1646,9 +1642,9 @@ HEAD=======.alert-description-box {
   opacity: 1;
 }
 
-/* =====================================================
+/* ====
    DARK THEME — TEXT VISIBILITY ONLY (NO BACKGROUND)
-   ===================================================== */
+   ==== */
 
 /* -------- Signal cards text -------- */
 .theme-dark .signal-card-advanced,
@@ -1691,4 +1687,3 @@ HEAD=======.alert-description-box {
   color: #141415 !important;
 }
 
->>>>>>>f801d30 (Initial Commit)

@@ -266,13 +266,8 @@ function AnimatedRoutes({ username, onLoginSuccess, onLogout }) {
               username ? (
                 <RequireSubscription>
                   (
-                  HEAD
                   <Trade username={username} />
                   )
-=======
-                  <Trade username={username} />
-                  )
->>>>>>> f801d30 (Initial Commit)
                 </RequireSubscription>
               ) : (
                 <Navigate to="/" replace />
@@ -285,13 +280,8 @@ function AnimatedRoutes({ username, onLoginSuccess, onLogout }) {
               username ? (
                 <RequireSubscription>
                   (
-                  HEAD
                   <ScriptDetail username={username} />
                   )
-=======
-                  <ScriptDetail username={username} />
-                  )
->>>>>>> f801d30 (Initial Commit)
                 </RequireSubscription>
               ) : (
                 <Navigate to="/" replace />
@@ -305,13 +295,8 @@ function AnimatedRoutes({ username, onLoginSuccess, onLogout }) {
               username ? (
                 <RequireSubscription>
                   (
-                  HEAD
                   <Orders username={username} />
                   )
-=======
-                  <Orders username={username} />
-                  )
->>>>>>> f801d30 (Initial Commit)
                 </RequireSubscription>
               ) : (
                 <Navigate to="/" replace />
@@ -321,214 +306,129 @@ function AnimatedRoutes({ username, onLoginSuccess, onLogout }) {
           <Route
             path="/buy/:symbol"
             element={username ? (
-              HEAD
-              < RequireSubscription >
-              <Buy />
-                </RequireSubscription>
-        ) : <Navigate to="/" replace />}
-=======
               <RequireSubscription>
-          <Buy />
-        </RequireSubscription>
-        ) : <Navigate to="/" replace />}
->>>>>>> f801d30 (Initial Commit)
+                <Buy />
+              </RequireSubscription>
+            ) : <Navigate to="/" replace />}
           />
-        <Route
-          path="/sell/:symbol"
-          element={username ? (
-            HEAD
-            < RequireSubscription >
-            <Sell />
-                </RequireSubscription>
-      ) : <Navigate to="/" replace />}
-=======
+          <Route
+            path="/sell/:symbol"
+            element={username ? (
               <RequireSubscription>
-        <Sell />
-      </RequireSubscription>
-      ) : <Navigate to="/" replace />}
->>>>>>> f801d30 (Initial Commit)
+                <Sell />
+              </RequireSubscription>
+            ) : <Navigate to="/" replace />}
           />
-      <Route
-        path="/trade-success"
-        element={username ? (
-          HEAD
-          < RequireSubscription >
-          <TradeSuccess />
-                </RequireSubscription >
-              ) : <Navigate to="/" replace />
-}
-=======
+          <Route
+            path="/trade-success"
+            element={username ? (
               <RequireSubscription>
                 <TradeSuccess />
               </RequireSubscription>
             ) : <Navigate to="/" replace />}
->>>>>>> f801d30 (Initial Commit)
           />
 
-  < Route
-path = "/chart/:symbol"
-element = {
-  username?(
-    HEAD
-                <RequireSubscription>
-  <ChartPage />
-                </RequireSubscription >
-              ) : <Navigate to="/" replace />}
-=======
+          <Route
+            path="/chart/:symbol"
+            element={username ? (
               <RequireSubscription>
                 <ChartPage />
               </RequireSubscription>
             ) : <Navigate to="/" replace />}
->>>>>>> f801d30 (Initial Commit)
           />
-  < Route
-path = "/alert/:symbol"
-element = {
-  username?(
-    HEAD
-                <RequireSubscription>
-  <SetAlert />
-                </RequireSubscription >
-              ) : <Navigate to="/" replace />}
-=======
+          <Route
+            path="/alert/:symbol"
+            element={username ? (
               <RequireSubscription>
                 <SetAlert />
               </RequireSubscription>
             ) : <Navigate to="/" replace />}
->>>>>>> f801d30 (Initial Commit)
           />
-  < Route
-path = "/notes/:symbol"
-element = {
-  username?(
-    HEAD
-                <RequireSubscription>
-  <Notes />
-                </RequireSubscription >
-              ) : <Navigate to="/" replace />}
-=======
+          <Route
+            path="/notes/:symbol"
+            element={username ? (
               <RequireSubscription>
                 <Notes />
               </RequireSubscription>
             ) : <Navigate to="/" replace />}
->>>>>>> f801d30 (Initial Commit)
           />
 
-  < Route
-path = "/portfolio"
-element = {
-  username?(
+          <Route
+            path="/portfolio"
+            element={
+              username ? (
                 <RequireSubscription>
-  (
-    HEAD
-    < Portfolio username = { username } />
-              )
-=======
+                  (
                   <Portfolio username={username} />
                   )
->>>>>>> f801d30 (Initial Commit)
-                </RequireSubscription >
+                </RequireSubscription>
               ) : (
-  <Navigate to="/" replace />
-)
+                <Navigate to="/" replace />
+              )
             }
           />
 
-  < Route
-path = "/recommendations"
-element = {
-  username?(
+          <Route
+            path="/recommendations"
+            element={
+              username ? (
                 <RequireSubscription>
-  <Recommendation />
-                </RequireSubscription >
+                  <Recommendation />
+                </RequireSubscription>
               ) : <Navigate to="/" replace />
             }
           />
 
-  < Route
-path = "/insight"
-element = {
-  username?(
-    HEAD
-                <RequireSubscription>
-  <Insight />
-                </RequireSubscription >
-              ) : <Navigate to="/" replace />}
-=======
+          <Route
+            path="/insight"
+            element={username ? (
               <RequireSubscription>
                 <Insight />
               </RequireSubscription>
             ) : <Navigate to="/" replace />}
->>>>>>> f801d30 (Initial Commit)
           />
 
-  < Route
-path = "/ipo-tracker"
-element = {
-  username?(
-    HEAD
-                <RequireSubscription>
-  <IpoTracker />
-                </RequireSubscription >
-              ) : <Navigate to="/" replace />}
-=======
+          <Route
+            path="/ipo-tracker"
+            element={username ? (
               <RequireSubscription>
                 <IpoTracker />
               </RequireSubscription>
             ) : <Navigate to="/" replace />}
->>>>>>> f801d30 (Initial Commit)
           />
 
-  < Route path = "/feedback" element = {< Feedback username = { username } />} />
+          <Route path="/feedback" element={<Feedback username={username} />} />
 
-    < Route
-path = "/profile"
-element = {
-  username?(
+          <Route
+            path="/profile"
+            element={
+              username ? (
                 <RequireSubscription>
-  (
-    HEAD
-    < Profile username = { username } logout = { onLogout } />
-              )
-=======
+                  (
                   <Profile username={username} logout={onLogout} />
                   )
->>>>>>> f801d30 (Initial Commit)
-                </RequireSubscription >
+                </RequireSubscription>
               ) : (
-  <Navigate to="/" replace />
-)
+                <Navigate to="/" replace />
+              )
             }
           />
 
-  < Route
-path = "/profile/funds"
-element = {
-  username?(
+          <Route
+            path="/profile/funds"
+            element={
+              username ? (
                 <RequireSubscription>
-  <Funds username={username} />
-                </RequireSubscription >
+                  <Funds username={username} />
+                </RequireSubscription>
               ) : (
-  <Navigate to="/" replace />
-)
+                <Navigate to="/" replace />
+              )
             }
           />
 
-  < Route path = "/payments" element = {< Payments username = { username } />} />
-    < Route
-HEAD
-path = "/trade"
-element = {
-  username?(
-      <RequireSubscription>
-  <Trade username={username} />
-      </RequireSubscription >
-    ) : (
-  <Navigate to="/" replace />
-)
-  }
-/>
-=======
+          <Route path="/payments" element={<Payments username={username} />} />
+          <Route
             path="/trade"
             element={
               username ? (
@@ -540,34 +440,18 @@ element = {
               )
             }
           />
->>>>>>> f801d30 (Initial Commit)
-  < Route
-path = "/history"
-element = {
-  username?(
+          <Route
+            path="/history"
+            element={
+              username ? (
                 <RequireSubscription>
-  <History username={username} />
-                </RequireSubscription >
+                  <History username={username} />
+                </RequireSubscription>
               ) : <Navigate to="/" replace />
             }
           />
 
-  < Route
-HEAD
-path = "/settings"
-element = {
-  username?(
-                <RequireSubscription>
-  <Settings />
-                </RequireSubscription >
-              ) : <Navigate to="/" replace />}
-/>
-
-  < Route
-path = "/settings/change-password"
-element = {
-  username?(
-=======
+          <Route
             path="/settings"
             element={username ? (
               <RequireSubscription>
@@ -580,21 +464,10 @@ element = {
             path="/settings/change-password"
             element={
               username ? (
->>>>>>> f801d30 (Initial Commit)
                 <RequireSubscription>
-  <PasswordChange username={username} />
-                </RequireSubscription >
+                  <PasswordChange username={username} />
+                </RequireSubscription>
               ) : <Navigate to="/" replace />
-HEAD
-  }
-/>
-
-{/* ✅ Short route for Profile tile */ }
-<Route
-  path="/passwordchange"
-  element={
-    username ? (
-=======
             }
           />
 
@@ -603,20 +476,10 @@ HEAD
             path="/passwordchange"
             element={
               username ? (
->>>>>>> f801d30 (Initial Commit)
                 <RequireSubscription>
                   <PasswordChange username={username} />
                 </RequireSubscription>
               ) : <Navigate to="/" replace />
-    HEAD
-  }
-/>
-
-<Route
-  path="/settings/change-email"
-  element={
-    username ? (
-=======
             }
           />
 
@@ -624,18 +487,12 @@ HEAD
             path="/settings/change-email"
             element={
               username ? (
->>>>>>> f801d30 (Initial Commit)
                 <RequireSubscription>
                   <EmailChange username={username} />
                 </RequireSubscription>
               ) : <Navigate to="/" replace />
-    HEAD
-  }
-/>
-=======
             }
           />
->>>>>>> f801d30 (Initial Commit)
 
 
           <Route path="/modify/:id" element={<ModifyOrderPage />} />
@@ -643,54 +500,34 @@ HEAD
           <Route
             path="/live"
             element={username ? (
-    HEAD
-                <RequireSubscription>
-                  <LiveChart />
-                </RequireSubscription>
-              ) : <Navigate to="/" replace />}
-=======
               <RequireSubscription>
-      <LiveChart />
-    </RequireSubscription>
-    ) : <Navigate to="/" replace />}
->>>>>>> f801d30 (Initial Commit)
+                <LiveChart />
+              </RequireSubscription>
+            ) : <Navigate to="/" replace />}
           />
 
-    <Route
-      path="/whatsapp"
-      element={username ? (
-        HEAD
-        < RequireSubscription >
-        <Whatsapp />
-                </RequireSubscription>
-              ) : <Navigate to="/" replace />}
-=======
+          <Route
+            path="/whatsapp"
+            element={username ? (
               <RequireSubscription>
                 <Whatsapp />
               </RequireSubscription>
             ) : <Navigate to="/" replace />}
->>>>>>> f801d30 (Initial Commit)
           />
 
-  < Route path = "*" element = {< Navigate to = "/" replace />} />
-        </Routes >
-  HEAD
-        
-      </AnimatePresence >
-
-=======
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
 
       </AnimatePresence>
 
->>>>>>> f801d30 (Initial Commit)
-  {/* ✅ Chart-style popup modal */ }
-  < AlertModal
-open = { popup.open }
-title = { popup.title }
-message = { popup.message }
-onClose = { closePopup }
-isDark = { isDark }
-  />
+      {/* ✅ Chart-style popup modal */}
+      <AlertModal
+        open={popup.open}
+        title={popup.title}
+        message={popup.message}
+        onClose={closePopup}
+        isDark={isDark}
+      />
     </>
   );
 }

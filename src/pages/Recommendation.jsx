@@ -97,8 +97,8 @@ export default function Recommendations() {
             <div className="signal-card">Card A</div>
             <div className="signal-card">Card B</div>
           </div>
-=======
-import React, {useState, useEffect, useMemo, useRef, startTransition} from "react";
+
+          import React, {useState, useEffect, useMemo, useRef, startTransition} from "react";
           import "./Recommendations.css";
           import SignalCard from "../components/SignalCard";
           import BackButton from "../components/BackButton";
@@ -822,7 +822,7 @@ import React, {useState, useEffect, useMemo, useRef, startTransition} from "reac
           <div className="intraday-section">
 
             {/* ---------------- DATE ROW ---------------- */}
-            {/* ================= ADVANCED FILTER CONTAINER ================= */}
+            {/* === ADVANCED FILTER CONTAINER === */}
             <div className="advanced-filter-wrapper">
 
               {/* ---------------- DATE ROW ---------------- */}
@@ -922,16 +922,16 @@ import React, {useState, useEffect, useMemo, useRef, startTransition} from "reac
               </div>
 
             </div>
-            {/* ================= END ADVANCED FILTER CONTAINER ================= */}
+            {/* === END ADVANCED FILTER CONTAINER === */}
 
 
             {/* ---------------- SIGNALS SECTION ---------------- */}
             <div className="signals-section">
               <div className="signals-columns">
 
-                {/* ====================================================
+                {/* ===
                   ACTIVE SIGNALS
-              ==================================================== */}
+              === */}
                 <div className="signals-column">
                   <h3 className="section-title active-title">
                     <span className="signal-title-wrap">
@@ -1008,9 +1008,9 @@ import React, {useState, useEffect, useMemo, useRef, startTransition} from "reac
                   )}
                 </div>
 
-                {/* ====================================================
+                {/* ===
                   CLOSED SIGNALS
-              ==================================================== */}
+              === */}
                 <div className="signals-column">
                   <h3 className="section-title closed-title">
                     <span className="signal-title-wrap">
@@ -1234,7 +1234,7 @@ import React, {useState, useEffect, useMemo, useRef, startTransition} from "reac
               {/* SIGNALS LAYOUT (UNCHANGED) */}
               <div className="recommendation-content">
                 {renderSignalLayout()}
->>>>>>> f801d30 (Initial Commit)
+                f801d30 (Initial Commit)
               </div>
             </div>
           </div>
@@ -1267,6 +1267,6 @@ import React, {useState, useEffect, useMemo, useRef, startTransition} from "reac
             </div>
           </div>
           );
-=======
->>>>>>> f801d30 (Initial Commit)
+
+          f801d30 (Initial Commit)
 }

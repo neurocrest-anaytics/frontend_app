@@ -8,8 +8,8 @@ export function startHeartbeat() {
     fetch(`${BASE}/healthz`, { method: "GET", cache: "no-store" })
     HEAD
       .catch(() => { }); // silent
-=======
-      .catch(() => { }); // silent
->>>>>>> f801d30 (Initial Commit)
-  }, 45000);
+
+      .catch (() => { }); // silent
+
+}, 45000);
 }

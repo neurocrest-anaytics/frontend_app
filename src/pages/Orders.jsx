@@ -5,9 +5,6 @@ import { User, X, RefreshCw, TrendingUp, TrendingDown } from "lucide-react";
 import BackButton from "../components/BackButton";
 import { toast } from "react-toastify";
 import useOpenTrades from "../hooks/useOpenTrades";
-HEAD
-import HeaderBackRow from "../components/HeaderBackRow";
-=======
 import { FaWhatsapp } from "react-icons/fa";
 import SwipeNav from "../components/SwipeNav";
 import { useTheme } from "../context/ThemeContext";
@@ -18,7 +15,6 @@ import AppHeader from "../components/AppHeader";
 const API = (import.meta.env.VITE_BACKEND_BASE_URL || "https://paper-trading-backend.onrender.com")
   .trim()
   .replace(/\/+$/, "");
->>>>>>> f801d30 (Initial Commit)
 
 
 // ---------- Safe helpers ----------
@@ -405,7 +401,7 @@ export default function Orders({ username }) {
     }
   }, [location.state, loadData]);
 
-  // 🔁 ALSO refresh **whenever the user clicks a tab**
+  // 🔁 ALSO refresh **whenever the user clicks a tab** (your ask)
   useEffect(() => {
     loadData();
   }, [tab, loadData]);
@@ -507,23 +503,6 @@ export default function Orders({ username }) {
   // ---------- Total P&L (includes both active & closed) ----------
   const totalPnl = positions.reduce((sum, o) => {
     const qty = toNum(o.qty) ?? 0;
-    HEAD
-    const entry = toNum(o.price) ?? 0;
-
-    // ✅ Freeze with exit_price if inactive
-    const effectivePrice =
-      o.inactive && o.exit_price != null
-        ? toNum(o.exit_price)
-        : (toNum(quotes[(o.script || o.symbol || "").toUpperCase()]?.price) ??
-          toNum(o.live_price) ??
-          entry);
-
-    const isBuy = (o.type || o.order_type) === "BUY";
-    const perShare = entry && effectivePrice
-      ? (isBuy ? (effectivePrice - entry) : (entry - effectivePrice))
-      : 0;
-    const pnl = perShare * qty;
-=======
     const entryPrice = toNum(o.price) ?? 0;
 
     const side = (o.type || o.order_type || "").toUpperCase();
@@ -580,7 +559,6 @@ export default function Orders({ username }) {
     const pnl = isBuy
       ? (liveValue - investment - entryAdditionalCost)
       : (investment - liveValue - entryAdditionalCost);
->>>>>>> f801d30 (Initial Commit)
 
     return sum + (Number.isFinite(pnl) ? pnl : 0);
   }, 0);
@@ -815,93 +793,6 @@ export default function Orders({ username }) {
 
   // ---------- UI ----------
   return (
-    HEAD
-    < div className = "relative min-h-screen flex flex-col bg-gray-100 dark:bg-gray-900" >
-
-      {/* keep original BackButton but hide it (header overlay will show the aligned one) */ }
-      < div className = "hidden" >
-        <HeaderBackRow backTo="/menu" />
-
-      </div >
-
-    {/* HEADER (overlay row + icons row + title row + tabs row) */ }
-    < div className = "sticky top-0 z-50 p-4 bg-white rounded-b-2xl shadow relative" >
-      {/* Overlay row: Back + Logo aligned like Trade.jsx */ }
-      < div className = "absolute inset-x-0 top-2 px-1" >
-        <div className="flex items-center justify-between">
-          <div className="pointer-events-auto">
-            <BackButton to="/menu" />
-          </div>
-          <img
-            src="/logo.png"   /* change path if needed */
-            alt="Logo"
-            className="h-7 w-auto pointer-events-auto"
-          />
-        </div>
-        </div >
-
-    {/* Row 1: Portfolio / History / Profile */ }
-    < div className = "mt-8 flex items-center justify-center gap-10" >
-          <div className="flex flex-col items-center cursor-pointer" onClick={() => navigate("/portfolio")}>
-            <Briefcase size={22} className="text-gray-600 dark:text-white hover:text-blue-600" />
-            <span className="text-xs text-gray-500 dark:text-white">Portfolio</span>
-          </div>
-          <div className="flex flex-col items-center cursor-pointer" onClick={() => navigate("/history")}>
-            <Clock size={22} className="text-gray-600 hover:text-blue-600" />
-            <span className="text-xs text-gray-500">History</span>
-          </div>
-          <div className="flex flex-col items-center cursor-pointer" onClick={() => navigate("/profile")}>
-            <User size={22} className="text-gray-600 dark:text-white hover:text-blue-600" />
-            <span className="text-xs text-gray-500 dark:text-white">Profile</span>
-          </div>
-        </div >
-
-    {/* Row 2: Title */ }
-    < div className = "mt-2 flex justify-center" >
-      <h2 className="text-2xl font-bold text-center text-gray-700">Orders</h2>
-        </div >
-
-    {/* Row 3: Tabs (Open Trades / Positions) */ }
-    < div className = "mt-2 flex items-center justify-center gap-10 text-sm" >
-    {
-      ["open", "positions"].map((t) => (
-        <button
-          key={t}
-          onClick={() => setTab(t)}
-          className={`pb-1 text-sm font-medium ${tab === t
-            ? "text-blue-600 border-b-2 border-blue-600"
-            : "text-gray-500"
-            }`}
-        >
-          {t === "open" ? "Open Trades" : "Positions"}
-        </button>
-      ))
-    }
-        </div >
-      </div >
-
-    {/* ===== Body ===== */ }
-    < div className = "p-4" >
-      {/* (Kept) original tabs bar, but hidden since tabs now live in header */ }
-      < div className = "sticky flex justify-center mb-4 space-x-6 hidden" >
-      {
-        ["open", "positions"].map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`pb-1 text-sm font-medium ${tab === t
-              ? "text-blue-600 border-b-2 border-blue-600"
-              : "text-gray-500 dark:text-gray-300"
-              }`}
-          >
-            {t === "open" ? "Open Trades" : "Positions"}
-          </button>
-        ))
-      }
-        </div >
-
-    {/* ===== Total P&L (Positions only) ===== */ }
-=======
     <div className={`min-h-screen ${bgClass} ${textClass} relative transition-colors duration-500 ease-out`}>
       {/* BACKGROUND BLUR EFFECTS */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -949,104 +840,57 @@ export default function Orders({ username }) {
         </div>
 
         {/* Total P&L (Positions only) */}
->>>>>>> f801d30 (Initial Commit)
-  {
-    tab !== "open" && (
-      <div className="mb-4 text-center">
-        <div className={`inline-block px-4 py-2 ${glassClass} rounded-xl shadow text-xl font-semibold`}>
-          Total P&L:{" "}
-          <span
-            className={
-              totalPnl >= 0
-                ? (isDark ? "text-emerald-400" : "text-emerald-600")
-                : (isDark ? "text-rose-400" : "text-rose-600")
-            }
-          >
-            {money(totalPnl)}
-          </span>
+        {tab !== "open" && (
+          <div className="mb-4 text-center">
+            <div className={`inline-block px-4 py-2 ${glassClass} rounded-xl shadow text-xl font-semibold`}>
+              Total P&L:{" "}
+              <span
+                className={
+                  totalPnl >= 0
+                    ? (isDark ? "text-emerald-400" : "text-emerald-600")
+                    : (isDark ? "text-rose-400" : "text-rose-600")
+                }
+              >
+                {money(totalPnl)}
+              </span>
 
-        </div>
-      </div>
-    )
-  }
-
-  HEAD
-  {/* ===== Refresh Indicator ===== */ }
-  {
-    tab === "open" && (
-      <div className="flex justify-center mb-3 text-sm text-gray-500 dark:text-gray-300">
-        {isRefreshing ? (
-          <span>Refreshing open trades...</span>
-        ) : (
-          <button onClick={refresh} className="text-blue-600 hover:underline">
-            Refresh Now
-          </button>
+            </div>
+          </div>
         )}
-      </div>
-    )
-  }
 
-  {/* ===== List Rendering ===== */ }
-=======
         {/* List Rendering */}
->>>>>>> f801d30 (Initial Commit)
-  {
-    loading ? (
-      <div className={`text-center ${textSecondaryClass}`}>Loading...</div>
-    ) : errorMsg ? (
-      <div className="text-center text-red-400">{errorMsg}</div>
-    ) : ordersToShow.length === 0 ? (
-      <div className={`text-center ${textSecondaryClass} mt-10`}>
-        No {isOrdersTab ? "open trades" : "positions"}.
-      </div>
-    ) : (
-      <div className="space-y-3">
-        {ordersToShow.map((o, i) => {
-          const script = (o.script || o.symbol || "N/A").toUpperCase();
-          const q = quotes[script] || {};
-          HEAD
+        {loading ? (
+          <div className={`text-center ${textSecondaryClass}`}>Loading...</div>
+        ) : errorMsg ? (
+          <div className="text-center text-red-400">{errorMsg}</div>
+        ) : ordersToShow.length === 0 ? (
+          <div className={`text-center ${textSecondaryClass} mt-10`}>
+            No {isOrdersTab ? "open trades" : "positions"}.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {ordersToShow.map((o, i) => {
+              const script = (o.script || o.symbol || "N/A").toUpperCase();
+              const q = quotes[script] || {};
 
-          // ✅ Use exit_price for inactive (closed) SELL scripts
-          const live =
-            o.inactive && o.exit_price != null
-              ? toNum(o.exit_price)
-              : toNum(q.price) ??
-              toNum(o.live_price) ??
-              toNum(o.price) ??
-              0;
-=======
->>>>>>> f801d30 (Initial Commit)
+              const live =
+                o.inactive && o.exit_price != null
+                  ? toNum(o.exit_price)
+                  : toNum(q.price) ?? toNum(o.live_price) ?? toNum(o.price) ?? 0;
 
-          const live =
-            o.inactive && o.exit_price != null
-              ? toNum(o.exit_price)
-              : toNum(q.price) ?? toNum(o.live_price) ?? toNum(o.price) ?? 0;
+              const dtRaw = pickDateTime(o);
+              const dt = parseDate(dtRaw);
 
-          const dtRaw = pickDateTime(o);
-          const dt = parseDate(dtRaw);
+              const side = o.type || o.order_type || "";
+              const isBuy = side === "BUY";
 
-          const side = o.type || o.order_type || "";
-          const isBuy = side === "BUY";
+              const entryPrice = isOrdersTab
+                ? toNum(o.trigger_price) ?? toNum(o.price) ?? 0
+                : toNum(o.price) ?? 0;
 
-          const entryPrice = isOrdersTab
-            ? toNum(o.trigger_price) ?? toNum(o.price) ?? 0
-            : toNum(o.price) ?? 0;
+              const qty = toNum(o.qty) ?? 0;
+              const investment = (entryPrice || 0) * (qty || 0);
 
-          const qty = toNum(o.qty) ?? 0;
-          const investment = (entryPrice || 0) * (qty || 0);
-
-          HEAD
-          // ✅ Freeze calculations for inactive rows using exit_price
-          const effectivePrice =
-            o.inactive && o.exit_price != null ? toNum(o.exit_price) : live;
-
-          // ✅ Simple and universal: profit = (exit - entry)
-          const perShare =
-            entryPrice && effectivePrice ? effectivePrice - entryPrice : 0;
-
-          const pct = entryPrice ? (perShare / entryPrice) * 100 : 0;
-          const total = perShare * qty;
-=======
               // Entry additional cost + net investment
               // Entry additional cost
               // Entry additional cost
@@ -1153,33 +997,25 @@ export default function Orders({ username }) {
               const pctBase = Math.abs(netInvestment) || 0;
               const pct = pctBase ? (total / pctBase) * 100 : 0;
 
->>>>>>> f801d30 (Initial Commit)
 
-          // ✅ Color purely on profit/loss sign — no side-based bias
-          const pnlUp = total >= 0;
+              const pnlUp = total >= 0;
 
-          const pnlColor = pnlUp
-            ? (isDark ? "text-emerald-400" : "text-emerald-600")
-            : (isDark ? "text-rose-400" : "text-rose-600");
+              const pnlColor = pnlUp
+                ? (isDark ? "text-emerald-400" : "text-emerald-600")
+                : (isDark ? "text-rose-400" : "text-rose-600");
 
-          const pctColor = pnlUp
-            ? (isDark ? "text-emerald-300" : "text-emerald-600")
-            : (isDark ? "text-rose-300" : "text-rose-600");
+              const pctColor = pnlUp
+                ? (isDark ? "text-emerald-300" : "text-emerald-600")
+                : (isDark ? "text-rose-300" : "text-rose-600");
 
 
-          const sl = toNum(o.stoploss);
-          const tgt = toNum(o.target);
-          const disabledRow = !!o.inactive;
+              const sl = toNum(o.stoploss);
+              const tgt = toNum(o.target);
+              const disabledRow = !!o.inactive;
 
-          return (
-            <div
-              key={o.id ?? `${script}-${dtRaw ?? ""}-${i}`}
-              HEAD
-              className={`p-4 rounded-xl shadow ${disabledRow
-                ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                : "bg-white dark:bg-gray-800 hover:shadow-md cursor-pointer"
-                }`}
-=======
+              return (
+                <div
+                  key={o.id ?? `${script}-${dtRaw ?? ""}-${i}`}
                   className={[
                     "rounded-[30px] p-4 sm:p-6 md:p-7 border",
 
@@ -1192,221 +1028,172 @@ export default function Orders({ username }) {
                       ? "bg-[#2c447a]/85 border-white/10 backdrop-blur-xl"
                       : "bg-white/80 border-slate-200/60 backdrop-blur-xl",
                   ].join(" ")}
->>>>>>> f801d30 (Initial Commit)
-              onClick={() => {
-                if (disabledRow) return;
-                setSelectedOrder(o);
-                setShowActions(true);
-              }}
-            >
-              {/* ===== TOP ROW ===== */}
-              <div className="flex items-start justify-between gap-6">
-                {/* LEFT: icon + symbol + meta */}
-                <div className="flex items-start gap-4">
-                  {/* ✅ TC glass + glow block */}
-                  <div className="relative">
-                    {/* glow behind */}
-                    <div
-                      className={[
-                        "absolute -inset-2 rounded-[22px] blur-xl",
-                        isBuy ? "bg-emerald-400/25" : "bg-rose-400/25",
-                      ].join(" ")}
-                    />
+                  onClick={() => {
+                    if (disabledRow) return;
+                    setSelectedOrder(o);
+                    setShowActions(true);
+                  }}
+                >
+                  {/* ===== TOP ROW ===== */}
+                  <div className="flex items-start justify-between gap-6">
+                    {/* LEFT: icon + symbol + meta */}
+                    <div className="flex items-start gap-4">
+                      {/* ✅ TC glass + glow block */}
+                      <div className="relative">
+                        {/* glow behind */}
+                        <div
+                          className={[
+                            "absolute -inset-2 rounded-[22px] blur-xl",
+                            isBuy ? "bg-emerald-400/25" : "bg-rose-400/25",
+                          ].join(" ")}
+                        />
 
-                    {/* main icon */}
-                    <div
-                      className={[
-                        "relative w-16 h-16 rounded-[22px] text-white flex items-center justify-center",
-                        "font-extrabold text-lg",
-                        "shadow-[0_12px_25px_rgba(0,0,0,0.25)]",
-                        isBuy
-                          ? "bg-gradient-to-br from-emerald-400 to-emerald-600"
-                          : "bg-gradient-to-br from-rose-400 to-rose-600",
-                      ].join(" ")}
-                    >
-                      {(script || "NA").slice(0, 2)}
+                        {/* main icon */}
+                        <div
+                          className={[
+                            "relative w-16 h-16 rounded-[22px] text-white flex items-center justify-center",
+                            "font-extrabold text-lg",
+                            "shadow-[0_12px_25px_rgba(0,0,0,0.25)]",
+                            isBuy
+                              ? "bg-gradient-to-br from-emerald-400 to-emerald-600"
+                              : "bg-gradient-to-br from-rose-400 to-rose-600",
+                          ].join(" ")}
+                        >
+                          {(script || "NA").slice(0, 2)}
 
 
-                      {/* ✅ BUY/SELL overlay */}
-                      <span
-                        className={[
-                          "absolute -bottom-3 right-0 translate-x-1 z-10",
-                          "px-2 rounded-[8px] text-[11px] font-extrabold tracking-wide",
-                          "text-white shadow-md",
-                          isBuy ? "bg-emerald-600" : "bg-rose-600",
-                        ].join(" ")}
-                      >
-                        {isBuy ? "BUY" : "SELL"}
-                      </span>
-                    </div>
-
-                    HEAD
-                    {/* symbol / segment + live  ———  right-side P&L block */}
-                    <div className="mt-1 flex items-start justify-between gap-2">
-                      <div>
-                        <div className="text-xl font-bold text-gray-800 dark:text-white">{script}</div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <SegmentBadge segment={o.segment} />
-                          <span className="text-xs text-gray-600">
-                            {o.inactive && o.exit_price != null ? "Exit" : "Live"}:{" "}
-                            <span className="font-semibold text-gray-800">
-                              {money(o.inactive && o.exit_price != null ? o.exit_price : live)}
-                            </span>
+                          {/* ✅ BUY/SELL overlay */}
+                          <span
+                            className={[
+                              "absolute -bottom-3 right-0 translate-x-1 z-10",
+                              "px-2 rounded-[8px] text-[11px] font-extrabold tracking-wide",
+                              "text-white shadow-md",
+                              isBuy ? "bg-emerald-600" : "bg-rose-600",
+                            ].join(" ")}
+                          >
+                            {isBuy ? "BUY" : "SELL"}
                           </span>
-
-                          <span className="text-[11px] text-gray-500 border rounded px-1">
-                            {o.exchange || "NSE"}
-                          </span>
-=======
->>>>>>> f801d30 (Initial Commit)
                         </div>
 
+                      </div>
 
-                        <div>
-                          {/* SYMBOL */}
-                          <div className={`text-2xl font-extrabold ${textClass}`}>{script}</div>
 
-                          {/* Entry / Order Price + Qty */}
-                          <div className={`mt-1 flex flex-wrap items-center gap-3 text-sm ${textSecondaryClass}`}>
-                            <div>
-                              {isOrdersTab ? "Order Price" : "Entry Price"}{" "}
-                              <span className={`${isDark ? "text-cyan-200" : "text-sky-600"} font-bold`}>
-                                {money(entryPrice)}
-                              </span>
-                            </div>
+                      <div>
+                        {/* SYMBOL */}
+                        <div className={`text-2xl font-extrabold ${textClass}`}>{script}</div>
 
-                            <span className={`${isDark ? "text-white/35" : "text-slate-300"}`}>•</span>
-
-                            <span
-                              className={`${isDark ? "bg-white/10 text-white" : "bg-slate-100 text-slate-700"} px-3 py-1 rounded-full text-xs font-semibold`}
-                            >
-                              {intval(o.qty)} Qty
+                        {/* Entry / Order Price + Qty */}
+                        <div className={`mt-1 flex flex-wrap items-center gap-3 text-sm ${textSecondaryClass}`}>
+                          <div>
+                            {isOrdersTab ? "Order Price" : "Entry Price"}{" "}
+                            <span className={`${isDark ? "text-cyan-200" : "text-sky-600"} font-bold`}>
+                              {money(entryPrice)}
                             </span>
                           </div>
 
-                          {/* ✅ NSE + Segment (3rd line) */}
-                          <div className="mt-1 flex items-center gap-2">
-                            {/* NSE */}
-                            <span
-                              className={`inline-block px-3 py-[2px] rounded-full text-[11px] font-semibold ${isDark
-                                ? "bg-white/10 text-white"
-                                : "bg-slate-100 text-slate-700"
-                                }`}
-                            >
-                              {(o.exchange || "NSE").toUpperCase()}
-                            </span>
+                          <span className={`${isDark ? "text-white/35" : "text-slate-300"}`}>•</span>
 
-                            {/* INTRADAY / DELIVERY */}
-                            <span
-                              className={`inline-block px-3 py-[2px] rounded-full text-[11px] font-semibold tracking-wide ${(o.segment || "").toLowerCase() === "intraday"
-                                ? isDark
-                                  ? "bg-indigo-500/20 text-indigo-200 border border-indigo-400/20"
-                                  : "bg-indigo-50 text-indigo-700 border border-indigo-200"
-                                : isDark
-                                  ? "bg-amber-500/20 text-amber-200 border border-amber-400/20"
-                                  : "bg-amber-50 text-amber-700 border border-amber-200"
-                                }`}
-                            >
-                              {(o.segment || "delivery").toUpperCase()}
-                            </span>
+                          <span
+                            className={`${isDark ? "bg-white/10 text-white" : "bg-slate-100 text-slate-700"} px-3 py-1 rounded-full text-xs font-semibold`}
+                          >
+                            {intval(o.qty)} Qty
+                          </span>
+                        </div>
 
-                          </div>
+                        {/* ✅ NSE + Segment (3rd line) */}
+                        <div className="mt-1 flex items-center gap-2">
+                          {/* NSE */}
+                          <span
+                            className={`inline-block px-3 py-[2px] rounded-full text-[11px] font-semibold ${isDark
+                              ? "bg-white/10 text-white"
+                              : "bg-slate-100 text-slate-700"
+                              }`}
+                          >
+                            {(o.exchange || "NSE").toUpperCase()}
+                          </span>
+
+                          {/* INTRADAY / DELIVERY */}
+                          <span
+                            className={`inline-block px-3 py-[2px] rounded-full text-[11px] font-semibold tracking-wide ${(o.segment || "").toLowerCase() === "intraday"
+                              ? isDark
+                                ? "bg-indigo-500/20 text-indigo-200 border border-indigo-400/20"
+                                : "bg-indigo-50 text-indigo-700 border border-indigo-200"
+                              : isDark
+                                ? "bg-amber-500/20 text-amber-200 border border-amber-400/20"
+                                : "bg-amber-50 text-amber-700 border border-amber-200"
+                              }`}
+                          >
+                            {(o.segment || "delivery").toUpperCase()}
+                          </span>
 
                         </div>
 
                       </div>
-                      {isOrdersTab && (
-                        <div className="text-right mt-5">
-                          {/* ✅ Buy/Sell Date ABOVE "Yet to trigger" */}
-                          <div className={`text-xs font-semibold ${isDark ? "text-slate-200/80" : "text-slate-500"}`}>
-                            {isBuy ? "Buy Date" : "Sell Date"} • {fmtDate(dt)} {fmtTime(dt)}
-                          </div>
 
-                          {/* Yet to trigger */}
-                          {o.status_msg && (
-                            <div className={`mt-1 text-xs ${isDark ? "text-slate-200/70" : "text-slate-500"}`}>
-                              {o.status_msg}
-                            </div>
-                          )}
-
-                          {/* Live price BELOW */}
-                          <div
-                            className={[
-                              "mt-2 flex items-baseline justify-end gap-1 text-sm font-bold transition-all duration-300",
-                              priceFlash[script] === "up"
-                                ? "text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-md"
-                                : priceFlash[script] === "down"
-                                  ? "text-rose-400 bg-rose-400/10 px-2 py-0.5 rounded-md"
-                                  : isDark
-                                    ? "text-cyan-200"
-                                    : "text-sky-600",
-                            ].join(" ")}
-                          >
-                            {priceFlash[script] === "up" && <span className="text-xs">▲</span>}
-                            {priceFlash[script] === "down" && <span className="text-xs">▼</span>}
-                            <span className="opacity-80">Live:</span>
-                            <span className="tabular-nums">{money(live)}</span>
-                          </div>
-                        </div>
-                      )}
-
-
-                      {/* ✅ RIGHT: P&L exactly like Image-2 */}
-                      {!isOrdersTab && (
-                        <div className="text-right">
-                          {/* ✅ Buy/Sell Date ABOVE P&L */}
-                          <div className={`text-xs font-semibold ${isDark ? "text-slate-200/80" : "text-slate-500"}`}>
-                            {isBuy ? "Buy Date" : "Sell Date"} • {fmtDate(dt)} {fmtTime(dt)}
-                          </div>
-
-                          {/* P&L */}
-                          <div className={`mt-2 flex items-baseline justify-end gap-2 ${pnlColor}`}>
-                            {pnlUp ? <TrendingUp size={26} /> : <TrendingDown size={26} />}
-                            <div className="text-3xl font-extrabold leading-none">
-                              {money(total)}
-                            </div>
-                          </div>
-
-                          {/* % */}
-                          <div className={`mt-1 text-sm font-bold ${pctColor}`}>
-                            {(perShare >= 0 ? "+" : "") + perShare.toFixed(4)} (
-                            {(pct >= 0 ? "+" : "") + pct.toFixed(2)}%)
-                          </div>
-
-                          {/* Live */}
-                          <div className={`mt-2 text-sm font-bold ${isDark ? "text-cyan-200" : "text-sky-600"}`}>
-                            Live: {money(o.inactive && o.exit_price != null ? o.exit_price : live)}
-                          </div>
-                        </div>
-    HEAD
-                      {/* ✅ Exit Price shown neatly below P&L */}
-                      {!isOrdersTab && o.exit_price != null && (
-                        <div className="text-xs text-gray-600 mt-1">
-                          Exit Price:{" "}
-                          <span className="font-semibold text-gray-800">
-                            {money(o.exit_price)}
-                          </span>
-                        </div>
-                      )}
                     </div>
-                  </div>
+                    {isOrdersTab && (
+                      <div className="text-right mt-5">
+                        {/* ✅ Buy/Sell Date ABOVE "Yet to trigger" */}
+                        <div className={`text-xs font-semibold ${isDark ? "text-slate-200/80" : "text-slate-500"}`}>
+                          {isBuy ? "Buy Date" : "Sell Date"} • {fmtDate(dt)} {fmtTime(dt)}
+                        </div>
 
-                  {/* entry/SL/Target */}
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <Chip label={isOrdersTab ? "Order Price" : "Entry Price"} value={money(entryPrice)} />
-                    {sl != null && <Chip label="SL" value={money(sl)} tone="red" />}
-                    {tgt != null && <Chip label="Target" value={money(tgt)} tone="green" />}
-                  </div>
+                        {/* Yet to trigger */}
+                        {o.status_msg && (
+                          <div className={`mt-1 text-xs ${isDark ? "text-slate-200/70" : "text-slate-500"}`}>
+                            {o.status_msg}
+                          </div>
+                        )}
 
-                  {/* footer line */}
-                  <div className="flex justify-between text-xs mt-2">
-                    <span className="text-gray-500 dark:text-gray-400">
-                      NSE | Total Investment={money((entryPrice || 0) * (toNum(o.qty) ?? 0))}
-                    </span>
-                    {o.status_msg && (
-                      <span className="text-[11px] text-gray-500">{o.status_msg}</span>
-=======
->>>>>>> f801d30 (Initial Commit)
+                        {/* Live price BELOW */}
+                        <div
+                          className={[
+                            "mt-2 flex items-baseline justify-end gap-1 text-sm font-bold transition-all duration-300",
+                            priceFlash[script] === "up"
+                              ? "text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-md"
+                              : priceFlash[script] === "down"
+                                ? "text-rose-400 bg-rose-400/10 px-2 py-0.5 rounded-md"
+                                : isDark
+                                  ? "text-cyan-200"
+                                  : "text-sky-600",
+                          ].join(" ")}
+                        >
+                          {priceFlash[script] === "up" && <span className="text-xs">▲</span>}
+                          {priceFlash[script] === "down" && <span className="text-xs">▼</span>}
+                          <span className="opacity-80">Live:</span>
+                          <span className="tabular-nums">{money(live)}</span>
+                        </div>
+                      </div>
+                    )}
+
+
+                    {/* ✅ RIGHT: P&L exactly like Image-2 */}
+                    {!isOrdersTab && (
+                      <div className="text-right">
+                        {/* ✅ Buy/Sell Date ABOVE P&L */}
+                        <div className={`text-xs font-semibold ${isDark ? "text-slate-200/80" : "text-slate-500"}`}>
+                          {isBuy ? "Buy Date" : "Sell Date"} • {fmtDate(dt)} {fmtTime(dt)}
+                        </div>
+
+                        {/* P&L */}
+                        <div className={`mt-2 flex items-baseline justify-end gap-2 ${pnlColor}`}>
+                          {pnlUp ? <TrendingUp size={26} /> : <TrendingDown size={26} />}
+                          <div className="text-3xl font-extrabold leading-none">
+                            {money(total)}
+                          </div>
+                        </div>
+
+                        {/* % */}
+                        <div className={`mt-1 text-sm font-bold ${pctColor}`}>
+                          {(perShare >= 0 ? "+" : "") + perShare.toFixed(4)} (
+                          {(pct >= 0 ? "+" : "") + pct.toFixed(2)}%)
+                        </div>
+
+                        {/* Live */}
+                        <div className={`mt-2 text-sm font-bold ${isDark ? "text-cyan-200" : "text-sky-600"}`}>
+                          Live: {money(o.inactive && o.exit_price != null ? o.exit_price : live)}
+                        </div>
+                      </div>
                     )}
                   </div>
 
@@ -1512,330 +1299,251 @@ export default function Orders({ username }) {
 
 
                 </div>
-                );
+              );
 
             })}
-              </div>
+          </div>
         )}
-            </div>
+      </div>
 
-      {/* Modal */ }
-          {/* Modal (Portfolio-style detailed modal) */ }
-          {
-            showActions && selectedOrder && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                {/* Backdrop */}
-                <div
-                  className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-                  onClick={handleCloseModal}
-                />
+      {/* Modal */}
+      {/* Modal (Portfolio-style detailed modal) */}
+      {showActions && selectedOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={handleCloseModal}
+          />
 
-                {/* Card */}
-                <div className="relative w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
-                  <div
-                    className={[
-                      "relative overflow-hidden rounded-3xl shadow-2xl",
-                      isDark
-                        ? "bg-white/5 border border-white/10 backdrop-blur-xl"
-                        : "bg-white/70 border border-white/50 backdrop-blur-xl",
-                      textClass,
-                    ].join(" ")}
-                  >
-                    {/* Decorative gradient glow */}
-                    <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-3xl" />
+          {/* Card */}
+          <div className="relative w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
+            <div
+              className={[
+                "relative overflow-hidden rounded-3xl shadow-2xl",
+                isDark
+                  ? "bg-white/5 border border-white/10 backdrop-blur-xl"
+                  : "bg-white/70 border border-white/50 backdrop-blur-xl",
+                textClass,
+              ].join(" ")}
+            >
+              {/* Decorative gradient glow */}
+              <div className="absolute top-0 left-0 right-0 h-40 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-3xl" />
 
-                    {(() => {
-                      const sym = getSymbol(selectedOrder);
-                      const q = (sym && quotes[sym]) || {};
+              {(() => {
+                const sym = getSymbol(selectedOrder);
+                const q = (sym && quotes[sym]) || {};
 
-                      const live =
-                        selectedOrder?.inactive && selectedOrder?.exit_price != null
-                          ? toNum(selectedOrder.exit_price)
-                          : (toNum(q.price) ?? toNum(selectedOrder.live_price) ?? toNum(selectedOrder.price) ?? 0);
+                const live =
+                  selectedOrder?.inactive && selectedOrder?.exit_price != null
+                    ? toNum(selectedOrder.exit_price)
+                    : (toNum(q.price) ?? toNum(selectedOrder.live_price) ?? toNum(selectedOrder.price) ?? 0);
 
-                      const isBuy = (selectedOrder.type || selectedOrder.order_type) === "BUY";
+                const isBuy = (selectedOrder.type || selectedOrder.order_type) === "BUY";
 
-                      // Entry/Order price
-                      const entryPrice =
-                        isOrdersTab
-                          ? (toNum(selectedOrder.trigger_price) ?? toNum(selectedOrder.price) ?? 0)
-                          : (toNum(selectedOrder.price) ?? 0);
+                // Entry/Order price
+                const entryPrice =
+                  isOrdersTab
+                    ? (toNum(selectedOrder.trigger_price) ?? toNum(selectedOrder.price) ?? 0)
+                    : (toNum(selectedOrder.price) ?? 0);
 
-                      // P&L per share (only meaningful for positions tab)
-                      const perShare =
-                        !isOrdersTab && entryPrice && live
-                          ? (isBuy ? (live - entryPrice) : (entryPrice - live))
-                          : 0;
+                // P&L per share (only meaningful for positions tab)
+                const perShare =
+                  !isOrdersTab && entryPrice && live
+                    ? (isBuy ? (live - entryPrice) : (entryPrice - live))
+                    : 0;
 
-                      return (
-                        <>
-                          {/* Header */}
-                          <div className="relative z-10 p-6 border-b border-white/10">
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                                  {sym}
-                                </h2>
-                                <p className={`text-sm ${textSecondaryClass} mt-1`}>
-                                  {isOrdersTab ? "Order Details" : "Position Details"}
-                                </p>
-                              </div>
+                return (
+                  <>
+                    {/* Header */}
+                    <div className="relative z-10 p-6 border-b border-white/10">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                            {sym}
+                          </h2>
+                          <p className={`text-sm ${textSecondaryClass} mt-1`}>
+                            {isOrdersTab ? "Order Details" : "Position Details"}
+                          </p>
+                        </div>
 
-                              <button
-                                onClick={handleCloseModal}
-                                className={`${glassClass} p-2 rounded-xl ${cardHoverClass} transition-all hover:rotate-90 duration-300`}
-                                title="Close"
-                              >
-                                <X className="w-5 h-5" />
-                              </button>
-                            </div>
+                        <button
+                          onClick={handleCloseModal}
+                          className={`${glassClass} p-2 rounded-xl ${cardHoverClass} transition-all hover:rotate-90 duration-300`}
+                          title="Close"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
 
-                            <div className="mt-3 text-center">
-                              <div className={`text-3xl font-extrabold ${textClass}`}>
-                                {money(live)}
-                              </div>
-                            </div>
+                      <div className="mt-3 text-center">
+                        <div className={`text-3xl font-extrabold ${textClass}`}>
+                          {money(live)}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Info Card (inner glass) */}
+                    <div className="relative z-10 p-6">
+                      <div className={`${glassClass} rounded-2xl p-5 space-y-3`}>
+                        <div className="flex justify-between items-center">
+                          <span className={`text-sm ${textSecondaryClass}`}>Qty</span>
+                          <span className="font-semibold">{intval(selectedOrder.qty)}</span>
+                        </div>
+
+                        <div className="flex justify-between items-center">
+                          <span className={`text-sm ${textSecondaryClass}`}>
+                            {isOrdersTab ? "Order Price" : "Entry Price"}
+                          </span>
+                          <span className="font-semibold">{money(entryPrice)}</span>
+                        </div>
+
+                        <div className="flex justify-between items-center">
+                          <span className={`text-sm ${textSecondaryClass}`}>Stoploss</span>
+                          <span className="font-semibold">{money(selectedOrder.stoploss ?? 0)}</span>
+                        </div>
+
+                        <div className="flex justify-between items-center">
+                          <span className={`text-sm ${textSecondaryClass}`}>Target</span>
+                          <span className="font-semibold">{money(selectedOrder.target ?? 0)}</span>
+                        </div>
+
+                        <div className="flex justify-between items-center">
+                          <span className={`text-sm ${textSecondaryClass}`}>Exchange</span>
+                          <span className="font-semibold">{(selectedOrder.exchange || "NSE").toUpperCase()}</span>
+                        </div>
+
+                        <div className="flex justify-between items-center">
+                          <span className={`text-sm ${textSecondaryClass}`}>Segment</span>
+                          <span className="font-semibold">{(selectedOrder.segment || "delivery").toUpperCase()}</span>
+                        </div>
+
+                        {/* P&L / Share (positions only) */}
+                        {!isOrdersTab && (
+                          <div className="flex justify-between items-center pt-3 border-t border-white/10">
+                            <span className={`text-sm ${textSecondaryClass}`}>P&amp;L / Share</span>
+                            <span
+                              className={`font-semibold ${perShare >= 0 ? "text-emerald-400" : "text-rose-400"}`}
+                            >
+                              {money(perShare)}
+                            </span>
                           </div>
+                        )}
+                      </div>
+                    </div>
 
-                          {/* Info Card (inner glass) */}
-                          <div className="relative z-10 p-6">
-                            <div className={`${glassClass} rounded-2xl p-5 space-y-3`}>
-                              <div className="flex justify-between items-center">
-                                <span className={`text-sm ${textSecondaryClass}`}>Qty</span>
-                                <span className="font-semibold">{intval(selectedOrder.qty)}</span>
-                              </div>
-
-                              <div className="flex justify-between items-center">
-                                <span className={`text-sm ${textSecondaryClass}`}>
-                                  {isOrdersTab ? "Order Price" : "Entry Price"}
-                                </span>
-                                <span className="font-semibold">{money(entryPrice)}</span>
-                              </div>
-
-                              <div className="flex justify-between items-center">
-                                <span className={`text-sm ${textSecondaryClass}`}>Stoploss</span>
-                                <span className="font-semibold">{money(selectedOrder.stoploss ?? 0)}</span>
-                              </div>
-
-                              <div className="flex justify-between items-center">
-                                <span className={`text-sm ${textSecondaryClass}`}>Target</span>
-                                <span className="font-semibold">{money(selectedOrder.target ?? 0)}</span>
-                              </div>
-
-                              <div className="flex justify-between items-center">
-                                <span className={`text-sm ${textSecondaryClass}`}>Exchange</span>
-                                <span className="font-semibold">{(selectedOrder.exchange || "NSE").toUpperCase()}</span>
-                              </div>
-
-                              <div className="flex justify-between items-center">
-                                <span className={`text-sm ${textSecondaryClass}`}>Segment</span>
-                                <span className="font-semibold">{(selectedOrder.segment || "delivery").toUpperCase()}</span>
-                              </div>
-
-                              {/* P&L / Share (positions only) */}
-                              {!isOrdersTab && (
-                                <div className="flex justify-between items-center pt-3 border-t border-white/10">
-                                  <span className={`text-sm ${textSecondaryClass}`}>P&amp;L / Share</span>
-                                  <span
-                                    className={`font-semibold ${perShare >= 0 ? "text-emerald-400" : "text-rose-400"}`}
-                                  >
-                                    {money(perShare)}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Action Buttons (keep your existing logic) */}
-                          <div className="relative z-10 px-6 pb-6">
-                            {isOrdersTab ? (
-                              <div className="grid grid-cols-2 gap-3">
-                                <button
-                                  onClick={() => handleModify(selectedOrder)}
-                                  className="py-3 rounded-xl font-semibold text-white
+                    {/* Action Buttons (keep your existing logic) */}
+                    <div className="relative z-10 px-6 pb-6">
+                      {isOrdersTab ? (
+                        <div className="grid grid-cols-2 gap-3">
+                          <button
+                            onClick={() => handleModify(selectedOrder)}
+                            className="py-3 rounded-xl font-semibold text-white
                         bg-gradient-to-r from-blue-500 to-cyan-500
                         hover:from-blue-600 hover:to-cyan-600
                         shadow-lg hover:shadow-blue-500/30 transition"
-                                >
-                                  Modify
-                                </button>
+                          >
+                            Modify
+                          </button>
 
-                                <button
-                                  disabled={busy}
-                                  onClick={() => handleCancel(selectedOrder.id)}   // ✅ correct
-                                  className={`py-3 rounded-xl font-semibold
+                          <button
+                            disabled={busy}
+                            onClick={() => handleCancel(selectedOrder.id)}   // ✅ correct
+                            className={`py-3 rounded-xl font-semibold
     bg-white/10 hover:bg-white/15 border border-white/10
     shadow-lg transition
     ${busy ? "opacity-60 cursor-not-allowed" : ""}`}
-                                  title="Cancel"
-                                >
-                                  Cancel
-                                </button>
+                            title="Cancel"
+                          >
+                            Cancel
+                          </button>
 
-                              </div>
-                            ) : (
-                              <div className="grid grid-cols-3 gap-3">
-                                <button
-                                  disabled={isInactiveSel}
-                                  onClick={() => {
-                                    if (isInactiveSel) return;
-                                    handleAdd(selectedOrder);
-                                    setShowActions(false);
-                                  }}
-                                  className={`py-3 rounded-xl font-semibold text-white
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-3 gap-3">
+                          <button
+                            disabled={isInactiveSel}
+                            onClick={() => {
+                              if (isInactiveSel) return;
+                              handleAdd(selectedOrder);
+                              setShowActions(false);
+                            }}
+                            className={`py-3 rounded-xl font-semibold text-white
     bg-gradient-to-r from-emerald-500 to-green-600
     hover:from-emerald-600 hover:to-green-700
     shadow-lg hover:shadow-emerald-500/25 transition
     ${isInactiveSel ? "opacity-50 cursor-not-allowed pointer-events-none" : ""}`}
-                                >
-                                  Add
-                                </button>
+                          >
+                            Add
+                          </button>
 
-                                <button
-                                  disabled={isInactiveSel}
-                                  onClick={() => {
-                                    if (isInactiveSel) return;
+                          <button
+                            disabled={isInactiveSel}
+                            onClick={() => {
+                              if (isInactiveSel) return;
 
-                                    const side = selectedOrder.type || selectedOrder.order_type;
+                              const side = selectedOrder.type || selectedOrder.order_type;
 
-                                    navigate(
-                                      side === "BUY"
-                                        ? `/buy/${selectedOrder.script}`
-                                        : `/sell/${selectedOrder.script}`,
-                                      {
-                                        state: {
-                                          fromPosition: true,
-                                          fromModify: true,
+                              navigate(
+                                side === "BUY"
+                                  ? `/buy/${selectedOrder.script}`
+                                  : `/sell/${selectedOrder.script}`,
+                                {
+                                  state: {
+                                    fromPosition: true,
+                                    fromModify: true,
 
-                                          short_first: Boolean(selectedOrder.short_first),
-                                          positionDatetime: selectedOrder.datetime,
+                                    short_first: Boolean(selectedOrder.short_first),
+                                    positionDatetime: selectedOrder.datetime,
 
-                                          qty: selectedOrder.qty,
-                                          price: selectedOrder.price,
-                                          stoploss: selectedOrder.stoploss,
-                                          target: selectedOrder.target,
-                                          segment: (selectedOrder.segment || "delivery").toLowerCase(),
-                                          exchange: (selectedOrder.exchange || "NSE").toUpperCase(),
-                                          orderMode: "MARKET",
+                                    qty: selectedOrder.qty,
+                                    price: selectedOrder.price,
+                                    stoploss: selectedOrder.stoploss,
+                                    target: selectedOrder.target,
+                                    segment: (selectedOrder.segment || "delivery").toLowerCase(),
+                                    exchange: (selectedOrder.exchange || "NSE").toUpperCase(),
+                                    orderMode: "MARKET",
 
-                                          returnTo: "/orders",
-                                          returnTab: "positions",
-                                        },
-                                      }
-                                    );
+                                    returnTo: "/orders",
+                                    returnTab: "positions",
+                                  },
+                                }
+                              );
 
-                                    setShowActions(false);
-                                  }}
-                                  className={`py-3 rounded-xl font-semibold text-white
+                              setShowActions(false);
+                            }}
+                            className={`py-3 rounded-xl font-semibold text-white
     bg-gradient-to-r from-blue-500 to-indigo-600
     hover:from-blue-600 hover:to-indigo-700
     shadow-lg hover:shadow-blue-500/25 transition
     ${isInactiveSel ? "opacity-50 cursor-not-allowed pointer-events-none" : ""}`}
-                                >
-                                  Modify
-                                </button>
-                                <button
-                                  disabled={isInactiveSel}
-                                  onClick={() => {
-                                    if (isInactiveSel) return;
-                                    handleExit(selectedOrder);
-                                  }}
-                                  className={`py-3 rounded-xl font-semibold text-white
+                          >
+                            Modify
+                          </button>
+                          <button
+                            disabled={isInactiveSel}
+                            onClick={() => {
+                              if (isInactiveSel) return;
+                              handleExit(selectedOrder);
+                            }}
+                            className={`py-3 rounded-xl font-semibold text-white
     bg-gradient-to-r from-rose-500 to-red-600
     hover:from-rose-600 hover:to-red-700
     shadow-lg hover:shadow-red-500/25 transition
     ${isInactiveSel ? "opacity-50 cursor-not-allowed pointer-events-none" : ""}`}
-                                >
-                                  Exit
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </>
-                      );
-                    })()}
-                  </div>
-                  HEAD
-
-                  {isOrdersTab ? (
-                    // Open Trades modal actions
-                    <div className="grid grid-cols-3 gap-3">
-                      <button
-                        onClick={() => handleModify(selectedOrder)}
-                        className="bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg"
-                      >
-                        Modify
-                      </button>
-                      <button
-                        disabled={busy}
-                        onClick={handleClose}
-                        className={`${busy ? "opacity-60" : ""} bg-gray-700 hover:bg-gray-800 text-white py-2 rounded-lg`}
-                        title="Cancel all open orders for this script and remove today's executed rows, refunding today’s BUY amounts"
-                      >
-                        Cancel
-                      </button>
+                          >
+                            Exit
+                          </button>
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    // Positions modal actions
-                    <div className="grid grid-cols-3 gap-3">
-                      <button
-                        className="bg-green-600 text-white px-5 py-2 rounded-md hover:bg-green-700"
-                        onClick={() => {
-                          const sym = getSymbol(selectedOrder);
-                          console.log("Navigating to Add:", sym);
-                          setShowActions(false);
-                          navigate(`/add/${sym}`, { state: { fromAdd: true } });
-                        }}
-                      >
-                        Add
-                      </button>
-
-                      <button
-                        onClick={() => handleExit(selectedOrder)}
-                        className="bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg"
-                      >
-                        Exit
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )
-          }
-
-          {/* Floating Icons (kept but hidden since header now has them) */ }
-          <div className="absolute right-5 top-20 flex items-center space-x-4 z-50 hidden">
-            <div className="flex flex-col items-center cursor-pointer" onClick={() => navigate("/portfolio")}>
-              <Briefcase size={22} className="text-gray-600 dark:text-white hover:text-blue-600" />
-              <span className="text-xs text-gray-500 dark:text-white">Portfolio</span>
-            </div>
-            <div className="flex flex-col items-center cursor-pointer" onClick={() => navigate("/history")}>
-              <Clock size={22} className="text-gray-600 hover:text-blue-600" />
-              <span className="text-xs text-gray-500">History</span>
-            </div>
-            <div className="flex flex-col items-center cursor-pointer" onClick={() => navigate("/profile")}>
-              <User size={22} className="text-gray-600 dark:text-white hover:text-blue-600" />
-              <span className="text-xs text-gray-500 dark:text-white">Profile</span>
+                  </>
+                );
+              })()}
             </div>
           </div>
-
-          {/* Bottom Nav */ }
-          <div className="fixed bottom-0 left-0 right-0 bg-gray-800 p-2 flex justify-around z-40 border-t border-gray-700">
-            <button onClick={() => navigate("/trade")} className="flex flex-col items-center text-gray-400">
-              <Search size={22} />
-              <span className="text-xs">Watchlist</span>
-            </button>
-            <button className="flex flex-col items-center text-blue-400">
-              <ClipboardList size={22} />
-              <span className="text-xs">Orders</span>
-            </button>
-          </div>
-=======
-          </div>
-        </div >
-      )
-  }
->>>>>>> f801d30 (Initial Commit)
-    </div >
+        </div>
+      )}
+    </div>
   );
 }

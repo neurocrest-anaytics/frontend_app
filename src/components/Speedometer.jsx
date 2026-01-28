@@ -1,4 +1,4 @@
-// ===================== Speedometer.jsx (SMALLER VERSION) =====================
+//  Speedometer.jsx (SMALLER VERSION) 
 import React from "react";
 
 export default function Speedometer({ value = 0, label = "" }) {
