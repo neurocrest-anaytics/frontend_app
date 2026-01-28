@@ -266,13 +266,8 @@ function AnimatedRoutes({ username, onLoginSuccess, onLogout }) {
               username ? (
                 <RequireSubscription>
                   (
-<<<<<<< HEAD
-                <Trade username={username} />
-              )
-=======
                   <Trade username={username} />
                   )
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
                 </RequireSubscription>
               ) : (
                 <Navigate to="/" replace />
@@ -285,13 +280,8 @@ function AnimatedRoutes({ username, onLoginSuccess, onLogout }) {
               username ? (
                 <RequireSubscription>
                   (
-<<<<<<< HEAD
-                <ScriptDetail username={username} />
-              )
-=======
                   <ScriptDetail username={username} />
                   )
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
                 </RequireSubscription>
               ) : (
                 <Navigate to="/" replace />
@@ -305,13 +295,8 @@ function AnimatedRoutes({ username, onLoginSuccess, onLogout }) {
               username ? (
                 <RequireSubscription>
                   (
-<<<<<<< HEAD
-                <Orders username={username} />
-              )
-=======
                   <Orders username={username} />
                   )
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
                 </RequireSubscription>
               ) : (
                 <Navigate to="/" replace />
@@ -321,93 +306,51 @@ function AnimatedRoutes({ username, onLoginSuccess, onLogout }) {
           <Route
             path="/buy/:symbol"
             element={username ? (
-<<<<<<< HEAD
-                <RequireSubscription>
-                  <Buy />
-                </RequireSubscription>
-              ) : <Navigate to="/" replace />}
-=======
               <RequireSubscription>
                 <Buy />
               </RequireSubscription>
             ) : <Navigate to="/" replace />}
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
           />
           <Route
             path="/sell/:symbol"
             element={username ? (
-<<<<<<< HEAD
-                <RequireSubscription>
-                  <Sell />
-                </RequireSubscription>
-              ) : <Navigate to="/" replace />}
-=======
               <RequireSubscription>
                 <Sell />
               </RequireSubscription>
             ) : <Navigate to="/" replace />}
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
           />
           <Route
             path="/trade-success"
             element={username ? (
-<<<<<<< HEAD
-                <RequireSubscription>
-                  <TradeSuccess />
-                </RequireSubscription>
-              ) : <Navigate to="/" replace />}
-=======
               <RequireSubscription>
                 <TradeSuccess />
               </RequireSubscription>
             ) : <Navigate to="/" replace />}
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
           />
 
           <Route
             path="/chart/:symbol"
             element={username ? (
-<<<<<<< HEAD
-                <RequireSubscription>
-                  <ChartPage />
-                </RequireSubscription>
-              ) : <Navigate to="/" replace />}
-=======
               <RequireSubscription>
                 <ChartPage />
               </RequireSubscription>
             ) : <Navigate to="/" replace />}
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
           />
           <Route
             path="/alert/:symbol"
             element={username ? (
-<<<<<<< HEAD
-                <RequireSubscription>
-                  <SetAlert />
-                </RequireSubscription>
-              ) : <Navigate to="/" replace />}
-=======
               <RequireSubscription>
                 <SetAlert />
               </RequireSubscription>
             ) : <Navigate to="/" replace />}
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
           />
           <Route
             path="/notes/:symbol"
             element={username ? (
-<<<<<<< HEAD
-                <RequireSubscription>
-                  <Notes />
-                </RequireSubscription>
-              ) : <Navigate to="/" replace />}
-=======
               <RequireSubscription>
                 <Notes />
               </RequireSubscription>
             ) : <Navigate to="/" replace />}
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
           />
 
           <Route
@@ -416,13 +359,8 @@ function AnimatedRoutes({ username, onLoginSuccess, onLogout }) {
               username ? (
                 <RequireSubscription>
                   (
-<<<<<<< HEAD
-                <Portfolio username={username} />
-              )
-=======
                   <Portfolio username={username} />
                   )
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
                 </RequireSubscription>
               ) : (
                 <Navigate to="/" replace />
@@ -444,33 +382,19 @@ function AnimatedRoutes({ username, onLoginSuccess, onLogout }) {
           <Route
             path="/insight"
             element={username ? (
-<<<<<<< HEAD
-                <RequireSubscription>
-                  <Insight />
-                </RequireSubscription>
-              ) : <Navigate to="/" replace />}
-=======
               <RequireSubscription>
                 <Insight />
               </RequireSubscription>
             ) : <Navigate to="/" replace />}
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
           />
 
           <Route
             path="/ipo-tracker"
             element={username ? (
-<<<<<<< HEAD
-                <RequireSubscription>
-                  <IpoTracker />
-                </RequireSubscription>
-              ) : <Navigate to="/" replace />}
-=======
               <RequireSubscription>
                 <IpoTracker />
               </RequireSubscription>
             ) : <Navigate to="/" replace />}
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
           />
 
           <Route path="/feedback" element={<Feedback username={username} />} />
@@ -481,13 +405,8 @@ function AnimatedRoutes({ username, onLoginSuccess, onLogout }) {
               username ? (
                 <RequireSubscription>
                   (
-<<<<<<< HEAD
-                <Profile username={username} logout={onLogout} />
-              )
-=======
                   <Profile username={username} logout={onLogout} />
                   )
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
                 </RequireSubscription>
               ) : (
                 <Navigate to="/" replace />
@@ -510,19 +429,6 @@ function AnimatedRoutes({ username, onLoginSuccess, onLogout }) {
 
           <Route path="/payments" element={<Payments username={username} />} />
           <Route
-<<<<<<< HEAD
-  path="/trade"
-  element={
-    username ? (
-      <RequireSubscription>
-        <Trade username={username} />
-      </RequireSubscription>
-    ) : (
-      <Navigate to="/" replace />
-    )
-  }
-/>
-=======
             path="/trade"
             element={
               username ? (
@@ -534,7 +440,6 @@ function AnimatedRoutes({ username, onLoginSuccess, onLogout }) {
               )
             }
           />
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
           <Route
             path="/history"
             element={
@@ -547,20 +452,6 @@ function AnimatedRoutes({ username, onLoginSuccess, onLogout }) {
           />
 
           <Route
-<<<<<<< HEAD
-  path="/settings"
-  element={username ? (
-                <RequireSubscription>
-                  <Settings />
-                </RequireSubscription>
-              ) : <Navigate to="/" replace />}
-/>
-
-<Route
-  path="/settings/change-password"
-  element={
-    username ? (
-=======
             path="/settings"
             element={username ? (
               <RequireSubscription>
@@ -573,21 +464,10 @@ function AnimatedRoutes({ username, onLoginSuccess, onLogout }) {
             path="/settings/change-password"
             element={
               username ? (
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
                 <RequireSubscription>
                   <PasswordChange username={username} />
                 </RequireSubscription>
               ) : <Navigate to="/" replace />
-<<<<<<< HEAD
-  }
-/>
-
-{/* ✅ Short route for Profile tile */}
-<Route
-  path="/passwordchange"
-  element={
-    username ? (
-=======
             }
           />
 
@@ -596,20 +476,10 @@ function AnimatedRoutes({ username, onLoginSuccess, onLogout }) {
             path="/passwordchange"
             element={
               username ? (
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
                 <RequireSubscription>
                   <PasswordChange username={username} />
                 </RequireSubscription>
               ) : <Navigate to="/" replace />
-<<<<<<< HEAD
-  }
-/>
-
-<Route
-  path="/settings/change-email"
-  element={
-    username ? (
-=======
             }
           />
 
@@ -617,18 +487,12 @@ function AnimatedRoutes({ username, onLoginSuccess, onLogout }) {
             path="/settings/change-email"
             element={
               username ? (
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
                 <RequireSubscription>
                   <EmailChange username={username} />
                 </RequireSubscription>
               ) : <Navigate to="/" replace />
-<<<<<<< HEAD
-  }
-/>
-=======
             }
           />
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
 
 
           <Route path="/modify/:id" element={<ModifyOrderPage />} />
@@ -636,46 +500,26 @@ function AnimatedRoutes({ username, onLoginSuccess, onLogout }) {
           <Route
             path="/live"
             element={username ? (
-<<<<<<< HEAD
-                <RequireSubscription>
-                  <LiveChart />
-                </RequireSubscription>
-              ) : <Navigate to="/" replace />}
-=======
               <RequireSubscription>
                 <LiveChart />
               </RequireSubscription>
             ) : <Navigate to="/" replace />}
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
           />
 
           <Route
             path="/whatsapp"
             element={username ? (
-<<<<<<< HEAD
-                <RequireSubscription>
-                  <Whatsapp />
-                </RequireSubscription>
-              ) : <Navigate to="/" replace />}
-=======
               <RequireSubscription>
                 <Whatsapp />
               </RequireSubscription>
             ) : <Navigate to="/" replace />}
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
           />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-<<<<<<< HEAD
-        
-      </AnimatePresence>
-       
-=======
 
       </AnimatePresence>
 
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
       {/* ✅ Chart-style popup modal */}
       <AlertModal
         open={popup.open}
