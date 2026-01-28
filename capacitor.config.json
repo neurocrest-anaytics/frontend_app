@@ -1,5 +1,30 @@
 {
   "appId": "com.neurocrest.app",
   "appName": "NeuroCrest",
+    HEAD
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "https://frontend-app-ten-opal.vercel.app",
+    "cleartext": false,
+    "allowNavigation": [
+      "frontend-app-ten-opal.vercel.app"
+    ]
+  },
+  "android": {
+    "allowMixedContent": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#000000",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": true,
+      "spinnerColor": "#ffffff"
+    }
+  }
+}
+
   "webDir": "dist"
 }
+                    f801d30 (Initial Commit)

@@ -623,10 +623,17 @@ export default function ChartPage() {
   const [desc4, setDesc4] = useState("");
 
   const [features, setFeatures] = useState({
+<<<<<<< HEAD
   allow_generate_signals: false,
   allow_chart_recommendation: false,
   allow_recommendation_page: false,
 });
+=======
+    allow_generate_signals: false,
+    allow_chart_recommendation: false,
+    allow_recommendation_page: false,
+  });
+>>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
 
 
   const [latestSignals, setLatestSignals] = useState([]);
@@ -776,6 +783,7 @@ export default function ChartPage() {
   const searchInputRef = useRef(null);
 
   useEffect(() => {
+<<<<<<< HEAD
   let alive = true;
   const u = localStorage.getItem("username") || "";
   if (!u) return;
@@ -805,6 +813,37 @@ export default function ChartPage() {
     alive = false;
   };
 }, []);
+=======
+    let alive = true;
+    const u = localStorage.getItem("username") || "";
+    if (!u) return;
+
+    fetch(`${API}/features/access/${encodeURIComponent(u)}`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r)))
+      .then((j) => {
+        if (!alive) return;
+        setFeatures({
+          allow_generate_signals: !!j.allow_generate_signals,
+          allow_chart_recommendation: !!j.allow_chart_recommendation,
+          allow_recommendation_page: !!j.allow_recommendation_page,
+        });
+        setRecoLocked(!j.allow_recommendation_page);
+
+      })
+      .catch(() => {
+        if (!alive) return;
+        setFeatures({
+          allow_generate_signals: false,
+          allow_chart_recommendation: false,
+          allow_recommendation_page: false,
+        });
+      });
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+>>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
 
   // 🔒 Check Recommendations page access (backend returns 403 when locked)
 
@@ -1090,6 +1129,7 @@ export default function ChartPage() {
       // --------------------------------------------------
       // 4) CONVERT TO MARKERS  ✅ FIX HERE
       // --------------------------------------------------
+<<<<<<< HEAD
      const toSec = (ts) => {
   const n = Number(ts);
   if (!Number.isFinite(n)) return null;
@@ -1117,6 +1157,35 @@ const markers = final
     };
   })
   .filter(Boolean);
+=======
+      const toSec = (ts) => {
+        const n = Number(ts);
+        if (!Number.isFinite(n)) return null;
+        // if backend ever sends ms, auto-fix it
+        return n > 1e11 ? Math.floor(n / 1000) : Math.floor(n);
+      };
+
+      const markers = final
+        .map((sig) => {
+          const ts = toSec(sig.timestamp);
+          if (!ts) return null;
+
+          // align marker to the currently visible timeframe buckets (2m/15m)
+          const aligned = candleBucket(ts, tf);
+
+          // snap to nearest candle time so markers always render
+          const snapped = findNearestCandleTime(candles, aligned);
+
+          return {
+            time: snapped, // ✅ seconds
+            position: sig.signal === "BUY" ? "belowBar" : "aboveBar",
+            shape: sig.signal === "BUY" ? "arrowUp" : "arrowDown",
+            color: sig.signal === "BUY" ? "#16a34a" : "#dc2626",
+            text: `${sig.signal} - ${sig.tf} | ${sig.close_price ?? ""}`,
+          };
+        })
+        .filter(Boolean);
+>>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
 
 
       // --------------------------------------------------
@@ -1357,6 +1426,7 @@ const markers = final
   /* ---------------- Fetch candles ---------------- */
   const [candles, setCandles] = useState([]);
 
+<<<<<<< HEAD
 const prevClose = useMemo(() => {
   if (!candles || candles.length < 2) return null;
   return Number(candles[candles.length - 2]?.close ?? null);
@@ -1366,6 +1436,17 @@ const isUp = useMemo(() => {
   if (lastPrice == null || prevClose == null) return null;
   return Number(lastPrice) >= Number(prevClose);
 }, [lastPrice, prevClose]);
+=======
+  const prevClose = useMemo(() => {
+    if (!candles || candles.length < 2) return null;
+    return Number(candles[candles.length - 2]?.close ?? null);
+  }, [candles]);
+
+  const isUp = useMemo(() => {
+    if (lastPrice == null || prevClose == null) return null;
+    return Number(lastPrice) >= Number(prevClose);
+  }, [lastPrice, prevClose]);
+>>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
 
 
   const mapDataForType = (t, rows) => {
@@ -1563,11 +1644,19 @@ const isUp = useMemo(() => {
         visible: true,
       },
       handleScroll: {
+<<<<<<< HEAD
   mouseWheel: true,
   pressedMouseMove: true,
   horzTouchDrag: true,
   vertTouchDrag: false,
 },
+=======
+        mouseWheel: true,
+        pressedMouseMove: true,
+        horzTouchDrag: true,
+        vertTouchDrag: false,
+      },
+>>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
 
       handleScale: { mouseWheel: true, pinch: true, axisPressedMouseMove: { time: true, price: true } },
       localization: {
@@ -1834,7 +1923,11 @@ const isUp = useMemo(() => {
     }
 
     load();
+<<<<<<< HEAD
     // ========== LIVE PRICE UPDATE ========== //
+=======
+    // === LIVE PRICE UPDATE === //
+>>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
     let ws = null;
 
     function handleTick(tick) {
@@ -2836,9 +2929,15 @@ const isUp = useMemo(() => {
   async function generateSignal() {
     console.log("=== GENERATE SIGNAL CLICKED ===");
     if (!features.allow_generate_signals) {
+<<<<<<< HEAD
   showPopup("Locked", "Generate Signals is enabled only for approved users.");
   return;
 }
+=======
+      showPopup("Locked", "Generate Signals is enabled only for approved users.");
+      return;
+    }
+>>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
 
     // -------------------------------------
     // ⭐ 1. OFF MODE (SECOND CLICK)
@@ -2965,12 +3064,21 @@ const isUp = useMemo(() => {
 
 
 
+<<<<<<< HEAD
   // ======================================================================
   // 🔵 OPEN RECOMMENDATIONS — CLICK HANDLER
   // ======================================================================
   async function openRecommendations() {
     console.log("📌 Recommendation button clicked");
         if (recoLocked) {
+=======
+  // 
+  // 🔵 OPEN RECOMMENDATIONS — CLICK HANDLER
+  // 
+  async function openRecommendations() {
+    console.log("📌 Recommendation button clicked");
+    if (recoLocked) {
+>>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
       showPopup("Locked", "Recommendations are available only for approved users.");
       return;
     }
@@ -3046,9 +3154,15 @@ const isUp = useMemo(() => {
 
 
 
+<<<<<<< HEAD
   // ======================================================================
   // 🔵 REFRESH RECOMMENDATIONS — FETCH + APPLY MARKERS + UPDATE DESCRIPTION
   // ======================================================================
+=======
+  // 
+  // 🔵 REFRESH RECOMMENDATIONS — FETCH + APPLY MARKERS + UPDATE DESCRIPTION
+  // 
+>>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
   async function refreshRecommendations() {
     try {
       const url = `${API}/market/reco-load?symbol=${symbol}&tf=${tf}`;
@@ -3094,10 +3208,17 @@ const isUp = useMemo(() => {
 
   /* --------------------------- UI --------------------------- */
   return (
+<<<<<<< HEAD
   <div
     className={`h-[100dvh] ${bgClass} ${textClass} relative overflow-x-hidden overflow-y-scroll show-scrollbar transition-colors duration-300`}
     style={{ scrollbarGutter: "stable" }}
   >
+=======
+    <div
+      className={`h-[100dvh] ${bgClass} ${textClass} relative overflow-x-hidden overflow-y-scroll show-scrollbar transition-colors duration-300`}
+      style={{ scrollbarGutter: "stable" }}
+    >
+>>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
 
 
 
@@ -3257,7 +3378,11 @@ const isUp = useMemo(() => {
         </div>
       </div>
 
+<<<<<<< HEAD
       {/* ================= SEARCH MODAL ================= */}
+=======
+      {/* === SEARCH MODAL === */}
+>>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
       {openSearch && (
         <div
           className="fixed inset-0 z-[10060] bg-black/50 backdrop-blur-sm flex items-start justify-center pt-20 px-3"
@@ -3425,7 +3550,11 @@ const isUp = useMemo(() => {
 
         <div className={`${glassClass} rounded-3xl p-6 shadow-2xl min-h-[80px]`}>
 
+<<<<<<< HEAD
           {/* ================= RECOMMENDATIONS ================= */}
+=======
+          {/* === RECOMMENDATIONS === */}
+>>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
           {recoMode && (
             <>
               <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/20">
@@ -3490,7 +3619,11 @@ const isUp = useMemo(() => {
             </>
           )}
 
+<<<<<<< HEAD
           {/* ================= GENERATED SIGNALS ================= */}
+=======
+          {/* === GENERATED SIGNALS === */}
+>>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
           {generateMode && (
             <>
               <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/20 mt-6">
@@ -3559,7 +3692,11 @@ const isUp = useMemo(() => {
 
       {/* Oscillator pane */}
       <div className="mt-2 border-t touch-pan-y">
+<<<<<<< HEAD
          <div ref={oscRef} style={{ width: "100%", touchAction: "pan-y" }} />
+=======
+        <div ref={oscRef} style={{ width: "100%", touchAction: "pan-y" }} />
+>>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
       </div>
 
       {/* status */}
