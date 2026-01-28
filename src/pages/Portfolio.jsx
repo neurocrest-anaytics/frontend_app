@@ -501,7 +501,11 @@ export default function Portfolio({ username }) {
     }
   };
 
+<<<<<<< HEAD
     // Totals (Total Invested should be SUM of Net Investment)
+=======
+  // Totals (Total Invested should be SUM of Net Investment)
+>>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
   const totalInvested = useMemo(() => {
     return (filteredOpen || []).reduce((s, p) => {
       const qtyRaw = toNum(p.qty) ?? 0;
