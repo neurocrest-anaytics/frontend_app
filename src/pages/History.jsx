@@ -1,21 +1,5 @@
-<<<<<<< HEAD
 import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
 
-=======
-HEAD
-// frontend/src/pages/History.jsx
-import React, { useEffect, useState, useMemo } from "react";
-import BackButton from "../components/BackButton";
-import { moneyINR } from "../utils/format";
-import { NotebookPen, Download } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useParams } from "react-router-dom";
-import HeaderBackRow from "../components/HeaderBackRow";
-
-import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
-
-
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
 import { moneyINR } from "../utils/format";
 import {
   NotebookPen,
@@ -840,71 +824,11 @@ export default function History({ username }) {
   const showLoading = loading || (tab === "all" && loadingActivity);
 
   return (
-<<<<<<< HEAD
-=======
-    HEAD
-    < div className = "min-h-screen bg-gray-100 p-4" >
-      <HeaderBackRow backTo="/profile" />
-      <h2 className="text-2xl font-bold text-center mb-4">History</h2>
-
-  {/* NEW: Filter + Download bar */ }
-  <div className="max-w-4xl mx-auto mb-3">
-    <div className="flex flex-wrap items-center justify-center gap-3">
-      <div className="flex items-center gap-2">
-        <label htmlFor="startDate" className="text-sm text-gray-700">
-          Start:
-        </label>
-        <input
-          id="startDate"
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          className="px-2 py-1 border rounded-md text-sm bg-white"
-        />
-      </div>
-      <div className="flex items-center gap-2">
-        <label htmlFor="endDate" className="text-sm text-gray-700">
-          End:
-        </label>
-        <input
-          id="endDate"
-          type="date"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          className="px-2 py-1 border rounded-md text-sm bg-white"
-        />
-      </div>
-      {(startDate || endDate) && (
-        <button
-          onClick={() => {
-            setStartDate("");
-            setEndDate("");
-          }}
-          className="px-3 py-1.5 rounded-md bg-gray-100 hover:bg-gray-200 text-sm"
-        >
-          Clear
-        </button>
-      )}
-      <button
-        onClick={handleDownloadExcel}
-        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700 text-sm"
-        title="Download filtered history (.xls)"
-      >
-        <Download size={16} />
-        <span>Download</span>
-      </button>
-    </div>
-
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
     <div className={`min-h-screen ${bgClass} ${textClass} relative transition-colors duration-300`}>
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl"></div>
         <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl"></div>
-<<<<<<< HEAD
-=======
-        f801d30 (Initial Commit)
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
       </div>
 
       <AppHeader />
@@ -1316,5 +1240,5 @@ export default function History({ username }) {
         )}
       </div>
     </div>
-    );
+  );
 }

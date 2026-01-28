@@ -892,13 +892,8 @@ export default function Trade({ username }) {
                               title={tab === "mustwatch" ? "Add to Must Watch" : "Add to Watchlist"}
                               onClick={(e) => addFromSearchToWatchlist(e, sym)}
                               className={`p-2 rounded-xl border transition-all ${isDark
-<<<<<<< HEAD
                                   ? "border-white/10 hover:bg-white/10"
                                   : "border-white/40 hover:bg-white/80"
-=======
-                                ? "border-white/10 hover:bg-white/10"
-                                : "border-white/40 hover:bg-white/80"
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
                                 }`}
                             >
                               <Plus className={`w-4 h-4 ${isDark ? "text-cyan-300" : "text-blue-700"}`} />
@@ -908,13 +903,8 @@ export default function Trade({ username }) {
                               title="Buy"
                               onClick={(e) => openBuy(e, sym)}
                               className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold tracking-wide border transition-all ${isDark
-<<<<<<< HEAD
                                   ? "bg-emerald-500/15 text-emerald-200 border-emerald-400/25 hover:bg-emerald-500/25"
                                   : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
-=======
-                                ? "bg-emerald-500/15 text-emerald-200 border-emerald-400/25 hover:bg-emerald-500/25"
-                                : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
                                 }`}
                             >
                               BUY
@@ -924,13 +914,8 @@ export default function Trade({ username }) {
                               title="Sell"
                               onClick={(e) => openSell(e, sym)}
                               className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold tracking-wide border transition-all ${isDark
-<<<<<<< HEAD
                                   ? "bg-rose-500/15 text-rose-200 border-rose-400/25 hover:bg-rose-500/25"
                                   : "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100"
-=======
-                                ? "bg-rose-500/15 text-rose-200 border-rose-400/25 hover:bg-rose-500/25"
-                                : "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100"
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
                                 }`}
                             >
                               SELL

@@ -27,41 +27,26 @@ function AlertModal({ open, title, message, onClose, isDark }) {
   return (
     <div className="fixed inset-0 z-[10050] flex items-center justify-center bg-black/60 backdrop-blur-sm px-3">
       <div
-<<<<<<< HEAD
         className={`w-full max-w-md rounded-2xl shadow-2xl p-5 ${
           isDark ? "bg-[#0b1220] border border-white/10" : "bg-white border border-black/10"
         }`}
-=======
-        className={`w-full max-w-md rounded-2xl shadow-2xl p-5 ${isDark ? "bg-[#0b1220] border border-white/10" : "bg-white border border-black/10"
-          }`}
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
         onMouseDown={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3">
           <div>
             <div
-<<<<<<< HEAD
               className={`text-[17px] font-semibold tracking-tight ${
                 isDark ? "text-blue-300" : "text-blue-700"
               }`}
-=======
-              className={`text-[17px] font-semibold tracking-tight ${isDark ? "text-blue-300" : "text-blue-700"
-                }`}
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
               style={{ fontFamily: "'Segoe UI', Inter, system-ui" }}
             >
               {title || "Alert"}
             </div>
 
             <div
-<<<<<<< HEAD
               className={`mt-3 text-[14.5px] leading-[1.7] whitespace-pre-line ${
                 isDark ? "text-slate-300" : "text-slate-600"
               }`}
-=======
-              className={`mt-3 text-[14.5px] leading-[1.7] whitespace-pre-line ${isDark ? "text-slate-300" : "text-slate-600"
-                }`}
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
               style={{ fontFamily: "Inter, system-ui, sans-serif" }}
             >
               {message}
@@ -70,14 +55,9 @@ function AlertModal({ open, title, message, onClose, isDark }) {
 
           <button
             onClick={onClose}
-<<<<<<< HEAD
             className={`w-9 h-9 rounded-xl grid place-items-center ${
               isDark ? "bg-white/10 hover:bg-white/15" : "bg-black/5 hover:bg-black/10"
             } transition`}
-=======
-            className={`w-9 h-9 rounded-xl grid place-items-center ${isDark ? "bg-white/10 hover:bg-white/15" : "bg-black/5 hover:bg-black/10"
-              } transition`}
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
             title="Close"
             type="button"
           >
@@ -156,11 +136,7 @@ export default function Feedback() {
       }
       if (u.email && !contactEmail) setContactEmail(u.email);
       if (u.phone && !contactPhone) setContactPhone(u.phone);
-<<<<<<< HEAD
     } catch {}
-=======
-    } catch { }
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -283,18 +259,11 @@ export default function Feedback() {
           <div className="flex justify-center mb-8 space-x-3">
             <button
               onClick={() => setTab("feedback")}
-<<<<<<< HEAD
               className={`px-6 py-3 rounded-xl font-semibold transition-all shadow-lg flex items-center space-x-2 ${
                 tab === "feedback"
                   ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-blue-500/50 scale-105"
                   : `${glassClass} ${cardHoverClass} ${textSecondaryClass}`
               }`}
-=======
-              className={`px-6 py-3 rounded-xl font-semibold transition-all shadow-lg flex items-center space-x-2 ${tab === "feedback"
-                  ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-blue-500/50 scale-105"
-                  : `${glassClass} ${cardHoverClass} ${textSecondaryClass}`
-                }`}
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
               type="button"
             >
               <MessageSquare className="w-5 h-5" />
@@ -302,18 +271,11 @@ export default function Feedback() {
             </button>
             <button
               onClick={() => setTab("contact")}
-<<<<<<< HEAD
               className={`px-6 py-3 rounded-xl font-semibold transition-all shadow-lg flex items-center space-x-2 ${
                 tab === "contact"
                   ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-blue-500/50 scale-105"
                   : `${glassClass} ${cardHoverClass} ${textSecondaryClass}`
               }`}
-=======
-              className={`px-6 py-3 rounded-xl font-semibold transition-all shadow-lg flex items-center space-x-2 ${tab === "contact"
-                  ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-blue-500/50 scale-105"
-                  : `${glassClass} ${cardHoverClass} ${textSecondaryClass}`
-                }`}
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
               type="button"
             >
               <Mail className="w-5 h-5" />

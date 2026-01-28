@@ -1,14 +1,7 @@
-<<<<<<< HEAD
 /* =========================
    NeuroCrest DatePicker UI
    (react-datepicker overrides)
    ========================= */
-=======
-/* ====
-   NeuroCrest DatePicker UI
-   (react-datepicker overrides)
-   ==== */
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
 
 /* ---- input (the field) ---- */
 .nc-date-wrapper {
@@ -137,7 +130,6 @@
     display: none;
 }
 
-<<<<<<< HEAD
 /* =========================
    Fix: Light theme visibility
    ========================= */
@@ -151,21 +143,6 @@
 /* =========================
    Light theme overrides (ONLY when nc-date-light exists)
    ========================= */
-=======
-/* ====
-   Fix: Light theme visibility
-   ==== */
-
-
-
-/* ====
-   Fix: Light theme visibility (ONLY light)
-   ==== */
-
-/* ====
-   Light theme overrides (ONLY when nc-date-light exists)
-   ==== */
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
 
 .nc-date-light .nc-date-input {
     color: #0f172a !important;
