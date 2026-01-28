@@ -21,10 +21,10 @@ public class MainActivity extends BridgeActivity {
         new Thread(() -> {
             try {
 <<<<<<< HEAD
-                String host = "backend-app-k52v.onrender.com";
+                String host = "paper-trading-backend-sqllite.onrender.com";
 =======
 
-                String host = "backend-app-k52v.onrender.com";
+                String host = "paper-trading-backend-sqllite.onrender.com";
 
                 String host = "paper-trading-backend-sqllite.onrender.com";
 
