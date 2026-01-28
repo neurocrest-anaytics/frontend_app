@@ -11,11 +11,7 @@ import {
   Home,
 } from "lucide-react";
 import BackButton from "../components/BackButton";
-HEAD
-import HeaderBackRow from "../components/HeaderBackRow";
-
 import { useLocation } from "react-router-dom";
-
 
 const API = (import.meta.env.VITE_BACKEND_BASE_URL || "http://127.0.0.1:8000")
   .trim()
@@ -272,11 +268,6 @@ export default function Funds({ username }) {
 
 
   return (
-    HEAD
-    < div className = "min-h-screen bg-gray-100 p-4 md:max-w-xl md:mx-auto" >
-      <HeaderBackRow backTo="/profile" />
-      <h2 className="text-2xl font-bold text-center mb-4">Funds</h2>
-
     <div
       className={`min-h-screen ${bgClass} ${textClass} relative overflow-hidden transition-colors duration-300`}
     >
@@ -287,7 +278,6 @@ export default function Funds({ username }) {
           style={{ animationDelay: "1s" }}
         ></div>
       </div>
-                    f801d30 (Initial Commit)
 
       <div className="relative z-10 w-full max-w-none mx-auto px-2 sm:px-3 lg:px-4 py-4">
         <div className="flex items-center justify-between mb-6">
@@ -625,6 +615,6 @@ export default function Funds({ username }) {
           </>
         )}
       </div>
-    </div >
+    </div>
   );
 }

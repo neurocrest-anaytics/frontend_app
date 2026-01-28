@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
 
 import BackButton from "../components/BackButton";
-HEAD
-import HeaderBackRow from "../components/HeaderBackRow";
-
 import {
   Sun,
   Moon,
@@ -77,7 +74,6 @@ function AlertModal({ open, title, message, onClose, isDark }) {
     </div>
   );
 }
-
 
 export default function Feedback() {
   const [tab, setTab] = useState("feedback");
@@ -217,11 +213,6 @@ export default function Feedback() {
   };
 
   return (
-    HEAD
-    < div className = "min-h-screen bg-white p-6" >
-      <HeaderBackRow backTo="/menu" />
-      <h2 className="text-2xl font-bold text-center text-blue-700 mb-6">📬 Feedback & Contact</h2>
-
     <div className={`min-h-screen ${bgClass} ${textClass} relative transition-colors duration-300 overflow-hidden`}>
       {/* ✅ Styled popup like Chart.jsx */}
       <AlertModal
@@ -231,7 +222,6 @@ export default function Feedback() {
         onClose={closePopup}
         isDark={isDark}
       />
-                    f801d30 (Initial Commit)
 
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
@@ -265,11 +255,10 @@ export default function Feedback() {
           <div className="flex justify-center mb-8 space-x-3">
             <button
               onClick={() => setTab("feedback")}
-              className={`px-6 py-3 rounded-xl font-semibold transition-all shadow-lg flex items-center space-x-2 ${
-                tab === "feedback"
+              className={`px-6 py-3 rounded-xl font-semibold transition-all shadow-lg flex items-center space-x-2 ${tab === "feedback"
                   ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-blue-500/50 scale-105"
                   : `${glassClass} ${cardHoverClass} ${textSecondaryClass}`
-              }`}
+                }`}
               type="button"
             >
               <MessageSquare className="w-5 h-5" />
@@ -277,11 +266,10 @@ export default function Feedback() {
             </button>
             <button
               onClick={() => setTab("contact")}
-              className={`px-6 py-3 rounded-xl font-semibold transition-all shadow-lg flex items-center space-x-2 ${
-                tab === "contact"
+              className={`px-6 py-3 rounded-xl font-semibold transition-all shadow-lg flex items-center space-x-2 ${tab === "contact"
                   ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-blue-500/50 scale-105"
                   : `${glassClass} ${cardHoverClass} ${textSecondaryClass}`
-              }`}
+                }`}
               type="button"
             >
               <Mail className="w-5 h-5" />
@@ -431,6 +419,6 @@ export default function Feedback() {
           )}
         </div>
       </div>
-    </div >
+    </div>
   );
 }

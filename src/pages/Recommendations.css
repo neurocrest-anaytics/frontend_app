@@ -35,8 +35,8 @@
 }
 
 .filter-item {
-  HEADwidth: 200px;
-  >>>>>>>f801d30 (Initial Commit) display: flex;
+  width: 200px;
+  display: flex;
   flex-direction: column;
   text-align: left;
 }
@@ -44,37 +44,26 @@
 .filter-item label {
   font-weight: 500;
   margin-bottom: 4px;
-  HEAD color: #222;
-}
-
-color: inherit;
-/* ✅ let theme decide */
+  color: inherit;
+  /* ✅ let theme decide */
 }
 
 
+.filter-item input,
 .filter-item select {
   padding: 6px 10px;
   border-radius: 5px;
   border: 1px solid #ccc;
 }
 
-HEAD
-
 /* -------- Signal Section Layout -------- */
+.signals-section {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  HEAD gap: 60px;
-  /* spacing between Active and Closed blocks */
   gap: 40px;
-  >>>>>>>f801d30 (Initial Commit) flex-wrap: wrap;
+  flex-wrap: wrap;
   margin-top: 20px;
-}
-
-HEAD .signals-column {
-  flex: 0 0 340px;
-  /* fixed width for both columns */
-  text-align: center;
 }
 
 .left-section {
@@ -89,6 +78,7 @@ HEAD .signals-column {
   text-align: center;
 }
 
+.subtext {
   font-size: 12px;
   color: #666;
 }
@@ -96,166 +86,11 @@ HEAD .signals-column {
 .signal-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  HEAD gap: 15px;
-  /* equal spacing between cards */
   gap: 15px;
-  >>>>>>>f801d30 (Initial Commit) justify-items: center;
+  justify-items: center;
   align-items: center;
   margin-top: 10px;
 }
-
-HEAD .signal-card {
-  background-color: #66b3ff;
-  color: white;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  width: 140px;
-  height: 140px;
-  font-size: 16px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.signal-card:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-}
-
-.signal-card-chart {
-  background-color: #f5f9ff;
-  border-radius: 12px;
-  width: 250px;
-  height: 220px;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease;
-}
-
-.signal-card-chart:hover {
-  transform: scale(1.03);
-}
-
-.card-header,
-.card-footer {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  font-weight: 600;
-  color: #222;
-}
-
-.chart-container {
-  flex-grow: 1;
-  margin: 5px 0;
-}
-
-.card-script {
-  color: #2962ff;
-}
-
-.card-confidence {
-  color: #00c853;
-}
-
-/* ---------- ADVANCED SIGNAL CARD STYLE ---------- */
-.signal-card-advanced {
-  background-color: #f5f9ff;
-  border-radius: 12px;
-  width: 320px;
-  height: 260px;
-  padding: 10px 12px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-  position: relative;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.signal-card-advanced:hover {
-  transform: scale(1.03);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-/* ---------- Header ---------- */
-.signal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 600;
-  font-size: 14px;
-  color: #222;
-}
-
-.signal-time {
-  color: #444;
-  font-size: 13px;
-}
-
-.signal-script {
-  color: #2962ff;
-  font-size: 15px;
-  font-weight: 700;
-}
-
-.signal-confidence {
-  color: #00c853;
-  font-size: 14px;
-}
-
-/* ---------- Chart Section ---------- */
-.chart-wrapper {
-  position: relative;
-  height: 130px;
-  background-color: #d7e3fc;
-  border-radius: 8px;
-  overflow: hidden;
-  margin: 6px 0;
-}
-
-.chart-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  pointer-events: none;
-}
-
-.vertical-label {
-  position: absolute;
-  left: 3px;
-  top: 50%;
-  transform: translateY(-50%) rotate(-90deg);
-  font-size: 11px;
-  color: #222;
-  font-weight: 600;
-}
-
-.horizontal-label {
-  position: absolute;
-  bottom: 3px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 11px;
-  color: #222;
-  font-weight: 600;
-}
-
-.center-label {
-  position: absolute;
-  font-size: 12px;
-  color: white;
-  font-weight: 600;
-  text-shadow: 0 0 3px rgba(0, 0, 0, 0.4);
-}
-
-
 
 /* ---------------- Signal Card ---------------- */
 .signal-card-advanced {
@@ -368,17 +203,15 @@ HEAD .signal-card {
   color: #111;
   display: flex;
   flex-direction: column;
-  HEAD gap: 3px;
   gap: 2px;
   text-align: left;
-  >>>>>>>f801d30 (Initial Commit)
 }
 
 .signal-footer strong {
   color: #000;
 }
 
-HEAD.alert-description-box {
+.alert-description-box {
   background: #fff8c4;
   border-top: 1px solid #e0c75a;
   border-bottom: 1px solid #e0c75a;
@@ -466,10 +299,10 @@ HEAD.alert-description-box {
   color: #111;
 }
 
-/* =
+/* =========================================================
    ✅ Clean Line Layout (Only Live Prices Below)
-   = */
-/*  HORIZONTAL PRICE DIAGRAM STYLING  */
+   ========================================================= */
+/* ======= HORIZONTAL PRICE DIAGRAM STYLING ======= */
 
 /* Clean diagram container */
 .clean-line-layout {
@@ -506,7 +339,7 @@ HEAD.alert-description-box {
   text-align: right !important;
 }
 
-/* = Indicator Layout = */
+/* ======== Indicator Layout ======== */
 .indicator-container {
   position: relative;
   width: 100%;
@@ -612,9 +445,9 @@ HEAD.alert-description-box {
   z-index: 6;
 }
 
-/* ==
+/* ==========================================================
    LAYER CONTROL — FIX OVERLAPPING OF MARKERS
-== */
+========================================================== */
 
 /* Default markers (SUP / RES / ST / T) stay at the back */
 .marker .shape {
@@ -708,9 +541,9 @@ HEAD.alert-description-box {
   width: 100%;
 }
 
-/* =
+/* =========================================================
    PRICE BUBBLES (Signal Price & Live Price)
-   = */
+   ========================================================= */
 /* -------- SMALL TRADINGVIEW STYLE BUBBLES -------- */
 .price-bubble {
   position: absolute;
@@ -750,9 +583,9 @@ HEAD.alert-description-box {
   z-index: 6;
 }
 
-/* =
+/* =========================================================
    FINAL MOBILE FIX — FORCE EVERYTHING INTO ONE COLUMN
-   = */
+   ========================================================= */
 @media (max-width: 768px) {
 
   /* Force Active + Closed Signals to stack vertically */
@@ -947,9 +780,9 @@ HEAD.alert-description-box {
 
 }
 
-/* ====
+/* ============================================================
    NEW — 3-SECTION SIGNAL CARD LAYOUT (HEADER / CHART / FOOTER)
-   ==== */
+   ============================================================ */
 
 .signal-card {
   width: 280px;
@@ -1113,12 +946,12 @@ HEAD.alert-description-box {
 
 
 
-/* ===
+/* ===============================
    DESKTOP — Legend floats right
-   === */
-/* ===
+   =============================== */
+/* ===============================
    CLOSED SIGNAL SPEEDOMETER ROW
-   === */
+   =============================== */
 
 .closed-speedometer-row {
   width: 100%;
@@ -1137,13 +970,13 @@ HEAD.alert-description-box {
   }
 }
 
-/* ====
+/* ============================================================
    FIX FOR 1030px → 1650px SCREENS (prevent overlapping)
    Legend stays centered below filters
-   ==== */
-/* ===
+   ============================================================ */
+/* ===============================
    LEGEND ROW (NO OVERLAP)
-   === */
+   =============================== */
 .legend-row {
   width: 100%;
   display: flex;
@@ -1154,10 +987,10 @@ HEAD.alert-description-box {
 }
 
 
-/* ==
+/* ============================================
    MOBILE FIX — Force each filter into its own row
    (< 768px)
-   == */
+   ============================================ */
 @media (max-width: 768px) {
 
   /* Make filter rows vertical */
@@ -1183,9 +1016,9 @@ HEAD.alert-description-box {
   }
 
   /* Fix legend on mobile – centered */
-  /* ===
+  /* ===============================
    LEGEND ROW (NO OVERLAP)
-   === */
+   =============================== */
   .legend-row {
     width: 100%;
     display: flex;
@@ -1197,9 +1030,9 @@ HEAD.alert-description-box {
 
 }
 
-/* ====
+/* =====================================================
    FINAL THEME CONTROL — ONLY SOURCE OF TRUTH
-   ==== */
+   ===================================================== */
 
 /* ---------- LIGHT THEME ---------- */
 .theme-light .filter-item label {
@@ -1260,13 +1093,13 @@ HEAD.alert-description-box {
   font-weight: 600;
 }
 
-/* ====
+/* =====================================================
    FIX: Alert Description Text Not Visible (Dark Theme)
-   ==== */
+   ===================================================== */
 
-/* ====
+/* =====================================================
    🔥 FINAL HARD OVERRIDE — ALERT TEXT VISIBILITY
-   ==== */
+   ===================================================== */
 
 /* Force color on the box */
 .theme-dark .alert-description-box {
@@ -1288,13 +1121,13 @@ HEAD.alert-description-box {
   color: #0e0d0d !important;
 }
 
-/* ====
+/* =====================================================
    ADVANCED FILTER CONTAINER (TOP SECTION ONLY)
-   ==== */
+   ===================================================== */
 
-/* ====
+/* =====================================================
    ADVANCED FILTER CONTAINER — PREMIUM (Landing style)
-   ==== */
+   ===================================================== */
 
 .advanced-filter-wrapper {
   margin: 20px auto 30px;
@@ -1357,10 +1190,10 @@ HEAD.alert-description-box {
 }
 
 
-/* ====
+/* =====================================================
    FIX: Active/Closed title not visible in DARK theme
    + Add animated grow-shrink dots
-   ==== */
+   ===================================================== */
 
 /* Make heading text visible in dark theme */
 .theme-dark .active-title,
@@ -1420,9 +1253,9 @@ HEAD.alert-description-box {
   }
 }
 
-/* ====
+/* =====================================================
    FIX: Accuracy Gauge text not visible in DARK theme
-   ==== */
+   ===================================================== */
 
 /* Percentage value inside gauge */
 .theme-dark svg text {
@@ -1436,10 +1269,10 @@ HEAD.alert-description-box {
   /* soft blue */
 }
 
-/* ====
+/* =====================================================
    PREMIUM DROPDOWN STYLE
    Inspired by Landing.jsx cards
-   ==== */
+   ===================================================== */
 
 .filter-item select,
 .filter-item input {
@@ -1499,9 +1332,9 @@ HEAD.alert-description-box {
   color-scheme: dark;
 }
 
-/* ====
+/* =====================================================
    CUSTOM DROPDOWN (Trade.jsx quality)
-   ==== */
+   ===================================================== */
 
 .custom-dd-wrapper {
   position: relative;
@@ -1603,14 +1436,14 @@ HEAD.alert-description-box {
   font-weight: 600;
 }
 
-/* ====
+/* =====================================================
    FINAL FIX — Date picker icon visibility (Dark theme)
-   ==== */
+   ===================================================== */
 
 /* Base date input */
-/* ====
+/* =====================================================
    FINAL POLISH — Date input icon (Dark theme)
-   ==== */
+   ===================================================== */
 
 .filter-item input[type="date"] {
   position: relative;
@@ -1642,9 +1475,9 @@ HEAD.alert-description-box {
   opacity: 1;
 }
 
-/* ====
+/* =====================================================
    DARK THEME — TEXT VISIBILITY ONLY (NO BACKGROUND)
-   ==== */
+   ===================================================== */
 
 /* -------- Signal cards text -------- */
 .theme-dark .signal-card-advanced,
@@ -1686,4 +1519,3 @@ HEAD.alert-description-box {
 .theme-dark .signal-count-item {
   color: #141415 !important;
 }
-
