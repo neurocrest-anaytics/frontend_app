@@ -1,14 +1,7 @@
-<<<<<<< HEAD
 // ============================================================
 //                 FINAL UPDATED SIGNALCARD.JSX
 //     (Correct BUY/SELL PNL Logic + Live>Signal Color Rule)
 // ============================================================
-=======
-// ====
-//                 FINAL UPDATED SIGNALCARD.JSX
-//     (Correct BUY/SELL PNL Logic + Live>Signal Color Rule)
-// ====
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
@@ -170,15 +163,9 @@ export default function SignalCard({
 
 
 
-<<<<<<< HEAD
   // ============================================================
   // ⭐ UNIVERSAL CORRECT PNL CALCULATION
   // ============================================================
-=======
-  // ====
-  // ⭐ UNIVERSAL CORRECT PNL CALCULATION
-  // ====
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
   const side = alertType?.toLowerCase();
 
   let pnl = 0;
@@ -188,15 +175,9 @@ export default function SignalCard({
   const isProfit = pnl > 0;
   const pnlColor = isProfit ? "#00C853" : "#E53935";
 
-<<<<<<< HEAD
   // ============================================================
   // PRICE RANGE FOR MARKERS
   // ============================================================
-=======
-  // ====
-  // PRICE RANGE FOR MARKERS
-  // ====
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
   const rawVals = [sup, st, sp, t, res, cp]
     .map(Number)
     .filter((v) => !isNaN(v));
@@ -234,7 +215,6 @@ export default function SignalCard({
 
   const isValid = (v) => v !== null && !isNaN(Number(v));
 
-<<<<<<< HEAD
   // ============================================================
   // ⭐ LIVE VS SIGNAL COLOR RULE (FINAL)
   // ============================================================
@@ -244,17 +224,6 @@ export default function SignalCard({
   // ============================================================
   //                     RENDER COMPONENT
   // ============================================================
-=======
-  // ====
-  // ⭐ LIVE VS SIGNAL COLOR RULE (FINAL)
-  // ====
-  /*const lineColor = isClosed ? "#999" : (cp > sp ? "#00C853" : "#E53935");*/
-  const lineColor = cp > sp ? "#00C853" : "#E53935";
-
-  // ====
-  //                     RENDER COMPONENT
-  // ====
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
   return (
     <div
       className={[
@@ -457,15 +426,9 @@ export default function SignalCard({
   );
 }
 
-<<<<<<< HEAD
 // ============================================================
 //                     MARKER COMPONENT
 // ============================================================
-=======
-// ====
-//                     MARKER COMPONENT
-// ====
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
 function Marker({
   type,
   pos,

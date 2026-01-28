@@ -287,13 +287,8 @@ export default function Menu({ logout }) {
                     {item.comingSoon && (
                       <div
                         className={`absolute top-2 right-2 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-md bg-gradient-to-r from-indigo-500 to-blue-500 ${isDark
-<<<<<<< HEAD
                             ? "bg-white/15 border border-white/15"
                             : "bg-slate-700"
-=======
-                          ? "bg-white/15 border border-white/15"
-                          : "bg-slate-700"
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
                           }`}
                       >
                         SOON
@@ -303,32 +298,18 @@ export default function Menu({ logout }) {
                     {/* Icon Container */}
                     <div
                       className={`relative w-20 h-20 rounded-2xl flex items-center justify-center transition-all duration-300 ${isDisabled
-<<<<<<< HEAD
                           ? isDark
                             ? "bg-white/10"
                             : "bg-gradient-to-br from-slate-200 to-gray-300"
                           : `bg-gradient-to-br ${item.color} group-hover:scale-110 group-hover:rotate-3 shadow-lg`
-=======
-                        ? isDark
-                          ? "bg-white/10"
-                          : "bg-gradient-to-br from-slate-200 to-gray-300"
-                        : `bg-gradient-to-br ${item.color} group-hover:scale-110 group-hover:rotate-3 shadow-lg`
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
                         } ${!isDisabled && isHovered ? "shadow-2xl" : ""}`}
                     >
                       <div
                         className={`${isDisabled
-<<<<<<< HEAD
                             ? isDark
                               ? "text-slate-300"
                               : "text-slate-500"
                             : "text-white"
-=======
-                          ? isDark
-                            ? "text-slate-300"
-                            : "text-slate-500"
-                          : "text-white"
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
                           } transition-transform duration-300 ${isHovered && !isDisabled ? "scale-110" : ""
                           }`}
                       >
@@ -345,21 +326,12 @@ export default function Menu({ logout }) {
                     <div className="mt-4 text-center relative z-10">
                       <span
                         className={`text-sm font-bold transition-colors duration-300 ${isDisabled
-<<<<<<< HEAD
                             ? isDark
                               ? "text-slate-300"
                               : "text-slate-500"
                             : isDark
                               ? "text-white group-hover:text-white"
                               : "text-slate-800 group-hover:text-slate-900"
-=======
-                          ? isDark
-                            ? "text-slate-300"
-                            : "text-slate-500"
-                          : isDark
-                            ? "text-white group-hover:text-white"
-                            : "text-slate-800 group-hover:text-slate-900"
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
                           }`}
                       >
                         {item.label}

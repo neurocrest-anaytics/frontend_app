@@ -1,17 +1,3 @@
-<<<<<<< HEAD
-=======
-// src/pages/Payments.jsx
-import React, { useCallback, useMemo, useState } from "react";
-import { loadStripe } from "@stripe/stripe-js";
-import {
-  Elements,
-  PaymentElement,
-  useElements,
-  useStripe,
-} from "@stripe/react-stripe-js";
-import BackButton from "../components/BackButton";
-import HeaderBackRow from "../components/HeaderBackRow";
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
 import React, { useState, useEffect, useMemo } from "react";
 import { Check, X, Loader, Smartphone, CreditCard, Info, ArrowLeft } from "lucide-react";
 
@@ -511,42 +497,6 @@ export default function Payments({ username }) {
     "bg-white/20 cursor-not-allowed";
 
   return (
-<<<<<<< HEAD
-=======
-    <div className="min-h-screen bg-gray-100 px-4 py-6">
-      <div className="max-w-3xl mx-auto space-y-4">
-        {/* Back to Profile */}
-        <HeaderBackRow backTo="/profile" />
-
-        <h1 className="text-2xl font-bold">Payments</h1>
-
-        {/* User info for prefill */}
-        <Section title="Customer Details (optional but recommended)">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <input
-              className="border rounded px-3 py-2"
-              placeholder="Name / Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <input
-              className="border rounded px-3 py-2"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-              className="border rounded px-3 py-2"
-              placeholder="Phone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
-          </div>
-        </Section>
-
-        {/* Tabs */}
-        <div className="flex gap-2">
->>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
     <>
       <div className="min-h-screen text-white bg-gradient-to-br from-[#0f172a] via-[#1e3a8a] to-[#020617] px-2 sm:px-4 py-10">
         <div className="w-full max-w-none mx-auto">
