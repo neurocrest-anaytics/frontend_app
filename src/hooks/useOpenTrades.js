@@ -39,10 +39,17 @@ export default function useOpenTrades(username, {
         setData(json);
         sessionStorage.setItem(`open_trades_${username}`, JSON.stringify(json));
       }
- } catch (err) {
-  if (err?.name === "AbortError") return; // ✅ ignore abort
-  console.warn("OpenTrades refresh failed:", err?.message || err);
-} finally {
+      HEAD
+    } catch (err) {
+      if (err?.name === "AbortError") return; // ✅ ignore abort
+      console.warn("OpenTrades refresh failed:", err?.message || err);
+    } finally {
+=======
+    } catch (err) {
+      if (err?.name === "AbortError") return; // ✅ ignore abort
+      console.warn("OpenTrades refresh failed:", err?.message || err);
+    } finally {
+>>>>>>> f801d30 (Initial Commit)
 
       if (abortRef.current === ctl) abortRef.current = null;
       setRefreshing(false);

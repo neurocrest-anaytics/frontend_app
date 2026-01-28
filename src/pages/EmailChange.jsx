@@ -1,116 +1,114 @@
-// ✅ frontend/src/pages/EmailChange.jsx
-import React, { useState } from "react";
-import { toast } from "react-toastify";
+// ✅ frontend/src/pages/ChangeEmail.jsx
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BackButton from "../components/BackButton";
+import { useTheme } from "../context/ThemeContext";
+import { Mail, Home, Sun, Moon, Info } from "lucide-react";
 
+export default function ChangeEmail({ username }) {
+  const navigate = useNavigate();
+  const { isDark, toggle } = useTheme();
 
-export default function EmailChange() {
-  const nav = useNavigate();
+  const bgClass = isDark
+    ? "bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900"
+    : "bg-gradient-to-br from-blue-50 via-white to-blue-50";
 
-  const [step, setStep] = useState(1); // 1: email + otp, 2: new email input
+  const glassClass = isDark
+    ? "bg-white/10 backdrop-blur-xl border border-white/20"
+    : "bg-white/70 backdrop-blur-xl border border-white/30";
+
+  const textClass = isDark ? "text-white" : "text-slate-900";
+  const textSecondaryClass = isDark ? "text-slate-300" : "text-slate-600";
+
+  const inputClass = isDark
+    ? "bg-white/5 border-white/20 text-slate-300 placeholder-slate-500"
+    : "bg-slate-100 border-slate-200 text-slate-500 placeholder-slate-400";
+
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
-  const [newEmail, setNewEmail] = useState("");
-  const [confirmNewEmail, setConfirmNewEmail] = useState("");
 
-  const sendOtp = async () => {
+  useEffect(() => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/send-email-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      if (!res.ok) throw new Error();
-      toast.success("OTP sent to email");
-      setStep(2);
-    } catch {
-      toast.error("Failed to send OTP");
-    }
-  };
-
-  const updateEmail = async () => {
-    if (newEmail !== confirmNewEmail) {
-      toast.error("Emails do not match");
-      return;
-    }
-    try {
-      const res = await fetch("http://127.0.0.1:8000/update-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          old_email: email,
-          otp,
-          new_email: newEmail,
-        }),
-      });
-      if (!res.ok) throw new Error();
-      toast.success("Email updated successfully!");
-      nav("/profile");
-    } catch {
-      toast.error("Email update failed. Try again.");
-    }
-  };
+      const u = JSON.parse(localStorage.getItem("nc_user") || "{}");
+      if (u?.email) setEmail(u.email);
+    } catch { }
+  }, []);
 
   return (
-    <div className="min-h-screen p-4 max-w-md mx-auto">
-      <BackButton to="/settings" />
-      <h2 className="text-xl font-semibold text-center mb-6">Email Change</h2>
+    <div className={`min-h-screen ${bgClass} ${textClass} relative overflow-hidden transition-colors duration-300`}>
+      {/* Background blobs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div
+          className="absolute bottom-0 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse"
+          style={{ animationDelay: "1s" }}
+        ></div>
+      </div>
 
-      {step === 1 && (
-        <div className="border rounded p-4">
-          <p className="font-medium mb-2">Confirm Email</p>
-          <input
-            type="email"
-            placeholder="Enter current email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full mb-3 p-2 border rounded"
-          />
-          <button
-            onClick={sendOtp}
-            className="text-sm text-blue-600 hover:underline"
-          >
-            SEND VERIFICATION CODE
-          </button>
+      <div className="relative z-10 w-full max-w-none mx-auto px-2 sm:px-3 lg:px-4 py-4">
+        {/* Top bar */}
+        <div className="flex items-center justify-between mb-6">
+          <BackButton to="/settings" />
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => navigate("/trade")}
+              className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-lg transition-all hover:scale-105 active:scale-95
+                ${isDark ? "bg-white/10 border border-white/20 text-white" : "bg-white/70 border border-white text-slate-900"}`}
+              title="Home"
+            >
+              <Home className="w-5 h-5" />
+            </button>
+
+            <button
+              type="button"
+              onClick={toggle}
+              className={`w-11 h-11 rounded-xl flex items-center justify-center shadow-lg transition-all hover:scale-105 active:scale-95
+                ${isDark ? "bg-white/10 border border-white/20 text-white" : "bg-white/70 border border-white text-slate-900"}`}
+              title={isDark ? "Light mode" : "Dark mode"}
+            >
+              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
-      )}
 
-      {step === 2 && (
-        <div className="border rounded p-4">
-          <p className="font-medium mb-2">Verify OTP</p>
-          <input
-            type="text"
-            placeholder="Enter OTP"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            className="w-full mb-3 p-2 border rounded"
-          />
-
-          <p className="font-medium mb-2">New Email</p>
-          <input
-            type="email"
-            placeholder="New Email"
-            value={newEmail}
-            onChange={(e) => setNewEmail(e.target.value)}
-            className="w-full mb-2 p-2 border rounded"
-          />
-          <input
-            type="email"
-            placeholder="Confirm New Email"
-            value={confirmNewEmail}
-            onChange={(e) => setConfirmNewEmail(e.target.value)}
-            className="w-full mb-2 p-2 border rounded"
-          />
-
-          <button
-            onClick={updateEmail}
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-          >
-            Change
-          </button>
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <Mail className="w-8 h-8 text-blue-500" />
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+              Your Email
+            </h1>
+          </div>
+          <p className={textSecondaryClass}>This is the email you used when signing up</p>
         </div>
-      )}
+
+        {/* Card */}
+        <div className={`${glassClass} rounded-3xl shadow-2xl p-6 sm:p-8 max-w-xl mx-auto`}>
+          <div className={`mb-5 rounded-2xl ${glassClass} px-4 py-3 flex items-center gap-3 shadow-lg`}>
+            <Info className="w-5 h-5 text-blue-400 flex-shrink-0" />
+            <span className={`${textSecondaryClass} font-medium`}>
+              Your email cannot be changed.
+            </span>
+          </div>
+
+          <label className={`block text-sm font-semibold ${textSecondaryClass} mb-2`}>Registered Email</label>
+
+          <input
+            type="email"
+            value={email || ""}
+            readOnly
+            disabled
+            placeholder="No email found"
+            className={`w-full px-5 py-4 border ${inputClass} rounded-2xl text-base font-semibold outline-none transition-all
+              opacity-70 cursor-not-allowed`}
+          />
+
+          <div className={`mt-4 text-sm ${textSecondaryClass}`}>
+            If you need help, contact support.
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
