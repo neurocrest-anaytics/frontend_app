@@ -1,7 +1,7 @@
-// ============================================================
+// ====
 //                 FINAL UPDATED SIGNALCARD.JSX
 //     (Correct BUY/SELL PNL Logic + Live>Signal Color Rule)
-// ============================================================
+// ====
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
@@ -163,9 +163,9 @@ export default function SignalCard({
 
 
 
-  // ============================================================
+  // ====
   // ⭐ UNIVERSAL CORRECT PNL CALCULATION
-  // ============================================================
+  // ====
   const side = alertType?.toLowerCase();
 
   let pnl = 0;
@@ -175,9 +175,9 @@ export default function SignalCard({
   const isProfit = pnl > 0;
   const pnlColor = isProfit ? "#00C853" : "#E53935";
 
-  // ============================================================
+  // ====
   // PRICE RANGE FOR MARKERS
-  // ============================================================
+  // ====
   const rawVals = [sup, st, sp, t, res, cp]
     .map(Number)
     .filter((v) => !isNaN(v));
@@ -215,15 +215,15 @@ export default function SignalCard({
 
   const isValid = (v) => v !== null && !isNaN(Number(v));
 
-  // ============================================================
+  // ====
   // ⭐ LIVE VS SIGNAL COLOR RULE (FINAL)
-  // ============================================================
+  // ====
   /*const lineColor = isClosed ? "#999" : (cp > sp ? "#00C853" : "#E53935");*/
   const lineColor = cp > sp ? "#00C853" : "#E53935";
 
-  // ============================================================
+  // ====
   //                     RENDER COMPONENT
-  // ============================================================
+  // ====
   return (
     <div
       className={[
@@ -426,9 +426,9 @@ export default function SignalCard({
   );
 }
 
-// ============================================================
+// ====
 //                     MARKER COMPONENT
-// ============================================================
+// ====
 function Marker({
   type,
   pos,

@@ -40,7 +40,7 @@ export function useTheme() {
   }
   return ctx;
 }
-=======
+
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 const ThemeContext = createContext(null);
@@ -82,4 +82,4 @@ export function useTheme() {
   }
   return ctx;
 }
->>>>>>> f801d30 (Initial Commit)
+

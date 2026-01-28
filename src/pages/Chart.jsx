@@ -1834,7 +1834,7 @@ export default function ChartPage() {
     }
 
     load();
-    // ========== LIVE PRICE UPDATE ========== //
+    // === LIVE PRICE UPDATE === //
     let ws = null;
 
     function handleTick(tick) {
@@ -2965,9 +2965,9 @@ export default function ChartPage() {
 
 
 
-  // ======================================================================
+  // 
   // 🔵 OPEN RECOMMENDATIONS — CLICK HANDLER
-  // ======================================================================
+  // 
   async function openRecommendations() {
     console.log("📌 Recommendation button clicked");
     if (recoLocked) {
@@ -3046,9 +3046,9 @@ export default function ChartPage() {
 
 
 
-  // ======================================================================
+  // 
   // 🔵 REFRESH RECOMMENDATIONS — FETCH + APPLY MARKERS + UPDATE DESCRIPTION
-  // ======================================================================
+  // 
   async function refreshRecommendations() {
     try {
       const url = `${API}/market/reco-load?symbol=${symbol}&tf=${tf}`;
@@ -3257,7 +3257,7 @@ export default function ChartPage() {
         </div>
       </div>
 
-      {/* ================= SEARCH MODAL ================= */}
+      {/* === SEARCH MODAL === */}
       {openSearch && (
         <div
           className="fixed inset-0 z-[10060] bg-black/50 backdrop-blur-sm flex items-start justify-center pt-20 px-3"
@@ -3425,7 +3425,7 @@ export default function ChartPage() {
 
         <div className={`${glassClass} rounded-3xl p-6 shadow-2xl min-h-[80px]`}>
 
-          {/* ================= RECOMMENDATIONS ================= */}
+          {/* === RECOMMENDATIONS === */}
           {recoMode && (
             <>
               <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/20">
@@ -3490,7 +3490,7 @@ export default function ChartPage() {
             </>
           )}
 
-          {/* ================= GENERATED SIGNALS ================= */}
+          {/* === GENERATED SIGNALS === */}
           {generateMode && (
             <>
               <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/20 mt-6">

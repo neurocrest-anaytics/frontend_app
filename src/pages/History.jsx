@@ -7,9 +7,9 @@ import { NotebookPen, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import HeaderBackRow from "../components/HeaderBackRow";
-=======
+
 import React, { useEffect, useState, useMemo, useRef, useCallback } from "react";
->>>>>>> f801d30 (Initial Commit)
+
 
 import { moneyINR } from "../utils/format";
 import {
@@ -887,13 +887,13 @@ export default function History({ username }) {
         <span>Download</span>
       </button>
     </div>
-=======
+
     <div className={`min-h-screen ${bgClass} ${textClass} relative transition-colors duration-300`}>
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/20 rounded-full blur-3xl"></div>
         <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl"></div>
->>>>>>> f801d30 (Initial Commit)
+        f801d30 (Initial Commit)
       </div>
 
       <AppHeader />

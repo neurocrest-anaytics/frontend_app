@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // src/pages/Payments.jsx
 import React, { useCallback, useMemo, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
@@ -10,12 +9,10 @@ import {
 } from "@stripe/react-stripe-js";
 import BackButton from "../components/BackButton";
 import HeaderBackRow from "../components/HeaderBackRow";
-=======
 import React, { useState, useEffect, useMemo } from "react";
 import { Check, X, Loader, Smartphone, CreditCard, Info, ArrowLeft } from "lucide-react";
 
 import { useNavigate, useLocation } from "react-router-dom";
->>>>>>> f801d30 (Initial Commit)
 
 const API = import.meta.env.VITE_BACKEND_BASE_URL || "http://127.0.0.1:8000";
 
@@ -511,7 +508,6 @@ export default function Payments({ username }) {
     "bg-white/20 cursor-not-allowed";
 
   return (
-<<<<<<< HEAD
     <div className="min-h-screen bg-gray-100 px-4 py-6">
       <div className="max-w-3xl mx-auto space-y-4">
         {/* Back to Profile */}
@@ -545,11 +541,9 @@ export default function Payments({ username }) {
 
         {/* Tabs */}
         <div className="flex gap-2">
-=======
     <>
       <div className="min-h-screen text-white bg-gradient-to-br from-[#0f172a] via-[#1e3a8a] to-[#020617] px-2 sm:px-4 py-10">
         <div className="w-full max-w-none mx-auto">
->>>>>>> f801d30 (Initial Commit)
           <button
             type="button"
             onClick={handleBack}

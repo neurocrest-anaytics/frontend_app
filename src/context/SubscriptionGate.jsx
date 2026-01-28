@@ -63,7 +63,7 @@ export default function SubscriptionGateProvider({ username, children }) {
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
-=======
+
 // src/context/SubscriptionGate.jsx
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { getNext7amISTEpochMs, readGate, shouldRecheckNow, writeGate } from "../utils/subscriptionDailyGate";
@@ -128,4 +128,4 @@ export default function SubscriptionGateProvider({ username, children }) {
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
->>>>>>> f801d30 (Initial Commit)
+

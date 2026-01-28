@@ -4,7 +4,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import BackButton from "../components/BackButton";
 HEAD
 import HeaderBackRow from "../components/HeaderBackRow";
-=======
+
 import {
   TrendingDown,
   DollarSign,
@@ -19,7 +19,7 @@ import {
   ArrowUpRight,
   ArrowDownRight,
 } from "lucide-react";
->>>>>>> f801d30 (Initial Commit)
+
 
 import { useTheme } from "../context/ThemeContext";
 
@@ -203,7 +203,7 @@ export default function Sell() {
     }
   }, [nav, symbol, isModify, isAdd]);
 
-=======
+
   useEffect(() => {
     if (!symbol) return;
 
@@ -256,7 +256,7 @@ export default function Sell() {
     const id = setInterval(checkMarket, 30_000);
     return () => clearInterval(id);
   }, [orderMode]);
->>>>>>> f801d30 (Initial Commit)
+
 
   // -------- Live price polling --------
   useEffect(() => {
@@ -517,10 +517,10 @@ export default function Sell() {
         payload.price = px;
       }
 
-      // ================================
+      // ====
       // ✅ SELL FIRST + LIMIT validation
       // Limit price must be ABOVE live price
-      // ================================
+      // ====
       if (
         orderMode === "LIMIT" &&
         (allowShort || isSellFirstModify) === true &&
@@ -536,9 +536,9 @@ export default function Sell() {
         }
       }
 
-      // ================================
+      // ====
       // ✅ SELL validation: Stoploss & Target
-      // ================================
+      // ====
       // ✅ SELL validation: Stoploss & Target (skip for EXIT)
       if (!isExit) {
         const entryPrice =
@@ -659,12 +659,12 @@ export default function Sell() {
               ? "MODIFY ORDER"
               : `SELL ${symbol}`}
         </h2>
-=======
+
   const handleModifyPosition = async () => {
     if (submitting) return;
         setSubmitting(true);
         setErrorMsg("");
->>>>>>> f801d30 (Initial Commit)
+        f801d30 (Initial Commit)
 
         try {
       // ✅ Anchor datetime MUST be present for modify to work correctly
