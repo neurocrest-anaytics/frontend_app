@@ -2,7 +2,11 @@
 module.exports = {
     darkMode: "class",
     content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
-    theme: { extend: { colors: { primary: "#2563eb", secondary: "#1e293b" } } },
+    theme: { extend: { 
+        fontFamily: {
+                sans: ["Inter", "system-ui", "sans-serif"],
+            },
+        colors: { primary: "#2563eb", secondary: "#1e293b" } } },
     safelist: [
         "text-green-600", "text-red-600",
         "bg-red-100", "hover:bg-red-200",
