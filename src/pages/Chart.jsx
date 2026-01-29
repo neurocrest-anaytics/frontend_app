@@ -554,7 +554,7 @@ function pointToSegDist(px, py, x1, y1, x2, y2) {
 function startLiveFeed(symbol, onTick) {
   const WS_BASE =
     import.meta.env.VITE_BACKEND_WS_URL ||
-    "wss://paper-trading-backend-sqllite.onrender.com";
+    "wss://backend-app-k52v.onrender.com";
 
   let ws;
 

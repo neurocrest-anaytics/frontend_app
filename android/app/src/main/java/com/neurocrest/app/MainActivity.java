@@ -21,12 +21,12 @@ public class MainActivity extends BridgeActivity {
         new Thread(() -> {
             try {
 <<<<<<< HEAD
-                String host = "paper-trading-backend-sqllite.onrender.com";
+                String host = "backend-app-k52v.onrender.com";
 =======
 
-                String host = "paper-trading-backend-sqllite.onrender.com";
+                String host = "backend-app-k52v.onrender.com";
 
-                String host = "paper-trading-backend-sqllite.onrender.com";
+                String host = "backend-app-k52v.onrender.com";
 
 >>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
                 String ip = java.net.InetAddress.getByName(host).getHostAddress();
