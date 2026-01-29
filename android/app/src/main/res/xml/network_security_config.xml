@@ -3,9 +3,9 @@
   <domain-config cleartextTrafficPermitted="true">
     <!-- ✅ Replace with your backend domain -->
 <<<<<<< HEAD
-    <domain includeSubdomains="true">paper-trading-backend-sqllite.onrender.com</domain>
+    <domain includeSubdomains="true">backend-app-k52v.onrender.com</domain>
 =======
-    <domain includeSubdomains="true">paper-trading-backend-sqllite.onrender.com</domain>
+    <domain includeSubdomains="true">backend-app-k52v.onrender.com</domain>
 >>>>>>> 6c42a83969e64dded0190e1fc5cbd41fda1a4d53
   </domain-config>
 </network-security-config>

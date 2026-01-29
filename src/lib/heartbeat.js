@@ -1,6 +1,6 @@
 // src/lib/heartbeat.js
 const BASE = import.meta?.env?.VITE_BACKEND_BASE_URL?.trim().replace(/\/+$/, "")
-  || "https://paper-trading-backend-sqllite.onrender.com";
+  || "https://backend-app-k52v.onrender.com";
 
 export function startHeartbeat() {
   // Ping every 45s while the tab is open
