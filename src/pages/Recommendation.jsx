@@ -1047,14 +1047,14 @@ export default function Recommendations() {
       {/* ===== MAIN CONTENT (STEP 5) ===== */}
       <div className="w-full px-3 sm:px-4 md:px-6 py-6 relative pb-24">
 
-        <div className="mb-6">
+        {/*<div className="mb-6">
           <h2 className={`text-4xl font-bold ${textClass} mb-2`}>
             Recommendations
           </h2>
           <p className={textSecondaryClass}>
             Trading signals & analytics
           </p>
-        </div>
+        </div>*/}
 
         {/* MAIN CATEGORY BUTTONS (UNCHANGED LOGIC) */}
         {/* MAIN CATEGORY BUTTONS (UI updated like header row) */}
