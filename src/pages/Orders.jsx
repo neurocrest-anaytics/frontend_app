@@ -811,8 +811,8 @@ export default function Orders({ username }) {
         {/* Page header + Tabs + Refresh button */}
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h2 className={`text-4xl font-bold ${textClass} mb-1`}>Orders</h2>
-            <p className={textSecondaryClass}>Your active trades and positions</p>
+             {/*<h2 className={`text-4xl font-bold ${textClass} mb-1`}>Orders</h2>
+            <p className={textSecondaryClass}>Your active trades and positions</p>*/}
 
             <div className={`flex p-1.5 rounded-2xl ${glassClass} w-fit mt-4 shadow-lg`}>
               {["open", "positions"].map((t) => (

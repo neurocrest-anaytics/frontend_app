@@ -836,8 +836,8 @@ export default function History({ username }) {
       <div className="w-full px-3 sm:px-4 md:px-6 py-6 relative pb-24">
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h2 className={`text-4xl font-bold ${textClass}`}>History</h2>
-            <p className={`${textSecondaryClass}`}>Your trading history and analytics</p>
+             {/*<h2 className={`text-4xl font-bold ${textClass}`}>History</h2>
+            <p className={`${textSecondaryClass}`}>Your trading history and analytics</p>*/}
 
             <div className={`mt-4 inline-flex p-1 rounded-2xl ${glassClass}`}>
               <button

@@ -102,6 +102,22 @@ body {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+/* ✅ Safe area helpers (for notch + fullscreen) */
+.safe-top {
+  padding-top: var(--sat);
+}
+
+.safe-x {
+  padding-left: var(--sal);
+  padding-right: var(--sar);
+}
+
+/* ✅ Use this for any sticky/fixed top header */
+.safe-sticky-top {
+  padding-top: calc(10px + var(--sat)); /* 10px = normal spacing */
+  padding-left: calc(12px + var(--sal));
+  padding-right: calc(12px + var(--sar));
+}
 
 
 
@@ -182,4 +198,11 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+}
+
+:root{
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
 }
