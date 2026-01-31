@@ -3110,7 +3110,16 @@ const isUp = useMemo(() => {
 
       {/* Header */}
       {/* Header (Sticky + 2 rows for mobile/tablet) */}
-      <div className={`sticky top-0 z-[10020] ${glassClass} shadow-xl pointer-events-auto`}>
+      {/* Header (Sticky + 2 rows for mobile/tablet) */}
+<div
+  className={`sticky top-0 z-[10020] ${glassClass} shadow-xl pointer-events-auto`}
+  style={{
+    paddingTop: "env(safe-area-inset-top)",
+    paddingLeft: "env(safe-area-inset-left)",
+    paddingRight: "env(safe-area-inset-right)",
+  }}
+>
+
 
         {/* Row 1: Back + Symbol/TF/Price + Search/WA/Theme */}
         <div className="flex items-center justify-between gap-2 px-3 py-2">
