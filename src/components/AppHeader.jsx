@@ -43,7 +43,11 @@ export default function AppHeader({ zClass = "z-50", showBack = true, showNav = 
       <div
         ref={headerRef}
         className={`fixed top-0 left-0 right-0 ${zClass} ${glassClass} shadow-2xl`}
-        style={{ paddingTop: "env(safe-area-inset-top)" }} // nice for mobiles/notches
+        style={{
+          paddingTop: "env(safe-area-inset-top)",
+          paddingLeft: "env(safe-area-inset-left)",
+          paddingRight: "env(safe-area-inset-right)",
+        }}
       >
         <div className="w-full px-3 sm:px-4 md:px-6 py-4">
           <div className="relative flex items-start justify-between mb-4">
