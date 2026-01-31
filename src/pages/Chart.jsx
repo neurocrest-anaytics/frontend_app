@@ -3111,8 +3111,8 @@ const isUp = useMemo(() => {
       {/* Header */}
       {/* Header (Sticky + 2 rows for mobile/tablet) */}
       {/* Header (Sticky + 2 rows for mobile/tablet) */}
-<div
-  className={`sticky top-0 z-[10020] ${glassClass} shadow-xl pointer-events-auto`}
+<div className={`sticky top-0 z-[10020] ${glassClass} shadow-xl pointer-events-auto safe-sticky-top`}
+
   style={{
     paddingTop: "env(safe-area-inset-top)",
     paddingLeft: "env(safe-area-inset-left)",
