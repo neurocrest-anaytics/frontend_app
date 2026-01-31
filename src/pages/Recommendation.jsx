@@ -1009,15 +1009,163 @@ export default function Recommendations() {
         </div>
 
         {/* ✅ DESKTOP VIEW: keep your existing 2-column layout */}
-        <div className="hidden md:block">
+        {/* ✅ DESKTOP VIEW: ORIGINAL 2-COLUMN LAYOUT (DO NOT CHANGE UI) */}
+        {/* ✅ DESKTOP VIEW: 2-COLUMN LAYOUT (WORKING) */}
+        <div className="hidden md:block w-full">
           <div className="signals-columns">
 
-            {/* 👉 keep your EXACT existing two columns code here:
-          1) Active signals column
-          2) Closed signals column
-      */}
+            {/* ================= ACTIVE COLUMN ================= */}
+            <div className="signals-column">
+              <h3 className="section-title active-title">
+                <span className="signal-title-wrap">
+                  <span className="signal-dot signal-dot-active"></span>
+                  Active Signals
+                </span>
+              </h3>
+
+              <div className="signal-count-box">
+                <div className="signal-count-item buy">
+                  BUY Signals: <span>{totalBuySignals}</span>
+                </div>
+                <div className="signal-count-item sell">
+                  SELL Signals: <span>{totalSellSignals}</span>
+                </div>
+                <div className="signal-count-item total">
+                  Total: <span>{totalBuySignals + totalSellSignals}</span>
+                </div>
+              </div>
+
+              {initialLoading ? (
+                <p>Loading data...</p>
+              ) : (
+                <div className="active-signals-container">
+                  <div
+                    style={{
+                      width: "100%",
+                      textAlign: "left",
+                      marginBottom: "4px",
+                      paddingLeft: "8px",
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      color: isDark ? "rgba(255,255,255,0.85)" : "#333",
+                    }}
+                  >
+                    % = Confidence | ▼ = Current Price
+                  </div>
+
+                  <div className="signal-grid">
+                    {activeSignals.length > 0 ? (
+                      activeSignals.map((sig) => (
+                        <SignalCard
+                          key={sig.id}
+                          script={sig.script}
+                          confidence={sig.confidence}
+                          alertType={sig.alertType}
+                          description={sig.description}
+                          sup={sig.sup}
+                          st={sig.st}
+                          signalPrice={sig.signalPrice}
+                          currentPrice={sig.currentPrice}
+                          t={sig.t}
+                          res={sig.res}
+                          timeVal={sig.timeVal}
+                          alertText={sig.alertText}
+                          userActions={sig.userActions}
+                          isClosed={false}
+                          strategy={sig.strategy}
+                          rawDate={sig.dateVal}
+                          rawTime={sig.timeVal}
+                          fromReco={true}
+                          closeTime={sig.closeTime}
+                        />
+                      ))
+                    ) : (
+                      <p>No active signals.</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ================= CLOSED COLUMN ================= */}
+            <div className="signals-column">
+              <h3 className="section-title closed-title">
+                <span className="signal-title-wrap">
+                  <span className="signal-dot signal-dot-closed"></span>
+                  Closed Signals
+                </span>
+              </h3>
+
+              <div className="closed-signals-container">
+                <div
+                  style={{
+                    width: "100%",
+                    textAlign: "left",
+                    marginBottom: "4px",
+                    paddingLeft: "8px",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    color: isDark ? "rgba(255,255,255,0.85)" : "#333",
+                  }}
+                >
+                  % = Gain | ▼ = Close Price
+                </div>
+
+                <div className="signal-grid">
+                  {closedSignals.length > 0 ? (
+                    closedSignals.map((sig) => (
+                      <div
+                        className="closed-card-wrapper"
+                        key={sig.id}
+                        style={{
+                          backgroundColor: (() => {
+                            const sp = Number(sig.signalPrice);
+                            const cp = Number(sig.currentPrice);
+                            const side = String(sig.alertType).toLowerCase();
+                            let pnl = 0;
+                            if (side === "buy") pnl = (cp / sp - 1) * 100;
+                            else pnl = (1 - cp / sp) * 100;
+                            return pnl >= 0 ? "#E6FFE6" : "#FFE5E5";
+                          })(),
+                          borderRadius: "12px",
+                          padding: "8px",
+                          transition: "0.25s ease",
+                        }}
+                      >
+                        <SignalCard
+                          key={sig.id}
+                          script={sig.script}
+                          confidence={sig.confidence}
+                          alertType={sig.alertType}
+                          description={sig.description}
+                          sup={sig.sup}
+                          st={sig.st}
+                          signalPrice={sig.signalPrice}
+                          currentPrice={sig.currentPrice}
+                          t={sig.t}
+                          res={sig.res}
+                          timeVal={sig.timeVal}
+                          alertText={sig.alertText}
+                          userActions={sig.userActions}
+                          isClosed={true}
+                          strategy={sig.strategy}
+                          rawDate={sig.dateVal}
+                          rawTime={sig.timeVal}
+                          closeTime={sig.closeTime}
+                        />
+                      </div>
+                    ))
+                  ) : (
+                    <p className="no-signals-text">No closed signals.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
+
+
 
       </div>
 
