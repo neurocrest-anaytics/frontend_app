@@ -1,7 +1,6 @@
 {
   "appId": "com.neurocrest.app",
   "appName": "NeuroCrest",
-    HEAD
   "webDir": "dist",
   "bundledWebRuntime": false,
   "server": {
@@ -24,7 +23,3 @@
     }
   }
 }
-
-  "webDir": "dist"
-}
-                    f801d30 (Initial Commit)
