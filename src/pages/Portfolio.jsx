@@ -629,12 +629,12 @@ export default function Portfolio({ username }) {
 
       {/* Body */}
       <div className="w-full px-3 sm:px-4 md:px-6 pt-3 sm:pt-[0] pb-24 relative">
-        <div className="mb-6">
+        {/*<div className="mb-6">
           <h2 className={`text-4xl font-bold ${textClass} mb-2`}>Portfolio</h2>
           <p className={`${textSecondaryClass}`}>
             Track your holdings and performance
           </p>
-        </div>
+        </div>*/}
 
         {loading && (
           <div className={`text-left ${textSecondaryClass} mt-20`}>
