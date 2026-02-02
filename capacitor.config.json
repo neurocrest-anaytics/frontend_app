@@ -3,13 +3,6 @@
   "appName": "NeuroCrest",
   "webDir": "dist",
   "bundledWebRuntime": false,
-  "server": {
-    "url": "https://frontend-app-ten-opal.vercel.app",
-    "cleartext": false,
-    "allowNavigation": [
-      "frontend-app-ten-opal.vercel.app"
-    ]
-  },
   "android": {
     "allowMixedContent": true
   },
