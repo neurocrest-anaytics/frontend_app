@@ -21,3 +21,15 @@ node_modules/
 # capacitor platforms & builds
 android/
 ios/
+
+# archives
+*.zip
+*.7z
+*.rar
+
+# builds
+dist/
+build/
+
+# dependencies
+node_modules/
