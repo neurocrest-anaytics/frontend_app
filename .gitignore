@@ -5,3 +5,19 @@ dist
 .env
 .env.*
 
+
+# archives
+*.zip
+*.7z
+*.rar
+
+# build outputs
+dist/
+build/
+
+# dependencies
+node_modules/
+
+# capacitor platforms & builds
+android/
+ios/
