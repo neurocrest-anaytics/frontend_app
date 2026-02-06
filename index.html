@@ -5,7 +5,54 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/png" href="/logo1.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Nerocrest.in</title>
+  <title>Neurocrest.in</title>
+
+  <!-- ✅ Universal CSP: allows Android, Emulator, Render, Vercel, Google, Stripe -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self' data: blob: capacitor://localhost;
+    img-src 'self' data: blob: https:;
+    media-src 'self' data: blob: https:;
+    style-src 'self' 'unsafe-inline' https:;
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' https:;
+    connect-src
+      'self'
+      capacitor://localhost
+      https://backend-app-k52v.onrender.com
+      https://accounts.google.com
+      https://www.googleapis.com
+      https://www.google.com
+      https://www.gstatic.com
+      https://js.stripe.com
+      http://10.0.2.2:8000
+      http://127.0.0.1:8000
+      https://*.onrender.com;
+    frame-src
+      'self'
+      https://accounts.google.com
+      https://www.google.com
+      https://js.stripe.com;
+  ">
+
+  <!-- ✅ Dynamically load Google & Stripe only for web (not Android WebView) -->
+  <script>
+    const isNative =
+      !!window.Capacitor?.isNativePlatform?.() ||
+      !!window.Capacitor?.getPlatform?.();
+
+    if (!isNative) {
+      // Load Google Sign-In (only on browsers)
+      const google = document.createElement('script');
+      google.src = "https://accounts.google.com/gsi/client";
+      google.async = true;
+      google.defer = true;
+      document.head.appendChild(google);
+
+      // Load Stripe.js (only on browsers)
+      const stripe = document.createElement('script');
+      stripe.src = "https://js.stripe.com/v3";
+      document.head.appendChild(stripe);
+    }
+  </script>
 </head>
 
 <body class="bg-gray-100 dark:bg-gray-900">
