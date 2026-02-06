@@ -2,3 +2,34 @@ node_modules
 package-lock.json
 .vercel
 dist
+.env
+.env.*
+
+
+# archives
+*.zip
+*.7z
+*.rar
+
+# build outputs
+dist/
+build/
+
+# dependencies
+node_modules/
+
+# capacitor platforms & builds
+android/
+ios/
+
+# archives
+*.zip
+*.7z
+*.rar
+
+# builds
+dist/
+build/
+
+# dependencies
+node_modules/

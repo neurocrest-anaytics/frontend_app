@@ -1,6 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<<<<<<< HEAD
 
+=======
+>>>>>>> 91bb098cdeaf6f4860fe35fa3fb79a4689566426
     <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -13,7 +16,10 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         android:networkSecurityConfig="@xml/network_security_config">
+<<<<<<< HEAD
 
+=======
+>>>>>>> 91bb098cdeaf6f4860fe35fa3fb79a4689566426
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -21,12 +27,10 @@
             android:theme="@style/AppTheme.NoActionBarLaunch"
             android:launchMode="singleTask"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
 
         <provider
@@ -34,9 +38,13 @@
             android:authorities="${applicationId}.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
+<<<<<<< HEAD
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
+=======
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths" />
+>>>>>>> 91bb098cdeaf6f4860fe35fa3fb79a4689566426
         </provider>
 
     </application>

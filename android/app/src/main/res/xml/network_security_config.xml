@@ -1,7 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
+<<<<<<< HEAD
   <domain-config cleartextTrafficPermitted="true">
     <!-- ✅ Replace with your backend domain -->
     <domain includeSubdomains="true">backend-app-k52v.onrender.com</domain>
   </domain-config>
 </network-security-config>
+=======
+  <base-config cleartextTrafficPermitted="true">
+    <trust-anchors>
+      <certificates src="system" />
+      <certificates src="user" />
+    </trust-anchors>
+  </base-config>
+
+</network-security-config>
+>>>>>>> 91bb098cdeaf6f4860fe35fa3fb79a4689566426

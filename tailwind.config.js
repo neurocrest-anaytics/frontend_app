@@ -1,17 +1,18 @@
 // tailwind.config.js
 module.exports = {
-    darkMode: "class", // ✅ enables class-based dark mode
-    content: [
-        "./index.html",            // include Vite entry HTML
-        "./src/**/*.{js,jsx,ts,tsx}", // include all React files
-    ],
-    theme: {
-        extend: {
-            colors: {
-                primary: "#2563eb", // blue-600
-                secondary: "#1e293b", // slate-800
+    darkMode: "class",
+    content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
+    theme: { extend: { 
+        fontFamily: {
+                sans: ["Inter", "system-ui", "sans-serif"],
             },
-        },
-    },
+        colors: { primary: "#2563eb", secondary: "#1e293b" } } },
+    safelist: [
+        "text-green-600", "text-red-600",
+        "bg-red-100", "hover:bg-red-200",
+        { pattern: /rounded(-(lg|xl|2xl))?/ },
+        { pattern: /shadow(-(md|xl))?/ },
+        { pattern: /(p|px|py|gap)-(1|2|3|4|5|6)/ }
+    ],
     plugins: [],
 };

@@ -1,46 +1,56 @@
+// -----------------------------------------------
 // src/lib/api.js
+// Universal API Base Configuration for NeuroCrest
+// -----------------------------------------------
 
-// ----------------------
-// Environment-based Base
-// ----------------------
-const ENV_BASE =
-  typeof import.meta !== "undefined" &&
-    import.meta?.env?.VITE_BACKEND_BASE_URL
-    ? String(import.meta.env.VITE_BACKEND_BASE_URL).trim()
-    : "";
+const RAW =
+  (typeof import.meta !== "undefined" && import.meta.env)
+    ? import.meta.env.VITE_BACKEND_BASE_URL
+    : undefined;
 
-// Default fallback URLs
+const isBrowser =
+  typeof window !== "undefined" && typeof document !== "undefined";
+
+// ✅ Only one backend should be used — your live Render one
 const DEFAULTS = {
+<<<<<<< HEAD
   emulator: "http://10.0.2.2:8000",   // ✅ Android Emulator alias
   local: "http://127.0.0.1:8000",     // ✅ Localhost (desktop)
   lan: "http://192.168.1.5:8000",     // ✅ Your PC IP for real devices on same Wi-Fi
   prod: "https://backend-app-k52v.onrender.com"   // ✅ Production API
+=======
+  localDev: "http://127.0.0.1:8000",         // Local FastAPI
+  emulator: "http://10.0.2.2:8000",          // Android Emulator
+  genymotion: "http://10.0.3.2:8000",        // Genymotion
+  production: "https://api.neurocrest.in",   // ✅ YOUR LIVE BACKEND
+>>>>>>> 91bb098cdeaf6f4860fe35fa3fb79a4689566426
 };
 
-// ------------------------------------------
-// Pick correct base automatically
-// ------------------------------------------
 function inferBase() {
-  // 1️⃣ Environment variable (highest priority)
-  if (ENV_BASE) return ENV_BASE.replace(/\/+$/, "");
-
-  // 2️⃣ Browser hostname check (auto-switch based on where it runs)
-  if (typeof window !== "undefined") {
-    const host = window.location.hostname;
-
-    if (host.startsWith("10.0.2.")) return DEFAULTS.emulator;
-    if (host.startsWith("192.168.")) return DEFAULTS.lan;
-    if (host === "localhost" || host === "127.0.0.1") return DEFAULTS.local;
+  if (RAW && typeof RAW === "string" && RAW.trim() !== "") {
+    return RAW.trim();
   }
 
-  // 3️⃣ Default: production API
-  return DEFAULTS.prod;
+  if (isBrowser) {
+    const host = window.location.hostname;
+
+    if (host === "localhost" || host === "127.0.0.1") {
+      return DEFAULTS.localDev;
+    }
+    if (host.startsWith("10.0.2.")) return DEFAULTS.emulator;
+    if (host.startsWith("10.0.3.")) return DEFAULTS.genymotion;
+
+    // Everything else → production
+    return DEFAULTS.production;
+  }
+
+  return DEFAULTS.production;
 }
 
-// ✅ Final API base URL
-export const API_BASE = inferBase();
-console.log("🔗 Using API Base:", API_BASE);
+export const API_BASE_URL = inferBase();
+export const API_BASE = API_BASE_URL;
 
+<<<<<<< HEAD
 // ------------------------------------------
 // Generic Fetch Wrapper (with detailed logs)
 // ------------------------------------------
@@ -102,4 +112,33 @@ export async function api(path, options = {}) {
     console.error("🚨 API Error:", err?.message || err, "@", url);
     throw err;
   }
+=======
+export async function api(path, options = {}) {
+  const url = `${API_BASE_URL}${path}`;
+  const res = await fetch(url, {
+    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+    ...options,
+  });
+  return res;
+}
+
+export async function apiFetch(path, options = {}) {
+  const url = `${API_BASE_URL}${path}`;
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`API ${res.status}: ${text}`);
+  }
+  return res.json();
+}
+
+if (isBrowser) {
+  console.log("🌐 NeuroCrest API Base URL →", API_BASE_URL);
+>>>>>>> 91bb098cdeaf6f4860fe35fa3fb79a4689566426
 }
