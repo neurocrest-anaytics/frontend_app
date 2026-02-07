@@ -21,6 +21,7 @@ import { User } from "lucide-react";
 import HeaderActions from "../components/HeaderActions";
 import { formatToIST } from "../utils/time";
 import AppHeader from "../components/AppHeader";
+import { BarChart2 } from "lucide-react";
 
 
 // ---------- API base (prod-safe) ----------
@@ -629,12 +630,12 @@ export default function Portfolio({ username }) {
 
       {/* Body */}
       <div className="w-full px-3 sm:px-4 md:px-6 pt-3 sm:pt-[0] pb-24 relative">
-        {/*<div className="mb-6">
+        <div className="mb-6">
           <h2 className={`text-4xl font-bold ${textClass} mb-2`}>Portfolio</h2>
           <p className={`${textSecondaryClass}`}>
             Track your holdings and performance
           </p>
-        </div>*/}
+        </div>
 
         {loading && (
           <div className={`text-left ${textSecondaryClass} mt-20`}>
@@ -864,9 +865,11 @@ export default function Portfolio({ username }) {
 
                               <span className="mx-2">•</span>
 
-                              <span className="font-semibold">
+                              <span className="inline-flex items-center gap-2 font-semibold">
                                 {Math.abs(qty)} Qty
+
                               </span>
+
                             </div>
 
 
@@ -1003,11 +1006,33 @@ export default function Portfolio({ username }) {
                   </button>
                 </div>
 
-                <div className="mt-3 text-center">
+                <div className="mt-3 flex items-center justify-center gap-2">
                   <div className={`text-3xl font-extrabold ${textClass}`}>
                     {money(selected.live)}
                   </div>
+
+                  {/* 📊 Chart icon beside Live */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const sym = (selected.symbol || "").toUpperCase();
+                      if (!sym) return;
+                      navigate(`/chart/${sym}`);
+                      handleCloseModal(); // optional: close modal after navigating
+                    }}
+                    title="View Chart"
+                    aria-label="View Chart"
+                    className={`p-2 rounded-full transition
+      hover:scale-105 active:scale-95
+      ${isDark
+                        ? "bg-white/10 hover:bg-white/20 text-white"
+                        : "bg-slate-200 hover:bg-slate-300 text-slate-700"
+                      }`}
+                  >
+                    <BarChart2 size={18} />
+                  </button>
                 </div>
+
               </div>
 
               {/* Info Card (inner glass) */}

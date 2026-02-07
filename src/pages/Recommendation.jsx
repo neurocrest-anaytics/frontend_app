@@ -1,11 +1,19 @@
-import React, { useState, useEffect, useMemo, useRef, startTransition } from "react";
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  startTransition,
+  useLayoutEffect,
+} from "react";
 import "./Recommendations.css";
 import SignalCard from "../components/SignalCard";
 import BackButton from "../components/BackButton";
 import SwipeNav from "../components/SwipeNav";
-import { Moon, Sun, Sparkles, User } from "lucide-react";
+import { Moon, Sun, Sparkles, User, RefreshCw } from "lucide-react";
+
 import CustomDropdown from "../components/CustomDropdown";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import HeaderActions from "../components/HeaderActions";
 import DatePicker from "react-datepicker";
@@ -14,10 +22,8 @@ import "./datepicker-neurocrest.css"; // ✅ same file used in History
 import AppHeader from "../components/AppHeader";
 
 const AccuracyGauge = ({ value, label }) => {
-
   const v = Math.max(0, Math.min(100, value));
   const angle = 180 - (v / 100) * 180;
-
 
   const needleX = 70 + 45 * Math.cos((Math.PI / 180) * angle);
   const needleY = 80 - 45 * Math.sin((Math.PI / 180) * angle);
@@ -29,8 +35,6 @@ const AccuracyGauge = ({ value, label }) => {
       viewBox="0 0 140 120"
       className="accuracy-gauge"
     >
-
-
       {/* RED zone */}
       <path
         d="M10 80 A60 60 0 0 1 50 20"
@@ -95,15 +99,21 @@ const AccuracyGauge = ({ value, label }) => {
   );
 };
 
-
-
 export default function Recommendations() {
   const [rows, setRows] = useState([]);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [priceRefreshing, setPriceRefreshing] = useState(false);
+  const [lastPriceUpdatedAt, setLastPriceUpdatedAt] = useState(null);
+
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
   // ✅ hydrate access state from the daily subscription cache written by RequireSubscription.jsx
   const initialAccess = (() => {
-    const username = (localStorage.getItem("username") || "").trim().toLowerCase();
+    const username = (localStorage.getItem("username") || "")
+      .trim()
+      .toLowerCase();
 
     try {
       const raw = localStorage.getItem("nc_sub_cache_v1");
@@ -118,11 +128,11 @@ export default function Recommendations() {
       if (fresh) {
         return {
           locked: !!c.isLocked,
-          checked: true,              // ✅ already checked today
+          checked: true, // ✅ already checked today
           hasAccess: !c.isLocked,
         };
       }
-    } catch { }
+    } catch {}
 
     return { locked: true, checked: false, hasAccess: false };
   })();
@@ -130,6 +140,9 @@ export default function Recommendations() {
   const [locked, setLocked] = useState(() => initialAccess.locked);
   const [accessChecked, setAccessChecked] = useState(() => initialAccess.checked);
   const hasAccessRef = useRef(initialAccess.hasAccess);
+
+  // ✅ used for live price polling on active signals
+  const activeSymbolsRef = useRef([]);
 
   const [segment, setSegment] = useState("Equity");
   const [selectedScreener, setSelectedScreener] = useState("All");
@@ -146,34 +159,37 @@ export default function Recommendations() {
   const [priceCloseFilter, setPriceCloseFilter] = useState("All");
   const [priceCloseList, setPriceCloseList] = useState(["All"]);
 
+  // ✅ NEW: Date sort order (DESC = newest first, ASC = oldest first)
+  const [dateSortOrder, setDateSortOrder] = useState("desc"); // "asc" | "desc"
+
   const { isDark, toggle } = useTheme();
 
-
   const bgClass = isDark
-    ? 'bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900'
-    : 'bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-100';
+    ? "bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900"
+    : "bg-gradient-to-br from-blue-50 via-cyan-50 to-blue-100";
 
   const glassClass = isDark
-    ? 'bg-white/5 backdrop-blur-xl border border-white/10'
-    : 'bg-white/60 backdrop-blur-xl border border-white/40';
+    ? "bg-white/5 backdrop-blur-xl border border-white/10"
+    : "bg-white/60 backdrop-blur-xl border border-white/40";
 
-  const textClass = isDark ? 'text-white' : 'text-slate-900';
-  const textSecondaryClass = isDark ? 'text-slate-300' : 'text-slate-600';
-  const cardHoverClass = isDark ? 'hover:bg-white/10' : 'hover:bg-white/80';
+  const textClass = isDark ? "text-white" : "text-slate-900";
+  const textSecondaryClass = isDark ? "text-slate-300" : "text-slate-600";
+  const cardHoverClass = isDark ? "hover:bg-white/10" : "hover:bg-white/80";
 
-  const brandGradient = "bg-gradient-to-r from-[#1ea7ff] via-[#22d3ee] via-[#22c55e] to-[#f59e0b]";
-
+  const brandGradient =
+    "bg-gradient-to-r from-[#1ea7ff] via-[#22d3ee] via-[#22c55e] to-[#f59e0b]";
 
   const [closedPriceMap, setClosedPriceMap] = useState({});
 
-  const API =
-    (import.meta.env.VITE_BACKEND_BASE_URL || "http://127.0.0.1:8000")
-      .toString()
-      .replace(/\/+$/, "");
+  const API = (import.meta.env.VITE_BACKEND_BASE_URL || "http://127.0.0.1:8000")
+    .toString()
+    .replace(/\/+$/, "");
 
   const toNum = (v) => {
     if (v === null || v === undefined) return undefined;
-    const n = Number.parseFloat(typeof v === "string" ? v.replace(/[, ]/g, "") : v);
+    const n = Number.parseFloat(
+      typeof v === "string" ? v.replace(/[, ]/g, "") : v
+    );
     return Number.isFinite(n) ? n : undefined;
   };
 
@@ -198,8 +214,6 @@ export default function Recommendations() {
 
     return "";
   };
-
-
 
   const getField = (row, candidates) => {
     if (!row) return undefined;
@@ -231,7 +245,9 @@ export default function Recommendations() {
   };
 
   const pickSignalPrice = (r) =>
-    toNum(getField(r, ["signal_price", "close_price", "Signal_price", "Signal Price"]));
+    toNum(
+      getField(r, ["signal_price", "close_price", "Signal_price", "Signal Price"])
+    );
 
   const pickCurrentPrice = (r) => toNum(r.currentPrice);
 
@@ -241,7 +257,8 @@ export default function Recommendations() {
   const pickTarget = (r) =>
     toNum(getField(r, ["target", "Target", "fno_target", "FNO_target"]));
 
-  const pickSupport = (r) => toNum(getField(r, ["support", "Support", "sup", "SUP"]));
+  const pickSupport = (r) =>
+    toNum(getField(r, ["support", "Support", "sup", "SUP"]));
 
   const pickResistance = (r) =>
     toNum(getField(r, ["resistance", "Resistance", "res", "RES"]));
@@ -257,7 +274,8 @@ export default function Recommendations() {
     return s ? String(s).trim() : "N/A";
   };
 
-  const pickScreener = (r) => getField(r, ["screener", "Screener"]) || "Unknown";
+  const pickScreener = (r) =>
+    getField(r, ["screener", "Screener"]) || "Unknown";
 
   const pickRawDate = (r) =>
     getField(r, ["raw_datetime", "Date", "date", "signal_date"]);
@@ -286,7 +304,6 @@ export default function Recommendations() {
     return `${hour.toString().padStart(2, "0")}:${minute} ${ampm}`;
   };
 
-
   const pickStrategy = (r) => {
     let raw = getField(r, ["Strategy", "strategy"]) || "";
     raw = String(raw).trim().toLowerCase();
@@ -301,14 +318,13 @@ export default function Recommendations() {
     return raw;
   };
 
-
-  const pickAlertText = (r) => getField(r, ["alert", "ALERT", "Alert"]) || "";
+  const pickAlertText = (r) =>
+    getField(r, ["alert", "ALERT", "Alert"]) || "";
 
   const pickUserActions = (r) => getField(r, ["user_actions"]) || "";
 
   const pickPriceCloseTo = (r) =>
     (getField(r, ["price_closeto", "price_close_to"]) || "").toString().trim();
-
 
   async function fetchLivePrice(script) {
     try {
@@ -325,9 +341,7 @@ export default function Recommendations() {
       return null;
     }
   }
-  // ----------------------------------------------------
-  // NORMALIZE FUNCTION (FINAL — ONLY CSV decides open/closed)
-  // ----------------------------------------------------
+
   // ----------------------------------------------------
   // NORMALIZE FUNCTION (FINAL — ONLY CSV decides open/closed)
   // ----------------------------------------------------
@@ -344,16 +358,11 @@ export default function Recommendations() {
     // ---- CSV close time ----
     const csvCloseTime = getField(row, ["close_time"]) || "";
 
-
-    // ---- UI Classification ----
     // -------------------------------
     // FINAL ACTIVE / CLOSED LOGIC
     // -------------------------------
     const isClosed = csvClose !== null && csvClose > 0;
     const isActive = !isClosed;
-
-
-
 
     // Freeze price for CLOSED, Live price for ACTIVE
     let live = pickCurrentPrice(row);
@@ -366,21 +375,21 @@ export default function Recommendations() {
 
     const strategy = pickStrategy(row);
 
-    // ✅ FULL datetime from backend (date + time)
     // ✅ FULL datetime (date + time) — DO NOT MODIFY
-    const rawDateTime =
-      getField(row, ["raw_datetime", "signal_date", "Date", "date"]);
+    const rawDateTime = getField(row, [
+      "raw_datetime",
+      "signal_date",
+      "Date",
+      "date",
+    ]);
 
     // ✅ Date only (used for date filter dropdown)
     const dateVal = normalizeToISODate(rawDateTime);
-
-
 
     const timeVal = pickTime(row);
     const alertText = pickAlertText(row);
     const userActions = pickUserActions(row);
     const priceCloseTo = pickPriceCloseTo(row);
-
 
     // outcome only needed to visually color closed blocks
     const outcome = isClosed ? "CLOSED" : null;
@@ -403,8 +412,8 @@ export default function Recommendations() {
       isClosed,
 
       // 🔥 CRITICAL FIELDS
-      dateVal,        // YYYY-MM-DD → for filtering
-      rawDateTime,    // YYYY-MM-DD HH:MM:SS → for sorting
+      dateVal, // YYYY-MM-DD → for filtering
+      rawDateTime, // YYYY-MM-DD HH:MM:SS → for sorting
 
       timeVal,
       alertText,
@@ -412,143 +421,263 @@ export default function Recommendations() {
       priceCloseTo,
       closeTime: csvCloseTime,
     };
-
-
   };
 
   // ----------------------------------------------------
-  // FETCH CSV DATA EVERY 5 SECONDS
+  // FETCH RECOMMENDATION DATA ONCE (NO AUTO-POLLING)
   // ----------------------------------------------------
+  const fetchRecommendationsOnce = async ({ mergeOnlyPrices = false } = {}) => {
+    const username = (localStorage.getItem("username") || "").trim();
+
+    if (!username) {
+      setLocked(true);
+      if (!mergeOnlyPrices) setRows([]);
+      setInitialLoading(false);
+      setAccessChecked(true);
+      return;
+    }
+
+    const res = await fetch(
+      `${API}/recommendations/data?username=${encodeURIComponent(
+        username
+      )}&ts=${Date.now()}`,
+      { cache: "no-store" }
+    );
+
+    setAccessChecked(true);
+
+    if (res.status === 403 || res.status === 401) {
+      setLocked(true);
+      if (!mergeOnlyPrices) setRows([]);
+      setInitialLoading(false);
+      return;
+    }
+
+    if (res.status === 404) {
+      setLocked(false);
+      if (!mergeOnlyPrices) setRows([]);
+      setInitialLoading(false);
+      return;
+    }
+
+    if (!res.ok) {
+      const errText = await res.text().catch(() => "");
+      console.error("recommendations/data failed:", res.status, errText);
+
+      if (!hasAccessRef.current) {
+        setLocked(true);
+        if (!mergeOnlyPrices) setRows([]);
+      }
+      setInitialLoading(false);
+      return;
+    }
+
+    const json = await res.json();
+    hasAccessRef.current = true;
+    setLocked(false);
+
+    const normalized = (Array.isArray(json) ? json : []).map(normalize);
+
+    // ✅ Only refresh LIVE PRICES, keep signals stable
+    if (mergeOnlyPrices) {
+      const priceById = new Map();
+      const priceByScript = new Map();
+
+      for (const r of normalized) {
+        if (r?.id) priceById.set(r.id, r.currentPrice);
+        if (r?.script) priceByScript.set(r.script, r.currentPrice);
+      }
+
+      setRows((prev) =>
+        (prev || []).map((r) => {
+          if (!r || r.isClosed) return r; // ✅ refresh only ACTIVE cards
+          const nextPrice = priceById.get(r.id) ?? priceByScript.get(r.script);
+          return nextPrice === undefined ? r : { ...r, currentPrice: nextPrice };
+        })
+      );
+
+      setLastPriceUpdatedAt(Date.now());
+      return;
+    }
+
+    // ✅ Full load only on page open
+    const seen = new Set();
+    const ordered = [];
+
+    for (const r of normalized) {
+      if (!r.script || r.script === "N/A") continue;
+      if (seen.has(r.id)) continue;
+      seen.add(r.id);
+      ordered.push(r);
+    }
+
+    const uniqueScreeners = ["All", ...new Set(ordered.map((r) => r.screener))];
+    const uniqueAlertTypes = ["All", ...new Set(ordered.map((r) => r.alertType))];
+    const uniquePriceCloseTo = [
+      "All",
+      ...new Set(ordered.map((r) => r.priceCloseTo).filter(Boolean)),
+    ];
+
+    startTransition(() => {
+      setScreenerList(uniqueScreeners);
+      setAlertTypeList(uniqueAlertTypes);
+      setPriceCloseList(uniquePriceCloseTo);
+      setRows(ordered);
+      setInitialLoading(false);
+    });
+
+    setLastPriceUpdatedAt(Date.now());
+  };
+
+  // ✅ manual refresh button: fetch ONLY prices once
+  const onRefreshPrices = async () => {
+    if (priceRefreshing) return;
+
+    try {
+      setPriceRefreshing(true);
+      await fetchRecommendationsOnce({ mergeOnlyPrices: true }); // ✅ price only
+    } catch (e) {
+      console.error("Price refresh failed:", e);
+    } finally {
+      setPriceRefreshing(false);
+    }
+  };
+
+  // =====================================================
+  // ✅ FIX: prevent scroll jumping on tab changes
+  // =====================================================
+  const scrollYBeforeSwitchRef = useRef(0);
+  const restoringScrollRef = useRef(false);
+
+  const setSignalTabKeepScroll = (nextTab) => {
+    // Save current position, then switch tab
+    scrollYBeforeSwitchRef.current =
+      window.scrollY || document.documentElement.scrollTop || 0;
+    restoringScrollRef.current = true;
+    setSignalTab(nextTab);
+  };
+
+  const setActiveTypeKeepScroll = (nextType) => {
+    scrollYBeforeSwitchRef.current =
+      window.scrollY || document.documentElement.scrollTop || 0;
+    restoringScrollRef.current = true;
+
+    setActiveType(nextType);
+    setSubIntraday("All");
+    setSignalTab("active");
+  };
+
+  // Restore scroll immediately after React commits DOM updates
+  useLayoutEffect(() => {
+    if (!restoringScrollRef.current) return;
+
+    restoringScrollRef.current = false;
+
+    const y = scrollYBeforeSwitchRef.current || 0;
+
+    // 2 RAFs makes it stable in mobile chrome
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: y, left: 0, behavior: "auto" });
+      });
+    });
+  }, [signalTab, activeType]);
+
+  useEffect(() => {
+    // Hydrate filters from URL only on first mount
+    const qpSegment = searchParams.get("segment");
+    const qpScreener = searchParams.get("screener");
+    const qpAlertType = searchParams.get("alertType");
+    const qpDate = searchParams.get("date");
+    const qpActiveType = searchParams.get("type"); // Intraday/BTST/Short-term
+    const qpSubIntraday = searchParams.get("subIntraday");
+    const qpPriceClose = searchParams.get("priceClose");
+    const qpTab = searchParams.get("tab"); // active/closed
+    const qpSort = searchParams.get("sort"); // ✅ asc/desc
+
+    if (qpSegment) setSegment(qpSegment);
+    if (qpScreener) setSelectedScreener(qpScreener);
+    if (qpAlertType) setSelectedAlertType(qpAlertType);
+    if (qpDate) setSelectedDate(qpDate);
+    if (qpActiveType) setActiveType(qpActiveType);
+    if (qpSubIntraday) setSubIntraday(qpSubIntraday);
+    if (qpPriceClose) setPriceCloseFilter(qpPriceClose);
+    if (qpTab) setSignalTab(qpTab);
+    if (qpSort === "asc" || qpSort === "desc") setDateSortOrder(qpSort);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams);
+
+    next.set("segment", segment || "Equity");
+    next.set("screener", selectedScreener || "All");
+    next.set("alertType", selectedAlertType || "All");
+    next.set("date", selectedDate || "");
+    next.set("type", activeType || "Intraday");
+    next.set("subIntraday", subIntraday || "All");
+    next.set("priceClose", priceCloseFilter || "All");
+    next.set("tab", signalTab || "active");
+    next.set("sort", dateSortOrder || "desc"); // ✅ keep sort in URL
+
+    // remove empty date to keep URL clean
+    if (!selectedDate) next.delete("date");
+
+    setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    segment,
+    selectedScreener,
+    selectedAlertType,
+    selectedDate,
+    activeType,
+    subIntraday,
+    priceCloseFilter,
+    signalTab,
+    dateSortOrder,
+  ]);
+
+  // ✅ fetch once when page opens (NO polling)
   useEffect(() => {
     let alive = true;
 
-    const fetchOnce = async () => {
+    (async () => {
       try {
-        const username = (localStorage.getItem("username") || "").trim();
-
-        // if username missing → lock immediately
-        if (!username) {
-          if (!alive) return;
-          setLocked(true);
-          setRows([]);
-          setInitialLoading(false);
-          setAccessChecked(true);
-          return;
-        }
-
-        const res = await fetch(
-          `${API}/recommendations/data?username=${encodeURIComponent(username)}&ts=${Date.now()}`,
-          { cache: "no-store" }
-        );
-
-        // ✅ access checked (any response means server replied)
-        if (!alive) return;
-        setAccessChecked(true);
-
-        // ✅ if NOT allowed
-        setAccessChecked(true);
-
-        if (res.status === 403 || res.status === 401) {
-          setLocked(true);
-          setRows([]);
-          setInitialLoading(false);
-          return;
-        }
-
-        // ✅ add this
-        if (res.status === 404) {
-          setLocked(false);
-          setRows([]);
-          setInitialLoading(false);
-          return;
-        }
-
-        // ✅ if CSV missing or endpoint error etc.
-        if (!res.ok) {
-          const errText = await res.text().catch(() => "");
-          console.error("recommendations/data failed:", res.status, errText);
-
-          // IMPORTANT:
-          // if user was previously allowed, don’t flip UI to locked on transient errors
-          if (!hasAccessRef.current) {
-            setLocked(true);
-            setRows([]);
-          }
-          setInitialLoading(false);
-          return;
-        }
-
-        // ✅ allowed + data ok
-        const json = await res.json();
-        hasAccessRef.current = true;
-        setLocked(false);
-
-        const normalized = (Array.isArray(json) ? json : []).map(normalize);
-
-        const seen = new Set();
-        const ordered = [];
-
-        for (const r of normalized) {
-          if (!r.script || r.script === "N/A") continue;
-          if (seen.has(r.id)) continue;
-          seen.add(r.id);
-          ordered.push(r);
-        }
-
-        const uniqueScreeners = ["All", ...new Set(ordered.map((r) => r.screener))];
-        const uniqueAlertTypes = ["All", ...new Set(ordered.map((r) => r.alertType))];
-        const uniquePriceCloseTo = [
-          "All",
-          ...new Set(ordered.map((r) => r.priceCloseTo).filter(Boolean)),
-        ];
-
-        startTransition(() => {
-          setScreenerList(uniqueScreeners);
-          setAlertTypeList(uniqueAlertTypes);
-          setPriceCloseList(uniquePriceCloseTo);
-          setRows(ordered);
-          setInitialLoading(false);
-        });
+        await fetchRecommendationsOnce({ mergeOnlyPrices: false }); // ✅ full load once
       } catch (e) {
         console.error("Fetch failed:", e);
         if (!alive) return;
-
-        // ✅ access checked (fetch finished, but error)
         setAccessChecked(true);
-
-        // don’t flip to locked if previously allowed
         if (!hasAccessRef.current) {
           setLocked(true);
           setRows([]);
         }
         setInitialLoading(false);
       }
-    };
-
-    fetchOnce();
-    const id = setInterval(fetchOnce, 5000);
+    })();
 
     return () => {
       alive = false;
-      clearInterval(id);
     };
-  }, [API]); // ✅ keep dependency stable (don’t use closedPriceMap here)
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [API]);
 
   // -------------------------------------------------------
   // FILTERING
   // -------------------------------------------------------
   const filteredRows = useMemo(() => {
     return rows.filter((r) => {
-      // ✅ DATE FILTER (FINAL & CORRECT)
       // ✅ DATE FILTER (FINAL FIX)
       let matchDate = true;
 
       if (selectedDate) {
         console.log(
           "📅 DATE FILTER →",
-          "selectedDate (ISO):", selectedDate,
-          "| row.dateVal:", r.dateVal
+          "selectedDate (ISO):",
+          selectedDate,
+          "| row.dateVal:",
+          r.dateVal
         );
         matchDate = r.dateVal === selectedDate;
       }
@@ -564,7 +693,6 @@ export default function Recommendations() {
         "| match:",
         matchDate
       );
-
 
       // ✅ SCREENER
       const matchScreener =
@@ -620,34 +748,120 @@ export default function Recommendations() {
     priceCloseFilter,
   ]);
 
-  // 🔹 Date dropdown options based on CSV + selected strategy
   // -------------------------------------------------------
   // ACTIVE & CLOSED SIGNALS
   // -------------------------------------------------------
   const activeSignals = useMemo(() => {
+    const dir = dateSortOrder === "asc" ? 1 : -1;
+
     return filteredRows
       .filter((r) => !r.outcome)
-      .sort(
-        (a, b) =>
-          new Date(b.rawDateTime).getTime() -
-          new Date(a.rawDateTime).getTime()
-      )
+      .sort((a, b) => {
+        // Sort ONLY by date (YYYY-MM-DD)
+        const d = String(a.dateVal || "").localeCompare(String(b.dateVal || ""));
+        if (d !== 0) return d * dir;
+
+        // optional tie-breaker (keeps same-day order stable without Date parsing)
+        return (
+          String(a.rawDateTime || "").localeCompare(String(b.rawDateTime || "")) *
+          dir
+        );
+      })
       .slice(0, 30);
-  }, [filteredRows]);
+  }, [filteredRows, dateSortOrder]);
+
+  // ✅ keep a stable list of active symbols for polling
+  useEffect(() => {
+    activeSymbolsRef.current = Array.from(
+      new Set(
+        (activeSignals || [])
+          .map((s) => (s?.script || "").toUpperCase())
+          .filter(Boolean)
+      )
+    );
+  }, [activeSignals]);
+
+  // ✅ Live price polling (same behaviour as Watchlist)
+  // Updates ONLY ACTIVE cards; closed cards stay frozen at close price
+  useEffect(() => {
+    if (locked) return;
+
+    let mounted = true;
+
+    async function pollOnce() {
+      const syms = activeSymbolsRef.current || [];
+      if (!syms.length) return;
+
+      try {
+        const res = await fetch(
+          `${API}/quotes?symbols=${encodeURIComponent(
+            syms.join(",")
+          )}&ts=${Date.now()}`,
+          { cache: "no-store" }
+        );
+
+        if (!res.ok) return;
+        const json = await res.json();
+
+        const priceMap = new Map();
+        if (Array.isArray(json)) {
+          for (const q of json) {
+            const s = (q?.symbol || "").toUpperCase();
+            const p = toNum(q?.price);
+            if (s && p !== undefined) priceMap.set(s, p);
+          }
+        }
+
+        if (!mounted) return;
+
+        setRows((prev) =>
+          (prev || []).map((r) => {
+            if (!r || r.isClosed) return r;
+            const s = (r.script || "").toUpperCase();
+            const p = priceMap.get(s);
+            if (p === undefined) return r;
+            if (r.currentPrice === p) return r;
+            return { ...r, currentPrice: p };
+          })
+        );
+
+        setLastPriceUpdatedAt(Date.now());
+      } catch (e) {
+        // keep silent — UI should not flicker
+        // console.error("Recommendations live price poll error:", e);
+      }
+    }
+
+    // run immediately + then every 3s
+    pollOnce();
+    const id = setInterval(pollOnce, 3000);
+
+    return () => {
+      mounted = false;
+      clearInterval(id);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [API, locked]);
 
   console.table(
-    activeSignals.map(s => ({
+    activeSignals.map((s) => ({
       script: s.script,
       rawDateTime: s.rawDateTime,
-      time: s.timeVal
+      time: s.timeVal,
     }))
   );
 
+  const closedSignals = useMemo(() => {
+    const dir = dateSortOrder === "asc" ? 1 : -1;
 
-  const closedSignals = useMemo(
-    () => filteredRows.filter((r) => r.outcome),
-    [filteredRows]
-  );
+    return filteredRows
+      .filter((r) => r.outcome)
+      .sort((a, b) => {
+        const ta = new Date(a.rawDateTime).getTime();
+        const tb = new Date(b.rawDateTime).getTime();
+        return (ta - tb) * dir;
+      });
+  }, [filteredRows, dateSortOrder]);
 
   // -------------------------------------------------------
   // BUY/SELL COUNTS
@@ -695,12 +909,15 @@ export default function Recommendations() {
   const buyClosedCount = buyClosedSignals.length;
   const sellClosedCount = sellClosedSignals.length;
 
-  // ✅ Show locked screen immediately (even while checking access)
-  // ✅ Show locked screen ONLY after access is confirmed (prevents popup on every navigation)
+  // ✅ Show locked screen ONLY after access is confirmed
   if (locked && accessChecked) {
     return (
-      <div className={`min-h-screen ${bgClass} ${textClass} flex items-center justify-center p-6`}>
-        <div className={`${glassClass} rounded-3xl p-8 max-w-md w-full text-center shadow-2xl`}>
+      <div
+        className={`min-h-screen ${bgClass} ${textClass} flex items-center justify-center p-6`}
+      >
+        <div
+          className={`${glassClass} rounded-3xl p-8 max-w-md w-full text-center shadow-2xl`}
+        >
           <h2 className="text-2xl font-bold mb-2">Recommendations Locked</h2>
 
           <p className={`${textSecondaryClass} mb-6`}>
@@ -717,35 +934,109 @@ export default function Recommendations() {
       </div>
     );
   }
+
+  // ✅ STICKY refresh button component (used under Active Signals title)
+  const StickyRefreshBar = () => (
+    <div
+      style={{
+        position: "sticky",
+        top: "86px", // ✅ adjust if your AppHeader height is different
+        zIndex: 50,
+        paddingTop: "8px",
+        paddingBottom: "8px",
+        marginBottom: "8px",
+        background: isDark ? "rgba(2,6,23,0.35)" : "rgba(255,255,255,0.35)",
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+        borderRadius: "14px",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          gap: "10px",
+          padding: "6px 8px",
+        }}
+      >
+        {lastPriceUpdatedAt ? (
+          <span
+            style={{
+              fontSize: "12px",
+              fontWeight: 600,
+              opacity: isDark ? 0.85 : 0.8,
+              whiteSpace: "nowrap",
+            }}
+          >
+            Updated:{" "}
+            {new Date(lastPriceUpdatedAt).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            })}
+          </span>
+        ) : null}
+
+        <button
+          onClick={onRefreshPrices}
+          disabled={priceRefreshing || locked || initialLoading}
+          className={[
+            "inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold",
+            "transition-all duration-200 border shadow-sm",
+            "focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/60",
+            priceRefreshing
+              ? "opacity-70 cursor-not-allowed"
+              : "hover:scale-[1.02] active:scale-[0.98]",
+            isDark
+              ? "bg-white/10 border-white/10 text-white hover:bg-white/15"
+              : "bg-white/80 border-slate-200/60 text-slate-900 hover:bg-white",
+          ].join(" ")}
+          title="Refresh live price"
+          type="button"
+        >
+          <RefreshCw
+            className={`w-4 h-4 ${priceRefreshing ? "animate-spin" : ""}`}
+          />
+          Refresh
+        </button>
+      </div>
+    </div>
+  );
+
   // -------------------------------------------------------
   // SIGNALS LAYOUT
   // -------------------------------------------------------
   const renderSignalLayout = () => (
     <div className="intraday-section">
-
-      {/* ---------------- DATE ROW ---------------- */}
       {/* ================= ADVANCED FILTER CONTAINER ================= */}
       <div className="advanced-filter-wrapper">
-
         {/* ---------------- DATE ROW ---------------- */}
         <div className="filters-row date-row-centered">
           <div className="filter-item">
             <label>Date:</label>
             <DatePicker
-              selected={selectedDate ? new Date(selectedDate) : null}
+              selected={selectedDate ? new Date(`${selectedDate}T00:00:00`) : null}
               onChange={(d) => {
                 if (!d) return setSelectedDate("");
-                const ymd = d.toISOString().slice(0, 10); // YYYY-MM-DD
-                setSelectedDate(ymd);
+
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, "0");
+                const day = String(d.getDate()).padStart(2, "0");
+
+                setSelectedDate(`${y}-${m}-${day}`); // ✅ local YYYY-MM-DD (no UTC shift)
               }}
               dateFormat="MM/dd/yyyy"
               placeholderText="mm/dd/yyyy"
               className={`px-3 py-2 rounded-xl ${glassClass} ${textClass} text-sm shadow-lg transition-all focus:ring-2 focus:ring-blue-500 nc-date-input`}
               calendarClassName="nc-date-calendar"
-              popperClassName={`nc-date-popper ${isDark ? "nc-date-dark" : "nc-date-light"}`}
-              wrapperClassName={`nc-date-wrapper ${isDark ? "nc-date-dark" : "nc-date-light"}`}
+              popperClassName={`nc-date-popper ${
+                isDark ? "nc-date-dark" : "nc-date-light"
+              }`}
+              wrapperClassName={`nc-date-wrapper ${
+                isDark ? "nc-date-dark" : "nc-date-light"
+              }`}
             />
-
           </div>
 
           {activeType === "Intraday" && (
@@ -754,14 +1045,9 @@ export default function Recommendations() {
               <CustomDropdown
                 label=""
                 value={subIntraday}
-                options={[
-                  "All",
-                  "Intraday",
-                  "Intraday - Fast Alerts"
-                ]}
+                options={["All", "Intraday", "Intraday - Fast Alerts"]}
                 onChange={setSubIntraday}
               />
-
             </div>
           )}
 
@@ -773,7 +1059,6 @@ export default function Recommendations() {
               options={["Equity", "F&O"]}
               onChange={setSegment}
             />
-
           </div>
         </div>
 
@@ -787,7 +1072,6 @@ export default function Recommendations() {
               options={alertTypeList}
               onChange={setSelectedAlertType}
             />
-
           </div>
 
           <div className="filter-item">
@@ -798,7 +1082,6 @@ export default function Recommendations() {
               options={screenerList}
               onChange={setSelectedScreener}
             />
-
           </div>
 
           <div className="filter-item">
@@ -809,7 +1092,6 @@ export default function Recommendations() {
               options={priceCloseList}
               onChange={setPriceCloseFilter}
             />
-
           </div>
         </div>
 
@@ -817,41 +1099,58 @@ export default function Recommendations() {
         <div className="legend-row">
           <div className="legend-box">
             <h4>Acronyms</h4>
-            <p><strong>RES</strong> = Resistance | <strong>SUP</strong> = Support</p>
-            <p><strong>T</strong> = Target | <strong>ST</strong> = Stoploss</p>
+            <p>
+              <strong>RES</strong> = Resistance | <strong>SUP</strong> = Support
+            </p>
+            <p>
+              <strong>T</strong> = Target | <strong>ST</strong> = Stoploss
+            </p>
             <p>● = Signal Price</p>
           </div>
         </div>
-
       </div>
       {/* ================= END ADVANCED FILTER CONTAINER ================= */}
 
-
       {/* ---------------- SIGNALS SECTION ---------------- */}
       <div className="signals-section">
-
-        {/* ✅ MOBILE TABS (like Orders tabs) */}
+        {/* ✅ MOBILE TABS (pill style like Open Trades / Positions) */}
         <div className="md:hidden w-full flex justify-center mb-4">
-          <div className="flex w-full max-w-md bg-white/5 border border-white/10 rounded-2xl p-1 backdrop-blur-xl">
+          <div
+            className={[
+              "flex w-full max-w-md rounded-2xl p-1 shadow-lg",
+              "backdrop-blur-xl border",
+              isDark
+                ? "bg-white/10 border-white/15"
+                : "bg-white/70 border-slate-200/70",
+            ].join(" ")}
+          >
             <button
-              onClick={() => setSignalTab("active")}
+              type="button"
+              onClick={() => setSignalTabKeepScroll("active")}
               className={[
                 "flex-1 py-3 rounded-xl text-sm font-semibold transition-all",
+                "text-center",
                 signalTab === "active"
-                  ? "bg-gradient-to-r from-[#1ea7ff] to-[#22d3ee] text-white shadow-lg"
-                  : "text-white/80"
+                  ? "bg-gradient-to-r from-[#1ea7ff] to-[#22d3ee] text-white shadow-md"
+                  : isDark
+                  ? "text-white/85 hover:bg-white/10"
+                  : "text-slate-700 hover:bg-white/70",
               ].join(" ")}
             >
               Active Signals
             </button>
 
             <button
-              onClick={() => setSignalTab("closed")}
+              type="button"
+              onClick={() => setSignalTabKeepScroll("closed")}
               className={[
                 "flex-1 py-3 rounded-xl text-sm font-semibold transition-all",
+                "text-center",
                 signalTab === "closed"
-                  ? "bg-gradient-to-r from-[#1ea7ff] to-[#22d3ee] text-white shadow-lg"
-                  : "text-white/80"
+                  ? "bg-gradient-to-r from-[#1ea7ff] to-[#22d3ee] text-white shadow-md"
+                  : isDark
+                  ? "text-white/85 hover:bg-white/10"
+                  : "text-slate-700 hover:bg-white/70",
               ].join(" ")}
             >
               Closed Signals
@@ -863,165 +1162,46 @@ export default function Recommendations() {
         <div className="md:hidden">
           {signalTab === "active" ? (
             <div className="signals-column">
-              {/* ===== ACTIVE SIGNALS (same code you already have) ===== */}
-              <h3 className="section-title active-title">
+              {/* ===== ACTIVE SIGNALS ===== */}
+              <h3
+                className="section-title active-title"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "10px",
+                }}
+              >
                 <span className="signal-title-wrap">
                   <span className="signal-dot signal-dot-active"></span>
                   Active Signals
                 </span>
-              </h3>
 
-              <div className="signal-count-box">
-                <div className="signal-count-item buy">
-                  BUY Signals: <span>{totalBuySignals}</span>
-                </div>
-                <div className="signal-count-item sell">
-                  SELL Signals: <span>{totalSellSignals}</span>
-                </div>
-                <div className="signal-count-item total">
-                  Total: <span>{totalBuySignals + totalSellSignals}</span>
-                </div>
-              </div>
-
-              {initialLoading ? (
-                <p>Loading data...</p>
-              ) : (
-                <div className="active-signals-container">
-                  <div style={{
-                    width: "100%",
-                    textAlign: "left",
-                    marginBottom: "4px",
-                    paddingLeft: "8px",
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    color: isDark ? "rgba(255,255,255,0.85)" : "#333"
-                  }}>
-                    % = Confidence | ▼ = Current Price
-                  </div>
-
-                  <div className="signal-grid">
-                    {activeSignals.length > 0 ? (
-                      activeSignals.map((sig) => (
-                        <SignalCard
-                          key={sig.id}
-                          script={sig.script}
-                          confidence={sig.confidence}
-                          alertType={sig.alertType}
-                          description={sig.description}
-                          sup={sig.sup}
-                          st={sig.st}
-                          signalPrice={sig.signalPrice}
-                          currentPrice={sig.currentPrice}
-                          t={sig.t}
-                          res={sig.res}
-                          timeVal={sig.timeVal}
-                          alertText={sig.alertText}
-                          userActions={sig.userActions}
-                          isClosed={false}
-                          strategy={sig.strategy}
-                          rawDate={sig.dateVal}
-                          rawTime={sig.timeVal}
-                          fromReco={true}
-                          closeTime={sig.closeTime}
-                        />
-                      ))
-                    ) : (
-                      <p>No active signals.</p>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="signals-column">
-              {/* ===== CLOSED SIGNALS (same code you already have) ===== */}
-              <h3 className="section-title closed-title">
-                <span className="signal-title-wrap">
-                  <span className="signal-dot signal-dot-closed"></span>
-                  Closed Signals
+                {/* ✅ NEW: Date sort (right side of title) */}
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                  <span
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      opacity: isDark ? 0.85 : 0.8,
+                    }}
+                  ></span>
+                  <button
+                    type="button"
+                    onClick={() => setDateSortOrder((p) => (p === "asc" ? "desc" : "asc"))}
+                    className="nc-sort-btn"
+                    title={dateSortOrder === "asc" ? "Oldest first" : "Newest first"}
+                  >
+                    <span className="nc-sort-label">Date:</span>
+                    <span className="nc-sort-icon">
+                      {dateSortOrder === "asc" ? "↑" : "↓"}
+                    </span>
+                  </button>
                 </span>
               </h3>
 
-              <div className="closed-signals-container">
-                <div style={{
-                  width: "100%",
-                  textAlign: "left",
-                  marginBottom: "4px",
-                  paddingLeft: "8px",
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  color: isDark ? "rgba(255,255,255,0.85)" : "#333"
-                }}>
-                  % = Gain | ▼ = Close Price
-                </div>
-
-                <div className="signal-grid">
-                  {closedSignals.length > 0 ? (
-                    closedSignals.map((sig) => (
-                      <div
-                        className="closed-card-wrapper"
-                        key={sig.id}
-                        style={{
-                          backgroundColor: (() => {
-                            const sp = Number(sig.signalPrice);
-                            const cp = Number(sig.currentPrice);
-                            const side = String(sig.alertType).toLowerCase();
-                            let pnl = 0;
-                            if (side === "buy") pnl = (cp / sp - 1) * 100;
-                            else pnl = (1 - cp / sp) * 100;
-                            return pnl >= 0 ? "#E6FFE6" : "#FFE5E5";
-                          })(),
-                          borderRadius: "12px",
-                          padding: "8px",
-                          transition: "0.25s ease",
-                        }}
-                      >
-                        <SignalCard
-                          key={sig.id}
-                          script={sig.script}
-                          confidence={sig.confidence}
-                          alertType={sig.alertType}
-                          description={sig.description}
-                          sup={sig.sup}
-                          st={sig.st}
-                          signalPrice={sig.signalPrice}
-                          currentPrice={sig.currentPrice}
-                          t={sig.t}
-                          res={sig.res}
-                          timeVal={sig.timeVal}
-                          alertText={sig.alertText}
-                          userActions={sig.userActions}
-                          isClosed={true}
-                          strategy={sig.strategy}
-                          rawDate={sig.dateVal}
-                          rawTime={sig.timeVal}
-                          closeTime={sig.closeTime}
-                        />
-                      </div>
-                    ))
-                  ) : (
-                    <p className="no-signals-text">No closed signals.</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ✅ DESKTOP VIEW: keep your existing 2-column layout */}
-        {/* ✅ DESKTOP VIEW: ORIGINAL 2-COLUMN LAYOUT (DO NOT CHANGE UI) */}
-        {/* ✅ DESKTOP VIEW: 2-COLUMN LAYOUT (WORKING) */}
-        <div className="hidden md:block w-full">
-          <div className="signals-columns">
-
-            {/* ================= ACTIVE COLUMN ================= */}
-            <div className="signals-column">
-              <h3 className="section-title active-title">
-                <span className="signal-title-wrap">
-                  <span className="signal-dot signal-dot-active"></span>
-                  Active Signals
-                </span>
-              </h3>
+              {/* ✅ MOVED HERE: Refresh button (sticky, never disappears) */}
+              <StickyRefreshBar />
 
               <div className="signal-count-box">
                 <div className="signal-count-item buy">
@@ -1076,6 +1256,7 @@ export default function Recommendations() {
                           rawDate={sig.dateVal}
                           rawTime={sig.timeVal}
                           fromReco={true}
+                          returnTo={`${location.pathname}?${searchParams.toString()}`}
                           closeTime={sig.closeTime}
                         />
                       ))
@@ -1086,13 +1267,43 @@ export default function Recommendations() {
                 </div>
               )}
             </div>
-
-            {/* ================= CLOSED COLUMN ================= */}
+          ) : (
             <div className="signals-column">
-              <h3 className="section-title closed-title">
+              {/* ===== CLOSED SIGNALS ===== */}
+              <h3
+                className="section-title closed-title"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "10px",
+                }}
+              >
                 <span className="signal-title-wrap">
                   <span className="signal-dot signal-dot-closed"></span>
                   Closed Signals
+                </span>
+
+                {/* ✅ NEW: Date sort (right side of title) */}
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                  <span
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      opacity: isDark ? 0.85 : 0.8,
+                    }}
+                  ></span>
+                  <button
+                    type="button"
+                    onClick={() => setDateSortOrder((p) => (p === "asc" ? "desc" : "asc"))}
+                    className="nc-sort-btn"
+                    title={dateSortOrder === "asc" ? "Oldest first" : "Newest first"}
+                  >
+                    <span className="nc-sort-label">Date:</span>
+                    <span className="nc-sort-icon">
+                      {dateSortOrder === "asc" ? "↑" : "↓"}
+                    </span>
+                  </button>
                 </span>
               </h3>
 
@@ -1161,12 +1372,224 @@ export default function Recommendations() {
                 </div>
               </div>
             </div>
-
-          </div>
+          )}
         </div>
 
+        {/* ✅ DESKTOP VIEW: ORIGINAL 2-COLUMN LAYOUT (DO NOT CHANGE UI) */}
+        <div className="hidden md:block w-full">
+          <div className="signals-columns">
+            {/* ================= ACTIVE COLUMN ================= */}
+            <div className="signals-column">
+              <h3
+                className="section-title active-title"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "10px",
+                }}
+              >
+                <span className="signal-title-wrap">
+                  <span className="signal-dot signal-dot-active"></span>
+                  Active Signals
+                </span>
 
+                {/* ✅ NEW: Date sort (right side of title) */}
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                  <span
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      opacity: isDark ? 0.85 : 0.8,
+                    }}
+                  ></span>
+                  <button
+                    type="button"
+                    onClick={() => setDateSortOrder((p) => (p === "asc" ? "desc" : "asc"))}
+                    className="nc-sort-btn"
+                    title={dateSortOrder === "asc" ? "Oldest first" : "Newest first"}
+                  >
+                    <span className="nc-sort-label">Date:</span>
+                    <span className="nc-sort-icon">
+                      {dateSortOrder === "asc" ? "↑" : "↓"}
+                    </span>
+                  </button>
+                </span>
+              </h3>
 
+              {/* ✅ MOVED HERE: Refresh button (sticky, never disappears) */}
+              <StickyRefreshBar />
+
+              <div className="signal-count-box">
+                <div className="signal-count-item buy">
+                  BUY Signals: <span>{totalBuySignals}</span>
+                </div>
+                <div className="signal-count-item sell">
+                  SELL Signals: <span>{totalSellSignals}</span>
+                </div>
+                <div className="signal-count-item total">
+                  Total: <span>{totalBuySignals + totalSellSignals}</span>
+                </div>
+              </div>
+
+              {initialLoading ? (
+                <p>Loading data...</p>
+              ) : (
+                <div className="active-signals-container">
+                  <div
+                    style={{
+                      width: "100%",
+                      textAlign: "left",
+                      marginBottom: "4px",
+                      paddingLeft: "8px",
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      color: isDark ? "rgba(255,255,255,0.85)" : "#333",
+                    }}
+                  >
+                    % = Confidence | ▼ = Current Price
+                  </div>
+
+                  <div className="signal-grid">
+                    {activeSignals.length > 0 ? (
+                      activeSignals.map((sig) => (
+                        <SignalCard
+                          key={sig.id}
+                          script={sig.script}
+                          confidence={sig.confidence}
+                          alertType={sig.alertType}
+                          description={sig.description}
+                          sup={sig.sup}
+                          st={sig.st}
+                          signalPrice={sig.signalPrice}
+                          currentPrice={sig.currentPrice}
+                          t={sig.t}
+                          res={sig.res}
+                          timeVal={sig.timeVal}
+                          alertText={sig.alertText}
+                          userActions={sig.userActions}
+                          isClosed={false}
+                          strategy={sig.strategy}
+                          rawDate={sig.dateVal}
+                          rawTime={sig.timeVal}
+                          fromReco={true}
+                          closeTime={sig.closeTime}
+                        />
+                      ))
+                    ) : (
+                      <p>No active signals.</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ================= CLOSED COLUMN ================= */}
+            <div className="signals-column">
+              <h3
+                className="section-title closed-title"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "10px",
+                }}
+              >
+                <span className="signal-title-wrap">
+                  <span className="signal-dot signal-dot-closed"></span>
+                  Closed Signals
+                </span>
+
+                {/* ✅ NEW: Date sort (right side of title) */}
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                  <span
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: 600,
+                      opacity: isDark ? 0.85 : 0.8,
+                    }}
+                  ></span>
+                  <button
+                    type="button"
+                    onClick={() => setDateSortOrder((p) => (p === "asc" ? "desc" : "asc"))}
+                    className="nc-sort-btn"
+                    title={dateSortOrder === "asc" ? "Oldest first" : "Newest first"}
+                  >
+                    <span className="nc-sort-label">Date:</span>
+                    <span className="nc-sort-icon">
+                      {dateSortOrder === "asc" ? "↑" : "↓"}
+                    </span>
+                  </button>
+                </span>
+              </h3>
+
+              <div className="closed-signals-container">
+                <div
+                  style={{
+                    width: "100%",
+                    textAlign: "left",
+                    marginBottom: "4px",
+                    paddingLeft: "8px",
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    color: isDark ? "rgba(255,255,255,0.85)" : "#333",
+                  }}
+                >
+                  % = Gain | ▼ = Close Price
+                </div>
+
+                <div className="signal-grid">
+                  {closedSignals.length > 0 ? (
+                    closedSignals.map((sig) => (
+                      <div
+                        className="closed-card-wrapper"
+                        key={sig.id}
+                        style={{
+                          backgroundColor: (() => {
+                            const sp = Number(sig.signalPrice);
+                            const cp = Number(sig.currentPrice);
+                            const side = String(sig.alertType).toLowerCase();
+                            let pnl = 0;
+                            if (side === "buy") pnl = (cp / sp - 1) * 100;
+                            else pnl = (1 - cp / sp) * 100;
+                            return pnl >= 0 ? "#E6FFE6" : "#FFE5E5";
+                          })(),
+                          borderRadius: "12px",
+                          padding: "8px",
+                          transition: "0.25s ease",
+                        }}
+                      >
+                        <SignalCard
+                          key={sig.id}
+                          script={sig.script}
+                          confidence={sig.confidence}
+                          alertType={sig.alertType}
+                          description={sig.description}
+                          sup={sig.sup}
+                          st={sig.st}
+                          signalPrice={sig.signalPrice}
+                          currentPrice={sig.currentPrice}
+                          t={sig.t}
+                          res={sig.res}
+                          timeVal={sig.timeVal}
+                          alertText={sig.alertText}
+                          userActions={sig.userActions}
+                          isClosed={true}
+                          strategy={sig.strategy}
+                          rawDate={sig.dateVal}
+                          rawTime={sig.timeVal}
+                          closeTime={sig.closeTime}
+                        />
+                      </div>
+                    ))
+                  ) : (
+                    <p className="no-signals-text">No closed signals.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* end signals-section */}
@@ -1179,9 +1602,10 @@ export default function Recommendations() {
   // -------------------------------------------------------
   return (
     <div
-      className={`min-h-screen ${isDark ? "theme-dark" : "theme-light"} ${bgClass} ${textClass} relative transition-colors duration-300`}
+      className={`min-h-screen ${
+        isDark ? "theme-dark" : "theme-light"
+      } ${bgClass} ${textClass} relative transition-colors duration-300`}
     >
-
       {/* ===== BACKGROUND BLOBS (same as History) ===== */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"></div>
@@ -1191,22 +1615,31 @@ export default function Recommendations() {
 
       <AppHeader />
 
-
       {/* ===== MAIN CONTENT (STEP 5) ===== */}
       <div className="w-full px-3 sm:px-4 md:px-6 py-6 relative pb-24">
+        <div className="mb-6 flex items-start justify-between gap-3">
+          <div>
+            <h2 className={`text-4xl font-bold ${textClass} mb-2`}>
+              Recommendations
+            </h2>
+            <p className={textSecondaryClass}>Trading signals & analytics</p>
 
-        {/*<div className="mb-6">
-          <h2 className={`text-4xl font-bold ${textClass} mb-2`}>
-            Recommendations
-          </h2>
-          <p className={textSecondaryClass}>
-            Trading signals & analytics
-          </p>
-        </div>*/}
+            {lastPriceUpdatedAt ? (
+              <p className={`mt-1 text-xs ${textSecondaryClass}`}>
+                Price updated:{" "}
+                {new Date(lastPriceUpdatedAt).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                })}
+              </p>
+            ) : null}
+          </div>
+
+          {/* ✅ Refresh button removed from here (moved below Active Signals) */}
+        </div>
 
         {/* MAIN CATEGORY BUTTONS (UNCHANGED LOGIC) */}
-        {/* MAIN CATEGORY BUTTONS (UI updated like header row) */}
-        {/* MAIN CATEGORY BUTTONS (match header row pill UI) */}
         <div className="w-full flex justify-center mb-6">
           <div className="flex items-center gap-3">
             {["Intraday", "BTST", "Short-term"].map((type) => {
@@ -1215,11 +1648,7 @@ export default function Recommendations() {
               return (
                 <button
                   key={type}
-                  onClick={() => {
-                    setActiveType(type);
-                    setSubIntraday("All");
-                    setSignalTab("active");
-                  }}
+                  onClick={() => setActiveTypeKeepScroll(type)}
                   className={[
                     "px-5 py-3 rounded-xl text-sm font-semibold",
                     "transition-all duration-200",
@@ -1228,7 +1657,9 @@ export default function Recommendations() {
                     "shadow-sm",
                     isActiveTab
                       ? "bg-gradient-to-r from-[#1ea7ff] to-[#22d3ee] text-white border-white/10 shadow-xl"
-                      : `${glassClass} ${textClass} ${cardHoverClass} ${isDark ? "border-white/10" : "border-slate-200/60"}`,
+                      : `${glassClass} ${textClass} ${cardHoverClass} ${
+                          isDark ? "border-white/10" : "border-slate-200/60"
+                        }`,
                   ].join(" ")}
                 >
                   {type}
@@ -1238,14 +1669,9 @@ export default function Recommendations() {
           </div>
         </div>
 
-
-
         {/* SIGNALS LAYOUT (UNCHANGED) */}
-        <div className="recommendation-content">
-          {renderSignalLayout()}
-        </div>
+        <div className="recommendation-content">{renderSignalLayout()}</div>
       </div>
     </div>
   );
-
 }

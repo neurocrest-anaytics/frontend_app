@@ -194,17 +194,6 @@ const [fpMsgType, setFpMsgType] = useState(""); // "success" | "error"
 
     setIsLoading(true);
     try {
-<<<<<<< HEAD
-      const url = `${backendBaseUrl}/auth/${endpoint}`;
-      const payload = { username, password };
-
-      // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-      // Step 5 logging (Capacitor/WebView): log the exact request
-      console.log("[NEUROCREST] Auth request →", url, payload);
-      // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-      const res = await fetch(url, {
-=======
       const res = await fetch(`${backendBaseUrl}/auth/signup/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -254,38 +243,11 @@ const [fpMsgType, setFpMsgType] = useState(""); // "success" | "error"
     setIsLoading(true);
     try {
       const res = await fetch(`${backendBaseUrl}/auth/login`, {
->>>>>>> 91bb098cdeaf6f4860fe35fa3fb79a4689566426
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ username, password }),
       });
 
-<<<<<<< HEAD
-      // Log status immediately, before parsing
-      console.log("[NEUROCREST] Auth response ←", res.status, url);
-
-      const data = await res.json().catch(() => ({}));
-
-      if (data.success) {
-        if (isLogin) {
-          onLoginSuccess(username);
-        } else {
-          setMessage("✅ " + data.message);
-          setMessageType("success");
-          // Optional: switch to login after successful registration
-          // setIsLogin(true);
-          // setPassword(""); setConfirm("");
-        }
-      } else {
-        console.error("[NEUROCREST] Auth error payload:", data);
-        setMessage("❌ " + (data.message || "Something went wrong"));
-        setMessageType("error");
-      }
-    } catch (err) {
-      console.error("[NEUROCREST] Auth NETWORK ERROR:", err?.message || err);
-      setMessage("❌ Cannot connect to server.");
-      setMessageType("error");
-=======
       const data = await res.json();
 
     if (data.success) {
@@ -359,7 +321,6 @@ const [fpMsgType, setFpMsgType] = useState(""); // "success" | "error"
 
     } catch (err) {
       showError("Cannot connect to server.");
->>>>>>> 91bb098cdeaf6f4860fe35fa3fb79a4689566426
     } finally {
       setIsLoading(false);
     }
@@ -491,25 +452,14 @@ const verifyForgotOtp = async () => {
     const token = credentialResponse.credential;
 
     try {
-      const url = `${backendBaseUrl}/auth/google-login`;
-
-      // Step 5 logging for Google login as well
-      console.log("[NEUROCREST] Google login →", url);
-
-      const res = await fetch(url, {
+      const res = await fetch(`${backendBaseUrl}/auth/google-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token }),
       });
 
-<<<<<<< HEAD
-      console.log("[NEUROCREST] Google login ←", res.status, url);
-
-      const data = await res.json().catch(() => ({}));
-=======
       const data = await res.json();
 
->>>>>>> 91bb098cdeaf6f4860fe35fa3fb79a4689566426
       if (data.success) {
         localStorage.setItem("user_id", data.username);
         localStorage.setItem("session_id", data.session_id || "");
@@ -517,21 +467,10 @@ const verifyForgotOtp = async () => {
         localStorage.setItem("username", data.username);
         onLoginSuccess(data.username);
       } else {
-<<<<<<< HEAD
-        console.error("[NEUROCREST] Google login error payload:", data);
-        setMessage("❌ " + (data.message || "Google login failed"));
-        setMessageType("error");
-      }
-    } catch (err) {
-      console.error("[NEUROCREST] Google login NETWORK ERROR:", err?.message || err);
-      setMessage("❌ Google login failed");
-      setMessageType("error");
-=======
         showError(data.message || "Google login failed");
       }
     } catch (err) {
       showError("Google login failed");
->>>>>>> 91bb098cdeaf6f4860fe35fa3fb79a4689566426
     }
   };
 
@@ -606,30 +545,13 @@ const verifyForgotOtp = async () => {
                 clearMessage();
                 setSignupStage("basic");
               }}
-<<<<<<< HEAD
-              className={`px-4 py-1 rounded ${isLogin ? "bg-blue-600 text-white" : "bg-gray-200"
-                }`}
-=======
               className={`flex-1 py-2 rounded-full font-semibold transition-all ${
                 isLogin ? `${brandGradient} text-black shadow-lg` : `${textSecondaryClass} hover:opacity-90`
               }`}
->>>>>>> 91bb098cdeaf6f4860fe35fa3fb79a4689566426
             >
               Sign In
             </button>
             <button
-<<<<<<< HEAD
-              onClick={() => {
-                setIsLogin(false);
-                setMessage("");
-                setMessageType("");
-              }}
-              className={`px-4 py-1 rounded ${!isLogin ? "bg-blue-600 text-white" : "bg-gray-200"
-                }`}
-            >
-              Register
-            </button>
-=======
   type="button"
   onClick={() => {
     closeForgot(); // ✅ Important
@@ -644,16 +566,11 @@ const verifyForgotOtp = async () => {
   Sign Up
 </button>
 
->>>>>>> 91bb098cdeaf6f4860fe35fa3fb79a4689566426
           </div>
 
           {/* message */}
           {message && (
             <div
-<<<<<<< HEAD
-              className={`text-sm text-center ${messageType === "success" ? "text-green-600" : "text-red-500"
-                }`}
-=======
               className={`mb-4 text-sm text-center ${
                 messageType === "success"
                   ? isDark
@@ -663,7 +580,6 @@ const verifyForgotOtp = async () => {
                   ? "text-rose-400"
                   : "text-rose-600"
               }`}
->>>>>>> 91bb098cdeaf6f4860fe35fa3fb79a4689566426
             >
               {message}
             </div>
@@ -790,51 +706,6 @@ const verifyForgotOtp = async () => {
                   {showPwd2 ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-<<<<<<< HEAD
-            )}
-
-            {isLogin && (
-              <p className="text-xs text-right text-blue-600 cursor-pointer hover:underline">
-                Forgot Password?
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 flex justify-center"
-            >
-              {isLoading ? (
-                <svg
-                  className="animate-spin h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a 8 8 0 018-8v8z"
-                  />
-                </svg>
-              ) : isLogin ? "Login" : "Register"}
-            </button>
-          </form>
-
-          {googleClientId && (
-            <div className="pt-4 text-center">
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={() => console.log("Google login error")}
-=======
         
     
               {/* Details */}
@@ -844,7 +715,6 @@ const verifyForgotOtp = async () => {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 className={`w-full rounded-xl px-4 py-3 outline-none border shadow-lg transition-all ${inputClass}`}
->>>>>>> 91bb098cdeaf6f4860fe35fa3fb79a4689566426
               />
               <input
                 type="text"

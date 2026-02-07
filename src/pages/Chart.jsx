@@ -65,6 +65,34 @@ function findNearestCandleTime(candles, targetTime) {
   return nearest;
 }
 
+function snapToCandleStart(candles, ts, tf) {
+  const tfSec = TF_SECONDS[tf] || 60;
+  if (!Array.isArray(candles) || candles.length === 0) return ts;
+
+  // candles are sorted by time
+  // We want the candle where: candle.time < = ts <= candle.time + tfSec
+  // (handles "close time" timestamps like 14:11 which belong to candle starting 14:09)
+  let lo = 0, hi = candles.length - 1;
+  let ans = candles[0].time;
+
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    const t = candles[mid].time;
+
+    if (t <= ts) {
+      ans = t;
+      lo = mid + 1;
+    } else {
+      hi = mid - 1;
+    }
+  }
+
+  // If ts is inside [ans, ans + tfSec] snap to ans
+  if (ts >= ans && ts <= ans + tfSec) return ans;
+
+  // fallback: nearest (rare)
+  return findNearestCandleTime(candles, ts);
+}
 
 
 
@@ -768,6 +796,9 @@ export default function ChartPage() {
     });
   }
 
+  // ✅ Always keep latest tf/symbol/candles (prevents old setInterval closures)
+
+
   // ---------------- SEARCH (instruments.csv via backend /search) ----------------
   const [openSearch, setOpenSearch] = useState(false);
   const [searchQ, setSearchQ] = useState("");
@@ -921,6 +952,7 @@ export default function ChartPage() {
   const oscChart = useRef(null);
   const priceSeries = useRef(null);
   const liveCandleRef = useRef(null);
+  const lastTickAtRef = useRef(0); // ms (for fallback polling)
 
   const livePriceLine = useRef(null);
   const volSeries = useRef(null);
@@ -1025,7 +1057,10 @@ export default function ChartPage() {
   // ---------------------------------------------------------
   // LOAD ALL SIGNALS (FINAL VERSION - FULL FIX)
   // ---------------------------------------------------------
-  async function loadAllSignals(symbol) {
+  async function loadAllSignals(symbolArg, tfArg) {
+  const tfNow = tfArg || tfRef.current;                 // ✅ latest timeframe
+  const candlesNow = candlesRef.current || [];          // ✅ latest candles
+
     try {
       console.log("loadAllSignals called for TF:", tf);
 
@@ -1071,19 +1106,16 @@ export default function ChartPage() {
       // --------------------------------------------------
       // 3) FILTER BASED ON CURRENT TF
       // --------------------------------------------------
-      let final = [];
+  // 3) FILTER BASED ON CURRENT TF
+let final = [];
 
-      if (tf === "2m") {
-        final = js.signals.filter(
-          (s) => s.tf === "2m" || s.tf === "15m"
-        );
-      }
+if (tfNow === "2m") {
+  final = js.signals.filter((s) => s.tf === "2m" || s.tf === "15m");
+} else if (tfNow === "15m") {
+  final = js.signals.filter((s) => s.tf === "15m");
+}
 
-      if (tf === "15m") {
-        final = js.signals.filter(
-          (s) => s.tf === "15m" || s.tf === "2m"
-        );
-      }
+
 
       final.sort((a, b) => a.timestamp - b.timestamp);
 
@@ -1102,14 +1134,10 @@ const markers = final
     const ts = toSec(sig.timestamp);
     if (!ts) return null;
 
-    // align marker to the currently visible timeframe buckets (2m/15m)
-    const aligned = candleBucket(ts, tf);
-
-    // snap to nearest candle time so markers always render
-    const snapped = findNearestCandleTime(candles, aligned);
+    const snapped = snapToCandleStart(candlesNow, ts, tfNow);
 
     return {
-      time: snapped, // ✅ seconds
+      time: snapped,
       position: sig.signal === "BUY" ? "belowBar" : "aboveBar",
       shape: sig.signal === "BUY" ? "arrowUp" : "arrowDown",
       color: sig.signal === "BUY" ? "#16a34a" : "#dc2626",
@@ -1117,6 +1145,7 @@ const markers = final
     };
   })
   .filter(Boolean);
+
 
 
       // --------------------------------------------------
@@ -1356,6 +1385,15 @@ const markers = final
 
   /* ---------------- Fetch candles ---------------- */
   const [candles, setCandles] = useState([]);
+
+  const tfRef = useRef("1m");
+useEffect(() => { tfRef.current = tf; }, [tf]);
+
+const symbolRef = useRef("");
+useEffect(() => { symbolRef.current = symbol; }, [symbol]);
+
+const candlesRef = useRef([]);
+useEffect(() => { candlesRef.current = candles; }, [candles]);
 
 const prevClose = useMemo(() => {
   if (!candles || candles.length < 2) return null;
@@ -1838,45 +1876,66 @@ const isUp = useMemo(() => {
     let ws = null;
 
     function handleTick(tick) {
-      if (!priceSeries.current) return;
+  if (!priceSeries.current) return;
 
-      const price = tick.ltp;
-      const ts = Math.floor(tick.timestamp / tfSec) * tfSec;
+  const price = tick?.ltp;
+  if (typeof price !== "number" || !isFinite(price)) return;
 
-      let c = liveCandleRef.current;
+  // backend sends UNIX seconds
+  const rawTs =
+    typeof tick?.timestamp === "number" && isFinite(tick.timestamp)
+      ? tick.timestamp
+      : Math.floor(Date.now() / 1000);
 
-      // New candle
-      if (!c || c.time !== ts) {
-        c = {
-          time: ts,
-          open: price,
-          high: price,
-          low: price,
-          close: price,
-        };
-      } else {
-        c.high = Math.max(c.high, price);
-        c.low = Math.min(c.low, price);
-        c.close = price;
-      }
+  const ts = Math.floor(rawTs / tfSec) * tfSec;
 
-      liveCandleRef.current = c;
+  let c = liveCandleRef.current;
 
-      // 🔥 ONLY this update
-      priceSeries.current.update(c);
+  // New candle
+  if (!c || c.time !== ts) {
+    c = {
+      time: ts,
+      open: price,
+      high: price,
+      low: price,
+      close: price,
+    };
+  } else {
+    c.high = Math.max(c.high, price);
+    c.low = Math.min(c.low, price);
+    c.close = price;
+  }
 
-      setLastPrice(price);
+  liveCandleRef.current = c;
+  lastTickAtRef.current = Date.now();
 
-      priceSeries.current.applyOptions({
-        priceLineVisible: true,
-        lastValueVisible: true,
-        priceLineColor: price >= c.open ? "#16a34a" : "#dc2626",
-      });
-    }
+  // ✅ Update last candle (this also moves series last-value line)
+  priceSeries.current.update(c);
 
+  // ✅ Header LTP
+  setLastPrice(price);
 
+  // ✅ Candle-color style for LTP line (same logic as candle color)
+  const up = price >= c.open;
+  const lineColor = up ? "#16a34a" : "#dc2626";
 
-    // Start websocket after initial load
+  // 1) built-in series last-value line color
+  priceSeries.current.applyOptions({
+    priceLineVisible: true,
+    lastValueVisible: true,
+    priceLineColor: lineColor,
+  });
+
+  // 2) custom "LTP" dotted price line
+  livePriceLine.current?.applyOptions({
+    price,
+    color: lineColor,
+    axisLabelColor: lineColor,
+    axisLabelTextColor: "#ffffff",
+  });
+}
+
+// Start websocket after initial load
     ws = startLiveFeed(symbol, handleTick);
 
     cleanupFns.push(() => ws?.close());
@@ -1887,66 +1946,89 @@ const isUp = useMemo(() => {
     };
   }, [symbol, tf, tfSec, chartType, applySeriesData]);
 
-  // LIVE PRICE UPDATER (updates every second)
-  // LIVE PRICE UPDATER — NO BLINK
-  useEffect(() => {
-    if (!priceSeries.current) return;
+  // LIVE PRICE UPDATER (fallback ONLY)
+// ✅ IMPORTANT: don't fight the WebSocket.
+// We poll /ohlc only if WS hasn't delivered a tick recently.
+useEffect(() => {
+  if (!priceSeries.current) return;
 
-    const timer = setInterval(async () => {
-      try {
-        const res = await fetch(
-          `${API}/market/ohlc?symbol=${symbol}&interval=${tf}&limit=1`
-        );
-        const js = await res.json();
-        if (!Array.isArray(js) || js.length === 0) return;
+  const timer = setInterval(async () => {
+    // If WS is healthy, do nothing (prevents candle/LTP mismatch)
+    if (Date.now() - (lastTickAtRef.current || 0) < 2500) return;
 
-        const live = js[js.length - 1];
+    try {
+      const res = await fetch(
+        `${API}/market/ohlc?symbol=${encodeURIComponent(symbol)}&interval=${tf}&limit=2`
+      );
+      const js = await res.json();
+      if (!Array.isArray(js) || js.length === 0) return;
 
-        // update last price in header
-        setLastPrice(live.close);
+      const live = js[js.length - 1];
+      if (!live || typeof live.close !== "number") return;
 
-        // move horizontal price line
-        livePriceLine.current?.applyOptions({ price: live.close });
+      const price = live.close;
+      const candleTime =
+        typeof live.time === "number" && isFinite(live.time)
+          ? live.time
+          : Math.floor(Math.floor(Date.now() / 1000) / tfSec) * tfSec;
 
-        // update ONLY last candle without re-render
-        priceSeries.current.update(live);
-        applyUnifiedMarkers();
+      let c = liveCandleRef.current;
 
-
-        // update volume also without re-render
-        volSeries.current?.update({
-          time: live.time,
-          value: live.volume,
-          color:
-            live.close >= live.open
-              ? "rgba(16,185,129,0.7)"
-              : "rgba(239,68,68,0.7)"
-        });
-
-        try {
-          const ts = mainChart.current?.timeScale();
-          if (!ts) return;
-
-          // Only force scroll when auto-follow is ON
-          if (autoFollowRef.current) {
-            ts.scrollToRealTime();
-          }
-        } catch (e) {
-          console.warn("scrollToRealTime failed", e);
-        }
-
-
-
-      } catch (e) {
-        console.error("Live price error:", e);
+      if (!c || c.time !== candleTime) {
+        c = {
+          time: candleTime,
+          open: typeof live.open === "number" ? live.open : price,
+          high: typeof live.high === "number" ? live.high : price,
+          low: typeof live.low === "number" ? live.low : price,
+          close: price,
+        };
+      } else {
+        c.high = Math.max(c.high, price);
+        c.low = Math.min(c.low, price);
+        c.close = price;
       }
-    }, 1000);
 
-    return () => clearInterval(timer);
-  }, [symbol, tf]);
+      liveCandleRef.current = c;
+
+      priceSeries.current.update(c);
+      setLastPrice(price);
+
+      const up = price >= c.open;
+      const lineColor = up ? "#16a34a" : "#dc2626";
+
+      priceSeries.current.applyOptions({
+        priceLineVisible: true,
+        lastValueVisible: true,
+        priceLineColor: lineColor,
+      });
+
+      livePriceLine.current?.applyOptions({
+        price,
+        color: lineColor,
+        axisLabelColor: lineColor,
+        axisLabelTextColor: "#ffffff",
+      });
+
+      volSeries.current?.update({
+        time: c.time,
+        value: typeof live.volume === "number" ? live.volume : 0,
+        color: up ? "rgba(16,185,129,0.7)" : "rgba(239,68,68,0.7)",
+      });
+
+      try {
+        const tsScale = mainChart.current?.timeScale();
+        if (tsScale && autoFollowRef.current) tsScale.scrollToRealTime();
+      } catch {}
+    } catch (e) {
+      console.error("Live price fallback error:", e);
+    }
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, [symbol, tf, tfSec]);
 
 
-  /* ---------------- Overlay drawing helpers ---------------- */
+/* ---------------- Overlay drawing helpers ---------------- */
   const pickTool = (key) => {
     setActiveTool(key);
     setDrawerOpen(false);
@@ -2846,7 +2928,8 @@ const isUp = useMemo(() => {
     if (isRunningRef.current) {
       clearInterval(autoRunRef.current);
       isRunningRef.current = false;
-      setGenerateMode(true);
+      setGenerateMode(false);
+
       localStorage.setItem("NC_generateMode_" + symbol, "true");
 
       const btn = document.querySelector("#genBtn");
@@ -2923,7 +3006,8 @@ const isUp = useMemo(() => {
       });
 
       // load markers after generation
-      await loadAllSignals(symbol);
+      await loadAllSignals(symbolRef.current, tfRef.current);
+
 
       console.log("✔ Updated signals for:", tf);
 
@@ -2932,6 +3016,14 @@ const isUp = useMemo(() => {
     }
   }
 
+useEffect(() => {
+  // ✅ If user already started Generate Mode, switching TF should refresh markers
+  if (!generateMode) return;
+
+  // This will re-fetch + re-filter markers for the new tf
+  loadAllSignals(symbol, tf);
+
+}, [tf, symbol, generateMode]);
 
   // --------------------------------------------------
   // UNIVERSAL MARKER MERGER (STEP-4)
@@ -3110,16 +3202,7 @@ const isUp = useMemo(() => {
 
       {/* Header */}
       {/* Header (Sticky + 2 rows for mobile/tablet) */}
-      {/* Header (Sticky + 2 rows for mobile/tablet) */}
-<div className={`sticky top-0 z-[10020] ${glassClass} shadow-xl pointer-events-auto safe-sticky-top`}
-
-  style={{
-    paddingTop: "env(safe-area-inset-top)",
-    paddingLeft: "env(safe-area-inset-left)",
-    paddingRight: "env(safe-area-inset-right)",
-  }}
->
-
+      <div className={`sticky top-0 z-[10020] ${glassClass} shadow-xl pointer-events-auto`}>
 
         {/* Row 1: Back + Symbol/TF/Price + Search/WA/Theme */}
         <div className="flex items-center justify-between gap-2 px-3 py-2">

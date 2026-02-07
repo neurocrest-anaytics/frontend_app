@@ -102,22 +102,6 @@ body {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
-/* ✅ Safe area helpers (for notch + fullscreen) */
-.safe-top {
-  padding-top: var(--sat);
-}
-
-.safe-x {
-  padding-left: var(--sal);
-  padding-right: var(--sar);
-}
-
-/* ✅ Use this for any sticky/fixed top header */
-.safe-sticky-top {
-  padding-top: calc(10px + var(--sat)); /* 10px = normal spacing */
-  padding-left: calc(12px + var(--sal));
-  padding-right: calc(12px + var(--sar));
-}
 
 
 
@@ -170,10 +154,13 @@ body {
   border: 1px solid rgba(0, 0, 0, 0.08) !important;
   color: #0f172a !important;
 }
+
 /* ✅ Force scrollbar visible */
 .show-scrollbar {
-  scrollbar-width: auto;     /* Firefox */
-  scrollbar-gutter: stable;  /* keeps space for scrollbar */
+  scrollbar-width: auto;
+  /* Firefox */
+  scrollbar-gutter: stable;
+  /* keeps space for scrollbar */
 }
 
 .show-scrollbar::-webkit-scrollbar {
@@ -198,11 +185,4 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-}
-
-:root{
-  --sat: env(safe-area-inset-top, 0px);
-  --sar: env(safe-area-inset-right, 0px);
-  --sab: env(safe-area-inset-bottom, 0px);
-  --sal: env(safe-area-inset-left, 0px);
 }
