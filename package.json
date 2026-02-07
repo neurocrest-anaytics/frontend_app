@@ -36,11 +36,11 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-<<<<<<< HEAD
+
     "@rollup/rollup-win32-x64-msvc": "^4.52.4",
-=======
+
     "@capacitor/assets": "^3.0.5",
->>>>>>> 91bb098cdeaf6f4860fe35fa3fb79a4689566426
+
     "@vitejs/plugin-react": "^4.0.0",
     "autoprefixer": "^10.4.0",
     "cross-env": "^10.1.0",
